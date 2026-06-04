@@ -351,7 +351,114 @@
 </div></section>
   <section class="section" id="formazione" data-section="1">
     <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
-    <!-- FORMAZIONE CONTENT -->
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Il cumulonembo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Come nasce un fulmine — 1/4</span>
+          <h2 class="reveal reveal-d1">Il cumulonembo</h2>
+          <p class="reveal reveal-d2">Una colonna d'aria calda e umida sale rapidamente fino a <strong>15 km di quota</strong>. La convezione intensa trascina milioni di goccioline d'acqua e cristalli di ghiaccio verso le zone più fredde dell'atmosfera.</p>
+          <p class="reveal reveal-d3">Il cumulonembo è la fabbrica dei fulmini: in una singola cella temporalesca possono svilupparsi correnti verticali di <strong>200 km/h</strong> e accumularsi energie equivalenti a decine di bombe atomiche.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="cloud-canvas" aria-label="Animazione convezione nella nuvola"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Separazione di carica -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Come nasce un fulmine — 2/4</span>
+          <h2 class="reveal reveal-d1">La triboelettricità</h2>
+          <p class="reveal reveal-d2">I cristalli di ghiaccio leggeri (con carica <em>+</em>) salgono con le correnti ascendenti, mentre il graupel più pesante (con carica <em>−</em>) cade. L'urto tra le particelle trasferisce elettroni, separando le cariche.</p>
+          <p class="reveal reveal-d3">Il risultato è un <strong>dipolo elettrico gigantesco</strong>: zona positiva in cima, zona negativa alla base della nube, zona positiva al suolo per induzione.</p>
+          <div class="reveal reveal-d4" style="margin-top:1.5rem;">
+            <label style="font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.5rem;">Intensità updraft</label>
+            <input type="range" min="0" max="100" value="30" data-charge-slider style="width:100%;-webkit-appearance:none;height:2px;background:var(--border);outline:none;" />
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--gold);text-align:right;margin-top:.3rem;" id="charge-val">30%</div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="charge-canvas" aria-label="Separazione di carica nel cumulonembo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Campo elettrico -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Come nasce un fulmine — 3/4</span>
+          <h2 class="reveal reveal-d1">Il campo da 100.000 V/m</h2>
+          <p class="reveal reveal-d2">Il dipolo di carica genera un campo elettrico crescente tra la base della nube (−) e il suolo (+). In condizioni normali l'aria è un buon isolante, ma quando il campo supera circa <strong>3 MV/m</strong> si innesca la ionizzazione di breakdown.</p>
+          <p class="reveal reveal-d3">L'aria ionizzata diventa conduttrice: si crea un sottile canale di plasma che si estende verso il suolo a step di ~50 m ogni 50 μs — il <em>leader a gradini</em>.</p>
+          <div class="warning-box reveal reveal-d4">
+            <div class="warning-title">Attenzione</div>
+            <p>Il leader a gradini è <strong>invisibile</strong> agli occhi umani. Il lampo che vediamo è il return stroke, la corrente che risale verso la nube.</p>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;justify-content:center;gap:1.5rem;">
+          <div class="reveal">
+            <div class="stat-value" style="font-family:var(--mono);font-size:3rem;color:var(--gold);">100.000</div>
+            <div class="stat-unit">V/m — campo elettrico tipico</div>
+          </div>
+          <div class="reveal reveal-d1">
+            <div class="stat-value" style="font-family:var(--mono);font-size:3rem;color:var(--blue);">3 MV/m</div>
+            <div class="stat-unit">soglia di breakdown dell'aria</div>
+          </div>
+          <div class="reveal reveal-d2">
+            <div class="stat-value" style="font-family:var(--mono);font-size:2.5rem;color:var(--white);">50 μs</div>
+            <div class="stat-unit">intervallo tra gradini del leader</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Phase list -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Come nasce un fulmine — 4/4</span>
+          <h2 class="reveal reveal-d1">Le 4 fasi</h2>
+          <div class="phase-controls reveal reveal-d2">
+            <button class="phase-btn" data-formation-phase="0">1 Separazione</button>
+            <button class="phase-btn" data-formation-phase="1">2 Accumulo</button>
+            <button class="phase-btn" data-formation-phase="2">3 Ionizzazione</button>
+            <button class="phase-btn" data-formation-phase="3">4 Scarica</button>
+            <button class="play-btn" data-formation-play>▶ Play</button>
+          </div>
+          <div id="formation-phase-text" class="reveal reveal-d3" style="margin-top:1.5rem;min-height:120px;">
+            <p style="color:var(--muted);font-style:italic;">Seleziona una fase o premi Play per l'animazione sequenziale.</p>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;">
+          <div id="formation-phase-icon" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+            <svg width="200" height="200" viewBox="0 0 200 200" id="formation-svg" aria-label="Icona fase formazione">
+              <circle cx="100" cy="100" r="80" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+              <text x="100" y="115" text-anchor="middle" font-family="JetBrains Mono" font-size="48" fill="var(--gold)">⚡</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /hc-track -->
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev" aria-label="Slide precedente">←</button>
+    <button class="hc-arrow hc-arrow-next" aria-label="Slide successiva">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div>
+    <div class="hc-dot"></div>
+    <div class="hc-dot"></div>
+    <div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="scarica" data-section="2">
     <div class="section-header"><span class="section-num">02 — LA SCARICA</span></div>
@@ -568,6 +675,180 @@
     })();
     // === HERO INIT END ===
     // === FORMAZIONE CANVAS ===
+    (function initFormazioneSection(){
+      const sec = document.getElementById('formazione');
+
+      // Cloud updraft canvas (slide 1)
+      function initCloudCanvas(canvas) {
+        if (canvas._init) return; canvas._init = true;
+        const ctx = canvas.getContext('2d');
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; drawCloud(); }
+        function drawCloud(){
+          const W=canvas.width,H=canvas.height;
+          ctx.clearRect(0,0,W,H);
+          // Cloud body
+          ctx.save(); ctx.fillStyle='#1a1a2e';
+          ctx.beginPath();
+          ctx.arc(W*.45,H*.15,W*.12,0,Math.PI*2);
+          ctx.arc(W*.55,H*.1,W*.1,0,Math.PI*2);
+          ctx.arc(W*.35,H*.17,W*.09,0,Math.PI*2);
+          ctx.fill(); ctx.restore();
+          // Updraft arrows
+          const arrowPositions=[.3,.45,.6,.75];
+          arrowPositions.forEach(x => {
+            const ax=W*x;
+            ctx.save(); ctx.strokeStyle='rgba(74,158,255,.5)'; ctx.lineWidth=1.5;
+            ctx.setLineDash([4,4]);
+            ctx.beginPath(); ctx.moveTo(ax,H*.85); ctx.lineTo(ax,H*.25); ctx.stroke();
+            // arrowhead
+            ctx.setLineDash([]);
+            ctx.fillStyle='rgba(74,158,255,.6)';
+            ctx.beginPath(); ctx.moveTo(ax,H*.22); ctx.lineTo(ax-6,H*.3); ctx.lineTo(ax+6,H*.3); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          });
+          // Downdraft (graupel)
+          const dpPos=[.37,.52,.67];
+          dpPos.forEach(x => {
+            const ax=W*x;
+            ctx.save(); ctx.strokeStyle='rgba(255,119,68,.4)'; ctx.lineWidth=1; ctx.setLineDash([3,5]);
+            ctx.beginPath(); ctx.moveTo(ax,H*.25); ctx.lineTo(ax,H*.75); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle='rgba(255,119,68,.5)';
+            ctx.beginPath(); ctx.moveTo(ax,H*.78); ctx.lineTo(ax-5,H*.7); ctx.lineTo(ax+5,H*.7); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          });
+          // Labels
+          ctx.font='11px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.6)';
+          ctx.fillText('↑ cristalli di ghiaccio (+)',W*.05,H*.9);
+          ctx.fillStyle='rgba(255,119,68,.6)';
+          ctx.fillText('↓ graupel (−)',W*.05,H*.97);
+        }
+        window.addEventListener('resize',resize);
+        resize();
+      }
+
+      // Charge separation canvas (slide 2)
+      function initChargeCanvas(canvas) {
+        if (canvas._init) return; canvas._init = true;
+        const ctx = canvas.getContext('2d');
+        const N=35;
+        let particles=[];
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; initP(); render(0.3); }
+        function initP(){
+          const W=canvas.width,H=canvas.height;
+          particles=Array.from({length:N*2},(_,i)=>({
+            x:W*.1+Math.random()*W*.8,
+            y:H*.35+(Math.random()-.5)*H*.3,
+            charge:i<N?1:-1
+          }));
+        }
+        function render(strength){
+          const W=canvas.width,H=canvas.height;
+          ctx.clearRect(0,0,W,H);
+          // Cloud
+          ctx.save(); ctx.fillStyle='#1a1a2e';
+          ctx.beginPath();
+          ctx.arc(W*.4,H*.1+5,W*.11,0,Math.PI*2);
+          ctx.arc(W*.52,H*.08,W*.1,0,Math.PI*2);
+          ctx.arc(W*.62,H*.12,W*.09,0,Math.PI*2);
+          ctx.fill(); ctx.restore();
+          // Ground
+          ctx.save(); ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(0,H-15); ctx.lineTo(W,H-15); ctx.stroke(); ctx.restore();
+          // Field lines
+          if(strength>.1){
+            for(let lx=W*.15;lx<W*.85;lx+=45){
+              ctx.save(); ctx.strokeStyle=`rgba(74,158,255,${strength*.18})`; ctx.lineWidth=.5;
+              ctx.setLineDash([4,6]);
+              ctx.beginPath(); ctx.moveTo(lx,H*.22); ctx.lineTo(lx,H-15); ctx.stroke();
+              ctx.restore();
+            }
+          }
+          // Particles
+          particles.forEach(p=>{
+            const targetY = p.charge>0 ? H*.14+H*.06*(1-strength) : H*.62+H*.18*strength;
+            p.y+=(targetY-p.y)*.06;
+            ctx.save();
+            ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,Math.PI*2);
+            const col=p.charge>0?'#4a9eff':'#ff7744';
+            ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=10; ctx.fill();
+            ctx.font='9px JetBrains Mono'; ctx.fillStyle=col;
+            ctx.fillText(p.charge>0?'+':'−',p.x+4,p.y-4);
+            ctx.restore();
+          });
+          if(strength>.3){
+            ctx.save(); ctx.font='bold 12px JetBrains Mono';
+            ctx.fillStyle=`rgba(74,158,255,${strength})`; ctx.fillText('⊕ zona +',W*.05,H*.16);
+            ctx.fillStyle=`rgba(255,119,68,${strength})`; ctx.fillText('⊖ zona −',W*.05,H*.7);
+            ctx.restore();
+          }
+        }
+        const slide=canvas.closest('.hc-slide');
+        const slider=slide?.querySelector('[data-charge-slider]');
+        const valEl=document.getElementById('charge-val');
+        if(slider){
+          slider.addEventListener('input',()=>{
+            const v=slider.value/100;
+            if(valEl) valEl.textContent=slider.value+'%';
+            render(v);
+          });
+        }
+        window.addEventListener('resize',resize);
+        resize();
+      }
+
+      // Phase list (slide 4)
+      const phaseData = [
+        { icon:'⚡', title:'1. Separazione di carica', text:'Il moto verticale nell\'updraft separa fisicamente cristalli (+) e graupel (−). Il dipolo elettrico si rafforza gradualmente nel corso dei minuti.' },
+        { icon:'🔋', title:'2. Accumulo', text:'La differenza di potenziale tra la base della nube e il suolo raggiunge centinaia di milioni di volt. L\'energia elettrostatica accumulata può superare 1 GJ.' },
+        { icon:'💥', title:'3. Ionizzazione', text:'Quando il campo supera la soglia di breakdown (~3 MV/m), l\'aria si ionizza. Il leader a gradini si propaga verso il basso in step di 50 m ogni 50 μs.' },
+        { icon:'⚡⚡', title:'4. Scarica', text:'Lo streamer ascendente incontra il leader discendente. Il circuito si chiude: il return stroke risale a 100.000 km/s portando la scarica di 20–300 kA.' }
+      ];
+      const phaseText = document.getElementById('formation-phase-text');
+      const phaseIcon = document.getElementById('formation-phase-icon');
+
+      function showPhase(i) {
+        const d = phaseData[i];
+        if(phaseText) phaseText.innerHTML = `<h3 style="color:var(--gold);margin-bottom:.75rem;">${d.title}</h3><p>${d.text}</p>`;
+        if(phaseIcon) phaseIcon.innerHTML = `<div style="font-size:5rem;text-align:center;">${d.icon}</div>`;
+      }
+
+      sec.addEventListener('section-enter', function onEnter(){
+        // init cloud canvas
+        const cloudC = document.getElementById('cloud-canvas');
+        if(cloudC) initCloudCanvas(cloudC);
+        const chargeC = document.getElementById('charge-canvas');
+        if(chargeC) initChargeCanvas(chargeC);
+        initCarousel(sec);
+
+        // Phase buttons
+        sec.querySelectorAll('[data-formation-phase]').forEach(btn=>{
+          btn.addEventListener('click',()=>{
+            const p=parseInt(btn.dataset.formationPhase);
+            showPhase(p);
+            sec.querySelectorAll('[data-formation-phase]').forEach(b=>b.classList.toggle('active',b===btn));
+          });
+        });
+        const playBtn = sec.querySelector('[data-formation-play]');
+        if(playBtn){
+          playBtn.addEventListener('click',()=>{
+            if(playBtn.classList.contains('playing')) return;
+            playBtn.classList.add('playing'); playBtn.textContent='⏳';
+            let p=0; showPhase(0);
+            sec.querySelectorAll('[data-formation-phase]').forEach((b,i)=>b.classList.toggle('active',i===0));
+            const iv=setInterval(()=>{
+              p++;
+              if(p>3){ clearInterval(iv); playBtn.classList.remove('playing'); playBtn.textContent='▶ Play'; }
+              else {
+                showPhase(p);
+                sec.querySelectorAll('[data-formation-phase]').forEach((b,i)=>b.classList.toggle('active',i===p));
+              }
+            },2000);
+          });
+        }
+      }, {once:true});
+    })();
+    // === FORMAZIONE CANVAS END ===
     // === SCARICA CANVAS ===
     // === FISICA CANVAS ===
     // === DATI INIT ===
