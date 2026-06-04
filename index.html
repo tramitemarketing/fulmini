@@ -1062,7 +1062,7 @@
         </div>
         <div class="slide-right">
           <div class="blitz-wrap">
-            <iframe id="blitz-iframe" title="Fulmini in tempo reale Blitzortung" loading="lazy"></iframe>
+            <iframe id="blitz-iframe" title="Fulmini in tempo reale Blitzortung"></iframe>
           </div>
         </div>
       </div>
@@ -2404,6 +2404,7 @@
     const ctx=canvas.getContext('2d'); let t=0;
     function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
     function draw(){
+      if(document.hidden){ requestAnimationFrame(draw); return; }
       const W=canvas.width,H=canvas.height;
       ctx.clearRect(0,0,W,H); ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
       t+=0.02;
