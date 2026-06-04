@@ -183,9 +183,9 @@
         <a href="#formazione" data-scroll-to="formazione">01 Formazione</a>
         <a href="#meccanismo" data-scroll-to="meccanismo">02 Meccanismo</a>
         <a href="#tipi" data-scroll-to="tipi">03 I Tipi</a>
-        <a href="#plasma" data-scroll-to="plasma">04 Il Plasma</a>
-        <a href="#chimica" data-scroll-to="chimica">05 Chimica</a>
-        <a href="#storia" data-scroll-to="storia">06 Storia</a>
+        <a href="#storia" data-scroll-to="storia">04 Storia</a>
+        <a href="#plasma" data-scroll-to="plasma">05 Il Plasma</a>
+        <a href="#chimica" data-scroll-to="chimica">06 Chimica</a>
         <a href="#mondo" data-scroll-to="mondo">07 Nel Mondo</a>
         <a href="#curiosita" data-scroll-to="curiosita">08 Curiosità</a>
         <a href="#sicurezza" data-scroll-to="sicurezza">09 Sicurezza</a>
@@ -226,9 +226,14 @@
           <h2 class="reveal reveal-d1">La collisione triboelettrica</h2>
           <p class="reveal reveal-d2">Tutto comincia dentro il <strong>cumulonembo</strong>. Le correnti d'aria violente fanno scontrare cristalli di ghiaccio e gocce d'acqua. Quando i cristalli di ghiaccio più leggeri salgono e il <em>graupel</em> più pesante scende, un passaggio di elettroni per attrito — <strong>l'effetto triboelettrico</strong> — separa le cariche.</p>
           <p class="reveal reveal-d3">I cristalli leggeri cedono elettroni: si caricano <strong>positivamente</strong> e salgono verso la cima. Il graupel acquista elettroni e si deposita nella parte medio-bassa: <strong>carica negativa in basso, positiva in alto</strong>.</p>
+          <div class="reveal reveal-d4" style="margin-top:1.5rem;">
+            <label style="font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.5rem;">Intensità updraft</label>
+            <input type="range" min="0" max="100" value="30" data-charge-slider style="width:100%;-webkit-appearance:none;height:2px;background:var(--border);outline:none;" />
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--gold);text-align:right;margin-top:.3rem;" id="charge-val">30%</div>
+          </div>
         </div>
         <div class="slide-right">
-          <canvas id="triboelec-canvas" aria-label="Separazione di cariche per effetto triboelettrico"></canvas>
+          <canvas id="charge-canvas" aria-label="Separazione di carica nel cumulonembo"></canvas>
         </div>
       </div>
     </div>
@@ -460,164 +465,8 @@
   </div>
 </div>
   </section>
-  <section class="section" id="plasma" data-section="4">
-    <div class="section-header"><span class="section-num">04 — IL PLASMA</span></div>
-    <div class="hc-wrap">
-  <div class="hc-track">
-
-    <!-- SLIDE 1: Cos'è il plasma -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Il Plasma — 1/3</span>
-          <h2 class="reveal reveal-d1">Il quarto stato della materia</h2>
-          <p class="reveal reveal-d2">Per capire a fondo il fulmine dobbiamo guardarlo non come un semplice "lampo elettrico", ma come un <strong>laboratorio di fisica del plasma</strong>. Il fulmine non è fatto di fuoco e non è "elettricità pura": la sua sostanza fisica è il <strong>plasma</strong>, il quarto stato della materia.</p>
-          <p class="reveal reveal-d3">Quando il campo elettrico supera la rigidità dielettrica dell'aria (~3×10⁶ V/m), gli elettroni vengono strappati violentemente dai nuclei. L'aria ionizzata — plasma — conduce l'elettricità come un metallo: <strong>resistività bassissima</strong>, fortemente emettitore di luce per ricombinazione degli elettroni.</p>
-          <div class="stat-strip reveal reveal-d4">
-            <div class="stat-item"><span class="stat-val">3×10⁶ V/m</span><span class="stat-unit">soglia ionizzazione aria</span></div>
-            <div class="stat-item"><span class="stat-val">~0 Ω</span><span class="stat-unit">resistività plasma</span></div>
-          </div>
-        </div>
-        <div class="slide-right">
-          <canvas id="plasma-canvas" class="plasma-glow" aria-label="Plasma ionizzato — particelle animate"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 2: Termodinamica e il tuono -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Il Plasma — 2/3</span>
-          <h2 class="reveal reveal-d1">L'esplosione e il tuono</h2>
-          <p class="reveal reveal-d2">Il canale di plasma ha un diametro sorprendentemente piccolo — inizialmente pochi millimetri, poi qualche centimetro. La densità di corrente è talmente alta che la temperatura schizza a circa <strong>30.000 K</strong> in meno di un microsecondo.</p>
-          <p class="reveal reveal-d3">Secondo la legge dei gas perfetti P = ρRT, un aumento così verticale e istantaneo della temperatura provoca un picco di pressione interno al canale stimato tra <strong>10 e 100 atmosfere</strong>. Il canale di plasma non può contenere questa pressione e si espande radialmente verso l'esterno a velocità <strong>supersonica</strong>, generando un'<strong>onda d'urto</strong> — il tuono.</p>
-        </div>
-        <div class="slide-right">
-          <canvas id="thunder-canvas" aria-label="Espansione supersonica del canale plasma — onda d'urto"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 3: Effetto pinch -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Il Plasma — 3/3</span>
-          <h2 class="reveal reveal-d1">L'effetto pinch (Z-pinch)</h2>
-          <p class="reveal reveal-d2">Il fulmine è governato dalle equazioni di Maxwell. Quando una corrente di intensità I (fino a 200.000 A) attraversa il canale di plasma, genera attorno al canale un campo magnetico <strong>B circolare</strong>, calcolabile con la legge di Ampère.</p>
-          <p class="reveal reveal-d3">Questo campo magnetico genera una <strong>forza di Lorentz</strong> che spinge le particelle cariche verso l'interno del canale: è il fenomeno noto nella fisica dei plasmi come <strong>Z-pinch (strizione magnetica)</strong>. La forza comprime il plasma, confinandolo e densificandolo, e contrasta temporaneamente l'espansione termica in un equilibrio dinamico violentissimo che dura solo pochi microsecondi.</p>
-        </div>
-        <div class="slide-right">
-          <canvas id="pinch-canvas" aria-label="Z-pinch — strizione magnetica del canale plasma"></canvas>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="hc-arrows">
-    <button class="hc-arrow hc-arrow-prev">←</button>
-    <button class="hc-arrow hc-arrow-next">→</button>
-  </div>
-  <div class="hc-dots">
-    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
-  </div>
-</div>
-  </section>
-  <section class="section" id="chimica" data-section="5">
-    <div class="section-header"><span class="section-num">05 — CHIMICA &amp; NUCLEARE</span></div>
-    <div class="hc-wrap">
-  <div class="hc-track">
-
-    <!-- SLIDE 1: Chimica ad alta energia -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Chimica &amp; Nucleare — 1/3</span>
-          <h2 class="reveal reveal-d1">Chimica ad alta energia</h2>
-          <p class="reveal reveal-d2">Il fulmine altera la chimica dell'atmosfera circostante, a causa delle altissime temperature e dei legami molecolari spezzati. Tre prodotti notevoli:</p>
-          <div class="molecule-grid reveal reveal-d3">
-            <div class="molecule-card"><span class="molecule-formula">O₃</span><div><h4>Ozono</h4><p>L'energia del fulmine dissocia le molecole stabili di N₂ e O₂. Gli atomi liberi si ricombinano formando ozono (da cui il tipico odore "fresco" di bruciato dopo un fulmine) e ossidi di azoto.</p></div></div>
-            <div class="molecule-card"><span class="molecule-formula">NOₓ</span><div><h4>Ossidi di azoto</h4><p>Il processo è fondamentale per la Terra, perché "fissa" l'azoto atmosferico nel terreno, rendendolo un fertilizzante naturale. I fulmini producono globalmente milioni di tonnellate di NOₓ all'anno.</p></div></div>
-            <div class="molecule-card"><span class="molecule-formula">SiO₂</span><div><h4>Fulgurite</h4><p>Quando il fulmine colpisce un terreno sabbioso, la corrente e i 30.000 K fondono istantaneamente il quarzo (SiO₂) lungo il percorso sotterraneo della scarica. Il risultato è la <strong>fulgurite</strong>, una roccia vetrosa e tubolare che ricalca letteralmente la forma della scarica nel terreno.</p></div></div>
-          </div>
-        </div>
-        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
-          <div class="reveal" style="text-align:center;font-family:var(--mono);font-size:2.5rem;color:var(--gold);">N₂ + O₂</div>
-          <div class="reveal reveal-d1" style="font-size:2rem;color:var(--muted);">↓ 30.000 K</div>
-          <div class="reveal reveal-d2" style="text-align:center;font-family:var(--mono);font-size:1.5rem;display:flex;gap:1.5rem;">
-            <span style="color:var(--blue);">O₃</span>
-            <span style="color:var(--muted);">+</span>
-            <span style="color:var(--green);">NOₓ</span>
-          </div>
-          <div class="reveal reveal-d3" style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;">fertilizzante naturale · odore caratteristico</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 2: TGF e raggi gamma -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Chimica &amp; Nucleare — 2/3</span>
-          <h2 class="reveal reveal-d1">TGF — Raggi gamma dal temporale</h2>
-          <p class="reveal reveal-d2">Negli ultimi decenni si è scoperto che i fulmini sono anche <strong>acceleratori di particelle naturali</strong>. I campi elettrici dei temporali accelerano gli elettroni a velocità relativistiche (vicine a quella della luce). Quando questi elettroni frenano contro i nuclei dell'aria, emettono <strong>raggi X e raggi gamma</strong> ad alta energia: i <strong>Terrestrial Gamma-ray Flashes (TGF)</strong>.</p>
-          <p class="reveal reveal-d3">Rilevabili persino dai satelliti nello spazio. In rari casi i fotoni gamma prodotti dal fulmine possono colpire il nucleo di azoto-14 (¹⁴N), strappandone un neutrone e generando isotopi instabili come l'azoto-13, innescando una brevissima reazione nucleare spontanea in atmosfera.</p>
-        </div>
-        <div class="slide-right">
-          <canvas id="tgf-canvas" aria-label="TGF — emissione gamma da temporale"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- SLIDE 3: Parametri ed energia -->
-    <div class="hc-slide">
-      <div class="slide-split">
-        <div class="slide-left">
-          <span class="eyebrow reveal">Chimica &amp; Nucleare — 3/3</span>
-          <h2 class="reveal reveal-d1">Parametri ed energia in gioco</h2>
-          <p class="reveal reveal-d2">I numeri legati a un singolo fulmine sono impressionanti, eppure quasi tutta l'energia si dissipa in calore. Un impianto elettrico domestico standard regge appena 16 A, contro i 30.000 A medi di un fulmine.</p>
-          <table class="data-table reveal reveal-d3">
-            <thead><tr><th>Caratteristica</th><th>Valore</th></tr></thead>
-            <tbody>
-              <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
-              <tr><td>Corrente media</td><td>20.000–30.000 A (picchi &gt;200.000 A)</td></tr>
-              <tr><td>Tensione</td><td>100 milioni–1 miliardo di Volt</td></tr>
-              <tr><td>Durata totale</td><td>~0,2 s (con più scariche successive)</td></tr>
-              <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
-              <tr><td>Energia utilizzabile</td><td>solo ~1 kWh (il resto è calore)</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
-          <div class="reveal" style="text-align:center;">
-            <div id="cnt-temp" class="record-val">0 K</div>
-            <div class="record-unit">temperatura canale</div>
-          </div>
-          <div class="reveal reveal-d1" style="text-align:center;">
-            <div id="cnt-amp" class="record-val">0 A</div>
-            <div class="record-unit">corrente media</div>
-          </div>
-          <div class="reveal reveal-d2" style="text-align:center;">
-            <div id="cnt-joule" class="record-val">0 MJ</div>
-            <div class="record-unit">energia totale</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="hc-arrows">
-    <button class="hc-arrow hc-arrow-prev">←</button>
-    <button class="hc-arrow hc-arrow-next">→</button>
-  </div>
-  <div class="hc-dots">
-    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
-  </div>
-</div>
-  </section>
-  <section class="section" id="storia" data-section="6">
-    <div class="section-header"><span class="section-num">06 — STORIA &amp; CULTURA</span></div>
+  <section class="section" id="storia" data-section="4">
+    <div class="section-header"><span class="section-num">04 — STORIA &amp; CULTURA</span></div>
     <div class="hc-wrap">
   <div class="hc-track">
 
@@ -738,6 +587,162 @@
   <div class="hc-dots">
     <div class="hc-dot active"></div><div class="hc-dot"></div>
     <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+  </section>
+  <section class="section" id="plasma" data-section="5">
+    <div class="section-header"><span class="section-num">05 — IL PLASMA</span></div>
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Cos'è il plasma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 1/3</span>
+          <h2 class="reveal reveal-d1">Il quarto stato della materia</h2>
+          <p class="reveal reveal-d2">Per capire a fondo il fulmine dobbiamo guardarlo non come un semplice "lampo elettrico", ma come un <strong>laboratorio di fisica del plasma</strong>. Il fulmine non è fatto di fuoco e non è "elettricità pura": la sua sostanza fisica è il <strong>plasma</strong>, il quarto stato della materia.</p>
+          <p class="reveal reveal-d3">Quando il campo elettrico supera la rigidità dielettrica dell'aria (~3×10⁶ V/m), gli elettroni vengono strappati violentemente dai nuclei. L'aria ionizzata — plasma — conduce l'elettricità come un metallo: <strong>resistività bassissima</strong>, fortemente emettitore di luce per ricombinazione degli elettroni.</p>
+          <div class="stat-strip reveal reveal-d4">
+            <div class="stat-item"><span class="stat-val">3×10⁶ V/m</span><span class="stat-unit">soglia ionizzazione aria</span></div>
+            <div class="stat-item"><span class="stat-val">~0 Ω</span><span class="stat-unit">resistività plasma</span></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="plasma-canvas" class="plasma-glow" aria-label="Plasma ionizzato — particelle animate"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Termodinamica e il tuono -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 2/3</span>
+          <h2 class="reveal reveal-d1">L'esplosione e il tuono</h2>
+          <p class="reveal reveal-d2">Il canale di plasma ha un diametro sorprendentemente piccolo — inizialmente pochi millimetri, poi qualche centimetro. La densità di corrente è talmente alta che la temperatura schizza a circa <strong>30.000 K</strong> in meno di un microsecondo.</p>
+          <p class="reveal reveal-d3">Secondo la legge dei gas perfetti P = ρRT, un aumento così verticale e istantaneo della temperatura provoca un picco di pressione interno al canale stimato tra <strong>10 e 100 atmosfere</strong>. Il canale di plasma non può contenere questa pressione e si espande radialmente verso l'esterno a velocità <strong>supersonica</strong>, generando un'<strong>onda d'urto</strong> — il tuono.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="thunder-canvas" aria-label="Espansione supersonica del canale plasma — onda d'urto"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Effetto pinch -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 3/3</span>
+          <h2 class="reveal reveal-d1">L'effetto pinch (Z-pinch)</h2>
+          <p class="reveal reveal-d2">Il fulmine è governato dalle equazioni di Maxwell. Quando una corrente di intensità I (fino a 200.000 A) attraversa il canale di plasma, genera attorno al canale un campo magnetico <strong>B circolare</strong>, calcolabile con la legge di Ampère.</p>
+          <p class="reveal reveal-d3">Questo campo magnetico genera una <strong>forza di Lorentz</strong> che spinge le particelle cariche verso l'interno del canale: è il fenomeno noto nella fisica dei plasmi come <strong>Z-pinch (strizione magnetica)</strong>. La forza comprime il plasma, confinandolo e densificandolo, e contrasta temporaneamente l'espansione termica in un equilibrio dinamico violentissimo che dura solo pochi microsecondi.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="pinch-canvas" aria-label="Z-pinch — strizione magnetica del canale plasma"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+  </section>
+  <section class="section" id="chimica" data-section="6">
+    <div class="section-header"><span class="section-num">06 — CHIMICA &amp; NUCLEARE</span></div>
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Chimica ad alta energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 1/3</span>
+          <h2 class="reveal reveal-d1">Chimica ad alta energia</h2>
+          <p class="reveal reveal-d2">Il fulmine altera la chimica dell'atmosfera circostante, a causa delle altissime temperature e dei legami molecolari spezzati. Tre prodotti notevoli:</p>
+          <div class="molecule-grid reveal reveal-d3">
+            <div class="molecule-card"><span class="molecule-formula">O₃</span><div><h4>Ozono</h4><p>L'energia del fulmine dissocia le molecole stabili di N₂ e O₂. Gli atomi liberi si ricombinano formando ozono (da cui il tipico odore "fresco" di bruciato dopo un fulmine) e ossidi di azoto.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">NOₓ</span><div><h4>Ossidi di azoto</h4><p>Il processo è fondamentale per la Terra, perché "fissa" l'azoto atmosferico nel terreno, rendendolo un fertilizzante naturale. I fulmini producono globalmente milioni di tonnellate di NOₓ all'anno.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">SiO₂</span><div><h4>Fulgurite</h4><p>Quando il fulmine colpisce un terreno sabbioso, la corrente e i 30.000 K fondono istantaneamente il quarzo (SiO₂) lungo il percorso sotterraneo della scarica. Il risultato è la <strong>fulgurite</strong>, una roccia vetrosa e tubolare che ricalca letteralmente la forma della scarica nel terreno.</p></div></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);font-size:2.5rem;color:var(--gold);">N₂ + O₂</div>
+          <div class="reveal reveal-d1" style="font-size:2rem;color:var(--muted);">↓ 30.000 K</div>
+          <div class="reveal reveal-d2" style="text-align:center;font-family:var(--mono);font-size:1.5rem;display:flex;gap:1.5rem;">
+            <span style="color:var(--blue);">O₃</span>
+            <span style="color:var(--muted);">+</span>
+            <span style="color:var(--green);">NOₓ</span>
+          </div>
+          <div class="reveal reveal-d3" style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;">fertilizzante naturale · odore caratteristico</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TGF e raggi gamma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 2/3</span>
+          <h2 class="reveal reveal-d1">TGF — Raggi gamma dal temporale</h2>
+          <p class="reveal reveal-d2">Negli ultimi decenni si è scoperto che i fulmini sono anche <strong>acceleratori di particelle naturali</strong>. I campi elettrici dei temporali accelerano gli elettroni a velocità relativistiche (vicine a quella della luce). Quando questi elettroni frenano contro i nuclei dell'aria, emettono <strong>raggi X e raggi gamma</strong> ad alta energia: i <strong>Terrestrial Gamma-ray Flashes (TGF)</strong>.</p>
+          <p class="reveal reveal-d3">Rilevabili persino dai satelliti nello spazio. In rari casi i fotoni gamma prodotti dal fulmine possono colpire il nucleo di azoto-14 (¹⁴N), strappandone un neutrone e generando isotopi instabili come l'azoto-13, innescando una brevissima reazione nucleare spontanea in atmosfera.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="tgf-canvas" aria-label="TGF — emissione gamma da temporale"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Parametri ed energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 3/3</span>
+          <h2 class="reveal reveal-d1">Parametri ed energia in gioco</h2>
+          <p class="reveal reveal-d2">I numeri legati a un singolo fulmine sono impressionanti, eppure quasi tutta l'energia si dissipa in calore. Un impianto elettrico domestico standard regge appena 16 A, contro i 30.000 A medi di un fulmine.</p>
+          <table class="data-table reveal reveal-d3">
+            <thead><tr><th>Caratteristica</th><th>Valore</th></tr></thead>
+            <tbody>
+              <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
+              <tr><td>Corrente media</td><td>20.000–30.000 A (picchi &gt;200.000 A)</td></tr>
+              <tr><td>Tensione</td><td>100 milioni–1 miliardo di Volt</td></tr>
+              <tr><td>Durata totale</td><td>~0,2 s (con più scariche successive)</td></tr>
+              <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
+              <tr><td>Energia utilizzabile</td><td>solo ~1 kWh (il resto è calore)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
+          <div class="reveal" style="text-align:center;">
+            <div id="cnt-temp" class="record-val">0 K</div>
+            <div class="record-unit">temperatura canale</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;">
+            <div id="cnt-amp" class="record-val">0 A</div>
+            <div class="record-unit">corrente media</div>
+          </div>
+          <div class="reveal reveal-d2" style="text-align:center;">
+            <div id="cnt-joule" class="record-val">0 MJ</div>
+            <div class="record-unit">energia totale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
   </div>
 </div>
   </section>
@@ -1086,7 +1091,7 @@
     const state = {
       currentSection: 0,
       slideCurrent: new Array(TOTAL_SECTIONS).fill(0),
-      slideTotal: [1, 3, 4, 5, 3, 3, 4, 5, 3, 3]
+      slideTotal: [1, 3, 4, 5, 4, 3, 3, 5, 3, 3]
     };
 
     function updateProgress(si) {
@@ -1268,62 +1273,67 @@
     resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
   }
 
-  function initTriboelecCanvas(canvas){
+  function initChargeCanvas(canvas){
     if(canvas._init) return; canvas._init=true;
     const ctx=canvas.getContext('2d');
-    const particles=[];
-    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; initParticles(); }
-    function initParticles(){
-      particles.length=0;
+    const N=35;
+    let particles=[], currentStrength=0.3;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; initP(); }
+    function initP(){
       const W=canvas.width,H=canvas.height;
-      for(let i=0;i<20;i++){
-        // graupel (large, will go down)
-        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:0.4+Math.random()*0.4,r:5+Math.random()*4,type:'graupel',charge:-1});
-        // crystal (small, will go up)
-        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*0.5,r:2+Math.random()*2,type:'crystal',charge:1});
-      }
+      particles=Array.from({length:N*2},(_,i)=>({
+        x:W*.1+Math.random()*W*.8,
+        y:H*.35+(Math.random()-.5)*H*.3,
+        charge:i<N?1:-1
+      }));
     }
     function draw(){
+      if(document.hidden){ requestAnimationFrame(draw); return; }
       const W=canvas.width,H=canvas.height;
       ctx.clearRect(0,0,W,H);
-      // bg gradient (cold atmosphere)
-      const bg=ctx.createLinearGradient(0,0,0,H);
-      bg.addColorStop(0,'#0a0a1a'); bg.addColorStop(1,'#05050f');
-      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-      // zones
-      ctx.fillStyle='rgba(201,168,76,.04)'; ctx.fillRect(0,0,W,H*.35); // positive zone
-      ctx.fillStyle='rgba(74,158,255,.04)'; ctx.fillRect(0,H*.65,W,H*.35); // negative zone
-      ctx.font='10px JetBrains Mono';
-      ctx.fillStyle='rgba(201,168,76,.4)'; ctx.fillText('zona +',8,18);
-      ctx.fillStyle='rgba(74,158,255,.4)'; ctx.fillText('zona −',8,H-8);
-
-      particles.forEach(p=>{
-        p.x+=p.vx; p.y+=p.vy;
-        if(p.x<p.r||p.x>W-p.r) p.vx*=-1;
-        if(p.y<p.r) p.vy=Math.abs(p.vy);
-        if(p.y>H-p.r) p.vy=-Math.abs(p.vy);
-        ctx.save();
-        if(p.type==='graupel'){
-          ctx.fillStyle='rgba(74,158,255,.75)';
-          ctx.shadowColor='#4a9eff'; ctx.shadowBlur=6;
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
-          ctx.fillText('−',p.x-3,p.y+3);
-        } else {
-          ctx.fillStyle='rgba(201,168,76,.75)';
-          ctx.shadowColor='#c9a84c'; ctx.shadowBlur=6;
-          // hexagonal crystal shape
-          ctx.beginPath();
-          for(let a=0;a<6;a++){ const ang=a*Math.PI/3; ctx.lineTo(p.x+p.r*Math.cos(ang),p.y+p.r*Math.sin(ang)); }
-          ctx.closePath(); ctx.fill();
-          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
-          ctx.fillText('+',p.x-3,p.y+3);
+      ctx.save(); ctx.fillStyle='#1a1a2e';
+      ctx.beginPath();
+      ctx.arc(W*.4,H*.1+5,W*.11,0,Math.PI*2);
+      ctx.arc(W*.52,H*.08,W*.1,0,Math.PI*2);
+      ctx.arc(W*.62,H*.12,W*.09,0,Math.PI*2);
+      ctx.fill(); ctx.restore();
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H-15); ctx.lineTo(W,H-15); ctx.stroke(); ctx.restore();
+      const s=currentStrength;
+      if(s>.1){
+        for(let lx=W*.15;lx<W*.85;lx+=45){
+          ctx.save(); ctx.strokeStyle=`rgba(74,158,255,${s*.18})`; ctx.lineWidth=.5;
+          ctx.setLineDash([4,6]);
+          ctx.beginPath(); ctx.moveTo(lx,H*.22); ctx.lineTo(lx,H-15); ctx.stroke();
+          ctx.restore();
         }
+      }
+      particles.forEach(p=>{
+        const targetY=p.charge>0?H*.14+H*.06*(1-s):H*.62+H*.18*s;
+        p.y+=(targetY-p.y)*.06;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,Math.PI*2);
+        const col=p.charge>0?'#4a9eff':'#ff7744';
+        ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=10; ctx.fill();
+        ctx.font='9px JetBrains Mono'; ctx.fillStyle=col;
+        ctx.fillText(p.charge>0?'+':'−',p.x+4,p.y-4);
         ctx.restore();
       });
+      if(s>.3){
+        ctx.save(); ctx.font='bold 12px JetBrains Mono';
+        ctx.fillStyle=`rgba(74,158,255,${s})`; ctx.fillText('⊕ zona +',W*.05,H*.16);
+        ctx.fillStyle=`rgba(255,119,68,${s})`; ctx.fillText('⊖ zona −',W*.05,H*.7);
+        ctx.restore();
+      }
       requestAnimationFrame(draw);
     }
-    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+    const slide=canvas.closest('.hc-slide');
+    const slider=slide?.querySelector('[data-charge-slider]');
+    const valEl=document.getElementById('charge-val');
+    if(slider) slider.addEventListener('input',()=>{ currentStrength=slider.value/100; if(valEl) valEl.textContent=slider.value+'%'; });
+    window.addEventListener('resize',resize);
+    resize();
+    requestAnimationFrame(draw);
   }
 
   function initCapacitorCanvas(canvas){
@@ -1381,7 +1391,7 @@
 
   sec.addEventListener('section-enter',function onEnter(){
     initChargeFieldCanvas(document.getElementById('charge-field-canvas'));
-    initTriboelecCanvas(document.getElementById('triboelec-canvas'));
+    initChargeCanvas(document.getElementById('charge-canvas'));
     initCapacitorCanvas(document.getElementById('capacitor-canvas'));
     initCarousel(sec);
   },{once:true});
