@@ -449,6 +449,78 @@
     }
     // === SCROLL ENGINE END ===
     // === CAROUSEL ENGINE ===
+    const carousels = {};
+
+    function carouselNext(si) { carousels[si] && carousels[si].next(); }
+    function carouselPrev(si) { carousels[si] && carousels[si].prev(); }
+
+    function initCarousel(sectionEl) {
+      const si = parseInt(sectionEl.dataset.section);
+      if (carousels[si]) return;
+      const track = sectionEl.querySelector('.hc-track');
+      if (!track) return;
+      const slides = Array.from(track.querySelectorAll('.hc-slide'));
+      if (!slides.length) return;
+
+      let current = 0;
+      state.slideTotal[si] = slides.length;
+
+      function goTo(n) {
+        current = Math.max(0, Math.min(n, slides.length-1));
+        const w = window.innerWidth;
+        track.style.transform = `translateX(${-current*w}px)`;
+        state.slideCurrent[si] = current;
+        if (state.currentSection === si) updateSlideCounter(si);
+        updateDots(sectionEl, current, slides.length);
+        updateArrows(sectionEl, current, slides.length);
+        // reveal elements in new slide
+        slides[current].querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+      }
+
+      carousels[si] = { next(){ goTo(current+1); }, prev(){ goTo(current-1); }, goTo };
+
+      // Arrow buttons
+      sectionEl.querySelector('.hc-arrow-prev')?.addEventListener('click', () => carousels[si].prev());
+      sectionEl.querySelector('.hc-arrow-next')?.addEventListener('click', () => carousels[si].next());
+
+      // Dot clicks
+      sectionEl.querySelectorAll('.hc-dot').forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+      });
+
+      // Touch swipe
+      let tx = 0;
+      track.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+      track.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (dx < -50) carousels[si].next();
+        else if (dx > 50) carousels[si].prev();
+      }, {passive:true});
+
+      // Resize recalculate
+      window.addEventListener('resize', () => {
+        track.style.transition = 'none';
+        track.style.transform = `translateX(${-current*window.innerWidth}px)`;
+        requestAnimationFrame(() => { track.style.transition = ''; });
+      });
+
+      updateDots(sectionEl, 0, slides.length);
+      updateArrows(sectionEl, 0, slides.length);
+      // reveal first slide immediately
+      slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    function updateDots(sectionEl, current, total) {
+      sectionEl.querySelectorAll('.hc-dot').forEach((d,i) => d.classList.toggle('active', i===current));
+    }
+
+    function updateArrows(sectionEl, current, total) {
+      const prev = sectionEl.querySelector('.hc-arrow-prev');
+      const next = sectionEl.querySelector('.hc-arrow-next');
+      if (prev) prev.disabled = current===0;
+      if (next) next.disabled = current===total-1;
+    }
+    // === CAROUSEL ENGINE END ===
     // === HERO INIT ===
     // === FORMAZIONE CANVAS ===
     // === SCARICA CANVAS ===
