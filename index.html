@@ -1219,6 +1219,7 @@
       const W=canvas.width,H=canvas.height;
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle='#020208'; ctx.fillRect(0,0,W,H);
+      ctx.save();
       t+=0.02;
       // atmosphere layers
       [['IONOSFERA ~90km','rgba(123,47,255,.08)',0,.15],
@@ -1252,6 +1253,7 @@
       ctx.font='18px serif'; ctx.fillText('🛰',W*.75,H*.08);
       ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(255,220,80,.5)';
       ctx.fillText('TGF rilevato',W*.55,H*.06);
+      ctx.restore();
       requestAnimationFrame(draw);
     }
     resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
@@ -1269,7 +1271,6 @@
       }
       requestAnimationFrame(step);
     }
-    sec.querySelector('[data-section="5"]')?.addEventListener('section-enter',()=>{},{ once:true });
     // animate when slide 3 becomes visible (use a small observer)
     const slide3=sec.querySelectorAll('.hc-slide')[2];
     if(!slide3) return;
