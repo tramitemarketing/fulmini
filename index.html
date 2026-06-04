@@ -411,7 +411,95 @@
   </section>
   <section class="section" id="chimica" data-section="5">
     <div class="section-header"><span class="section-num">05 — CHIMICA &amp; NUCLEARE</span></div>
-    <!-- CHIMICA CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Chimica ad alta energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 1/3</span>
+          <h2 class="reveal reveal-d1">Chimica ad alta energia</h2>
+          <p class="reveal reveal-d2">Il fulmine altera la chimica dell'atmosfera circostante, a causa delle altissime temperature e dei legami molecolari spezzati. Tre prodotti notevoli:</p>
+          <div class="molecule-grid reveal reveal-d3">
+            <div class="molecule-card"><span class="molecule-formula">O₃</span><div><h4>Ozono</h4><p>L'energia del fulmine dissocia le molecole stabili di N₂ e O₂. Gli atomi liberi si ricombinano formando ozono (da cui il tipico odore "fresco" di bruciato dopo un fulmine) e ossidi di azoto.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">NOₓ</span><div><h4>Ossidi di azoto</h4><p>Il processo è fondamentale per la Terra, perché "fissa" l'azoto atmosferico nel terreno, rendendolo un fertilizzante naturale. I fulmini producono globalmente milioni di tonnellate di NOₓ all'anno.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">SiO₂</span><div><h4>Fulgurite</h4><p>Quando il fulmine colpisce un terreno sabbioso, la corrente e i 30.000 K fondono istantaneamente il quarzo (SiO₂) lungo il percorso sotterraneo della scarica. Il risultato è la <strong>fulgurite</strong>, una roccia vetrosa e tubolare che ricalca letteralmente la forma della scarica nel terreno.</p></div></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);font-size:2.5rem;color:var(--gold);">N₂ + O₂</div>
+          <div class="reveal reveal-d1" style="font-size:2rem;color:var(--muted);">↓ 30.000 K</div>
+          <div class="reveal reveal-d2" style="text-align:center;font-family:var(--mono);font-size:1.5rem;display:flex;gap:1.5rem;">
+            <span style="color:var(--blue);">O₃</span>
+            <span style="color:var(--muted);">+</span>
+            <span style="color:var(--green);">NOₓ</span>
+          </div>
+          <div class="reveal reveal-d3" style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;">fertilizzante naturale · odore caratteristico</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TGF e raggi gamma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 2/3</span>
+          <h2 class="reveal reveal-d1">TGF — Raggi gamma dal temporale</h2>
+          <p class="reveal reveal-d2">Negli ultimi decenni si è scoperto che i fulmini sono anche <strong>acceleratori di particelle naturali</strong>. I campi elettrici dei temporali accelerano gli elettroni a velocità relativistiche (vicine a quella della luce). Quando questi elettroni frenano contro i nuclei dell'aria, emettono <strong>raggi X e raggi gamma</strong> ad alta energia: i <strong>Terrestrial Gamma-ray Flashes (TGF)</strong>.</p>
+          <p class="reveal reveal-d3">Rilevabili persino dai satelliti nello spazio. In rari casi i fotoni gamma prodotti dal fulmine possono colpire il nucleo di azoto-14 (¹⁴N), strappandone un neutrone e generando isotopi instabili come l'azoto-13, innescando una brevissima reazione nucleare spontanea in atmosfera.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="tgf-canvas" aria-label="TGF — emissione gamma da temporale"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Parametri ed energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 3/3</span>
+          <h2 class="reveal reveal-d1">Parametri ed energia in gioco</h2>
+          <p class="reveal reveal-d2">I numeri legati a un singolo fulmine sono impressionanti, eppure quasi tutta l'energia si dissipa in calore. Un impianto elettrico domestico standard regge appena 16 A, contro i 30.000 A medi di un fulmine.</p>
+          <table class="data-table reveal reveal-d3">
+            <thead><tr><th>Caratteristica</th><th>Valore</th></tr></thead>
+            <tbody>
+              <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
+              <tr><td>Corrente media</td><td>20.000–30.000 A (picchi &gt;200.000 A)</td></tr>
+              <tr><td>Tensione</td><td>100 milioni–1 miliardo di Volt</td></tr>
+              <tr><td>Durata totale</td><td>~0,2 s (con più scariche successive)</td></tr>
+              <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
+              <tr><td>Energia utilizzabile</td><td>solo ~1 kWh (il resto è calore)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
+          <div class="reveal" style="text-align:center;">
+            <div id="cnt-temp" class="record-val">0 K</div>
+            <div class="record-unit">temperatura canale</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;">
+            <div id="cnt-amp" class="record-val">0 A</div>
+            <div class="record-unit">corrente media</div>
+          </div>
+          <div class="reveal reveal-d2" style="text-align:center;">
+            <div id="cnt-joule" class="record-val">0 MJ</div>
+            <div class="record-unit">energia totale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="storia" data-section="6">
     <div class="section-header"><span class="section-num">06 — STORIA &amp; CULTURA</span></div>
@@ -1118,7 +1206,91 @@
   },{once:true});
 })();
 // === PLASMA CANVAS END ===
-    // === CHIMICA INIT ===
+// === CHIMICA INIT ===
+(function initChimicaSection(){
+  const sec = document.getElementById('chimica');
+
+  function initTGFCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#020208'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      // atmosphere layers
+      [['IONOSFERA ~90km','rgba(123,47,255,.08)',0,.15],
+       ['MESOSFERA ~70km','rgba(74,158,255,.06)',.15,.3],
+       ['STRATOSFERA ~50km','rgba(68,204,136,.05)',.3,.55],
+       ['TROPOSFERA','rgba(201,168,76,.04)',.55,1]
+      ].forEach(([label,color,y0,y1])=>{
+        ctx.fillStyle=color; ctx.fillRect(0,H*y0,W,H*(y1-y0));
+        ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.35)';
+        ctx.fillText(label,4,H*y0+12);
+        ctx.strokeStyle='rgba(102,102,128,.1)'; ctx.lineWidth=.5; ctx.setLineDash([3,5]);
+        ctx.beginPath(); ctx.moveTo(0,H*y0); ctx.lineTo(W,H*y0); ctx.stroke(); ctx.setLineDash([]);
+      });
+      // storm cloud
+      ctx.fillStyle='#151525';
+      ctx.beginPath(); ctx.arc(W*.4,H*.65,W*.08,0,Math.PI*2); ctx.arc(W*.5,H*.62,W*.1,0,Math.PI*2); ctx.arc(W*.62,H*.65,W*.09,0,Math.PI*2); ctx.fill();
+      // lightning bolt in cloud
+      ctx.strokeStyle='rgba(74,158,255,'+(0.3+Math.abs(Math.sin(t*5))*0.5)+')'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(W*.52,H*.62); ctx.lineTo(W*.49,H*.68); ctx.lineTo(W*.53,H*.68); ctx.lineTo(W*.5,H*.75); ctx.stroke();
+      // TGF electron beam going UP
+      const beamAlpha=0.4+Math.abs(Math.sin(t*3))*0.5;
+      ctx.save(); ctx.strokeStyle=`rgba(255,220,80,${beamAlpha})`; ctx.lineWidth=2;
+      ctx.shadowColor='#ffdc50'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(W*.5,H*.6); ctx.lineTo(W*.5,H*.02); ctx.stroke();
+      // gamma burst
+      ctx.globalAlpha=beamAlpha*0.8;
+      ctx.fillStyle='#ffdc50'; ctx.font='bold 11px JetBrains Mono';
+      ctx.fillText('γ',W*.52,H*.08); ctx.fillText('γ',W*.46,H*.14); ctx.fillText('γ',W*.54,H*.2);
+      ctx.restore();
+      // satellite icon
+      ctx.font='18px serif'; ctx.fillText('🛰',W*.75,H*.08);
+      ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(255,220,80,.5)';
+      ctx.fillText('TGF rilevato',W*.55,H*.06);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initCounters(){
+    function animCount(el,target,suffix,duration){
+      const start=Date.now();
+      function step(){
+        const p=Math.min(1,(Date.now()-start)/duration);
+        const ease=1-Math.pow(1-p,3);
+        const val=Math.round(target*ease);
+        el.textContent=val.toLocaleString('it-IT')+suffix;
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    sec.querySelector('[data-section="5"]')?.addEventListener('section-enter',()=>{},{ once:true });
+    // animate when slide 3 becomes visible (use a small observer)
+    const slide3=sec.querySelectorAll('.hc-slide')[2];
+    if(!slide3) return;
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        obs.disconnect();
+        animCount(document.getElementById('cnt-temp'),30000,' K',1800);
+        animCount(document.getElementById('cnt-amp'),30000,' A',2000);
+        animCount(document.getElementById('cnt-joule'),5000,' MJ',2200);
+      }
+    },{threshold:.3});
+    obs.observe(slide3);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initTGFCanvas(document.getElementById('tgf-canvas'));
+    initCounters();
+    initCarousel(sec);
+  },{once:true});
+})();
+// === CHIMICA INIT END ===
     // === TIPI CANVAS ===
     // === STORIA CANVAS ===
     // === MONDO MAP ===
