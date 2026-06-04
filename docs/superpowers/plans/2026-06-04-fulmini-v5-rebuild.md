@@ -1,0 +1,2933 @@
+# Fulmini Site v5 — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Rebuild `index.html` — sito educativo italiano sui fulmini v5, 10 sezioni scroll-snap, basato su `FULMINI_dispensa.pdf`, con 24 canvas animati e 3 elementi interattivi.
+
+**Architecture:** Singolo `index.html`, CSS in `<style>`, JS in `<script>` in fondo al body. Scroll-snap su `html`. HC carousel pixel-based. Canvas lazy-init via `section-enter` CustomEvent. Guard `_init` su ogni canvas function.
+
+**Tech Stack:** Vanilla HTML5/CSS3/JS, Google Fonts CDN (Cormorant Garamond + JetBrains Mono), Leaflet 1.9.4 CDN.
+
+**Design Spec:** `docs/superpowers/specs/2026-06-04-fulmini-site-v5-design.md`
+
+---
+
+## File Structure
+
+Un solo file:
+```
+index.html    ← riscritto completamente
+```
+
+**Marker HTML** (inseriti in Task 1, sostituiti successivamente):
+- `<!-- HERO CONTENT -->` → Task 4
+- `<!-- FORMAZIONE CONTENT -->` → Task 5
+- `<!-- MECCANISMO CONTENT -->` → Task 6
+- `<!-- PLASMA CONTENT -->` → Task 7
+- `<!-- CHIMICA CONTENT -->` → Task 8
+- `<!-- TIPI CONTENT -->` → Task 9
+- `<!-- STORIA CONTENT -->` → Task 10
+- `<!-- MONDO CONTENT -->` → Task 11
+- `<!-- CURIOSITA CONTENT -->` → Task 12
+- `<!-- SICUREZZA CONTENT -->` → Task 13
+
+**Marker JS** (Task 2-14, ogni task aggiunge il suo blocco):
+```
+// === SCROLL ENGINE ===
+// === CAROUSEL ENGINE ===
+// === HERO INIT ===
+// === FORMAZIONE CANVAS ===
+// === MECCANISMO CANVAS ===
+// === PLASMA CANVAS ===
+// === CHIMICA INIT ===
+// === TIPI CANVAS ===
+// === STORIA CANVAS ===
+// === MONDO MAP ===
+// === CURIOSITA INIT ===
+// === SICUREZZA INIT ===
+// === REVEAL INIT ===
+// === BOOTSTRAP ===
+```
+
+---
+
+## Task 1: HTML Skeleton + CSS Design System Completo
+
+**Files:**
+- Overwrite: `index.html`
+
+- [ ] **Step 1: Scrivi l'intero `index.html` con CSS e struttura**
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I Fulmini — Fisica, tipi, geografia, storia e curiosità</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0a0a0f;--surface:#0f0f18;--surface2:#14141f;
+      --gold:#c9a84c;--blue:#4a9eff;--white:#e8e6e0;
+      --muted:#666680;--border:rgba(201,168,76,.15);
+      --red:#ff4444;--green:#44cc88;--plasma:#7b2fff;
+      --mono:'JetBrains Mono','Courier New',monospace;
+    }
+    html{scroll-snap-type:y mandatory;overflow-y:scroll;background:var(--bg);}
+    body{overflow:visible;font-family:'Cormorant Garamond',Georgia,serif;color:var(--white);}
+    .section{width:100vw;height:100vh;scroll-snap-align:start;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+    .section-header{position:absolute;top:0;left:0;right:0;z-index:10;padding:.75rem 5.5rem;background:linear-gradient(to bottom,rgba(10,10,15,.95),transparent);display:flex;align-items:center;gap:1rem;}
+    .section-num{font-family:var(--mono);font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+    /* HERO */
+    @keyframes flashbolt{0%,100%{opacity:.12;}45%{opacity:.3;}50%{opacity:.85;}55%{opacity:.3;}60%{opacity:.12;}}
+    .bolt-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .bolt-svg{opacity:.2;animation:flashbolt 3.2s ease-in-out infinite;}
+    .hero-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1.5rem;text-align:center;padding:2rem;}
+    .hero-eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);}
+    .hero-title{font-size:clamp(4rem,12vw,9rem);font-weight:300;letter-spacing:.06em;line-height:.9;}
+    .hero-subtitle{font-family:var(--mono);font-size:.75rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;}
+    .hero-stats{display:flex;gap:3rem;margin-top:.5rem;font-family:var(--mono);}
+    .hero-stat{display:flex;flex-direction:column;align-items:center;gap:.2rem;}
+    .hero-stat-val{font-size:1.4rem;font-weight:700;color:var(--gold);}
+    .hero-stat-label{color:var(--muted);font-size:.6rem;letter-spacing:.1em;}
+    .hero-toc{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1rem;}
+    .hero-toc a{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);padding:.35rem .75rem;text-decoration:none;transition:color .2s,border-color .2s;}
+    .hero-toc a:hover{color:var(--gold);border-color:var(--gold);}
+    @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+    .hero-cta{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);animation:pulse 2s ease-in-out infinite;}
+    /* HC CAROUSEL */
+    .hc-wrap{flex:1;position:relative;overflow:hidden;}
+    .hc-track{display:flex;height:100%;will-change:transform;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+    .hc-slide{min-width:100vw;width:100vw;height:100%;position:relative;}
+    .hc-arrows{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;padding:0 1rem;pointer-events:none;z-index:20;}
+    .hc-arrow{pointer-events:all;background:rgba(10,10,15,.6);border:1px solid var(--border);color:var(--gold);font-family:var(--mono);font-size:1.2rem;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,border-color .2s;}
+    .hc-arrow:hover{background:rgba(201,168,76,.1);border-color:var(--gold);}
+    .hc-dots{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:20;}
+    .hc-dot{width:.4rem;height:.4rem;border-radius:50%;background:var(--muted);transition:background .2s,transform .2s;cursor:pointer;}
+    .hc-dot.active{background:var(--gold);transform:scale(1.3);}
+    /* SLIDE LAYOUTS */
+    .slide-split{display:flex;height:100%;}
+    .slide-left{flex:1;padding:4rem 3rem 3rem 5.5rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;}
+    .slide-right{flex:1;position:relative;display:flex;align-items:center;justify-content:center;}
+    .slide-right canvas{width:100%;height:100%;display:block;}
+    .slide-full{width:100%;height:100%;position:relative;}
+    /* TYPOGRAPHY */
+    .eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.5rem;}
+    h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.1;margin-bottom:1.2rem;}
+    h4{font-size:1rem;font-weight:600;margin-bottom:.3rem;}
+    p{font-size:1rem;line-height:1.65;color:rgba(232,230,224,.85);margin-bottom:.75rem;}
+    p:last-child{margin-bottom:0;}
+    strong{color:var(--white);}
+    .label{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+    .stat-unit{font-family:var(--mono);font-size:.7rem;color:var(--muted);}
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.visible{opacity:1;transform:none;}
+    .reveal-d1{transition-delay:.1s;}.reveal-d2{transition-delay:.2s;}.reveal-d3{transition-delay:.3s;}.reveal-d4{transition-delay:.4s;}
+    /* FIXED UI */
+    .progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(to right,var(--gold),var(--blue));transition:width .4s ease;z-index:1000;pointer-events:none;}
+    .nav-dots{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.6rem;z-index:100;}
+    .nav-dot{width:.45rem;height:.45rem;border-radius:50%;background:var(--muted);cursor:pointer;transition:background .2s,transform .2s;}
+    .nav-dot.active{background:var(--gold);transform:scale(1.4);}
+    .slide-counter{position:fixed;bottom:1.5rem;right:1.5rem;font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;z-index:100;pointer-events:none;}
+    .keyboard-hint{position:fixed;bottom:1.5rem;left:1.5rem;font-family:var(--mono);font-size:.55rem;color:rgba(102,102,128,.5);letter-spacing:.08em;z-index:100;pointer-events:none;}
+    /* TIMELINE */
+    .timeline{display:flex;flex-direction:column;gap:0;}
+    .timeline-item{display:flex;align-items:flex-start;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--border);cursor:pointer;}
+    .timeline-year{font-family:var(--mono);font-size:.7rem;color:var(--gold);min-width:2.5rem;padding-top:.15rem;}
+    .timeline-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:.4rem;flex-shrink:0;}
+    .timeline-content{flex:1;}
+    .timeline-detail{font-size:.85rem;color:var(--muted);max-height:0;overflow:hidden;transition:max-height .3s ease;margin-top:.25rem;}
+    .timeline-item.open .timeline-detail{max-height:100px;}
+    /* CARD GRID */
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;padding:1rem 0;}
+    .card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;transition:transform .2s,border-color .2s,box-shadow .2s;}
+    .card:hover{transform:translateY(-3px);border-color:rgba(201,168,76,.4);box-shadow:0 8px 30px rgba(201,168,76,.08);}
+    .card-icon{display:block;font-size:1.5rem;margin-bottom:.5rem;}
+    /* PHASE CONTROLS */
+    .phase-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem;}
+    .phase-btn{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .9rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;}
+    .phase-btn:hover,.phase-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);}
+    .play-btn{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem 1.2rem;border:1px solid var(--blue);background:transparent;color:var(--blue);cursor:pointer;transition:all .2s;}
+    .play-btn:hover,.play-btn.playing{background:rgba(74,158,255,.1);}
+    /* WARNING BOX */
+    .warning-box{margin-top:1.5rem;padding:1rem 1.25rem;border-left:3px solid var(--gold);background:rgba(201,168,76,.05);}
+    .warning-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    /* DO/DON'T */
+    .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;}
+    .do-col,.dont-col{display:flex;flex-direction:column;gap:.5rem;}
+    .col-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.25rem;}
+    .do-col .col-title{color:var(--green);}.dont-col .col-title{color:var(--red);}
+    .do-item,.dont-item{font-size:.9rem;padding:.4rem .5rem;border-left:2px solid transparent;color:rgba(232,230,224,.75);}
+    .do-item{border-color:rgba(68,204,136,.3);}.dont-item{border-color:rgba(255,68,68,.3);}
+    @media(max-width:640px){.do-dont{grid-template-columns:1fr;}}
+    /* THUNDER CALC */
+    .thunder-calc{margin-top:1rem;}
+    .thunder-calc label{display:block;font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem;}
+    .thunder-calc input[type="range"]{width:100%;accent-color:var(--gold);cursor:pointer;}
+    .thunder-val{font-family:var(--mono);font-size:1.2rem;color:var(--gold);display:block;margin:.5rem 0;}
+    .thunder-result{display:flex;align-items:center;gap:1rem;margin-top:.5rem;}
+    .thunder-km{font-family:var(--mono);font-size:1.8rem;font-weight:700;color:var(--white);}
+    .risk-badge{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;}
+    .risk-red{background:rgba(255,68,68,.15);color:var(--red);border:1px solid rgba(255,68,68,.3);}
+    .risk-yellow{background:rgba(255,200,0,.1);color:#ffc800;border:1px solid rgba(255,200,0,.3);}
+    .risk-green{background:rgba(68,204,136,.1);color:var(--green);border:1px solid rgba(68,204,136,.3);}
+    /* BLITZ WRAP */
+    .blitz-wrap{width:100%;height:100%;position:relative;}
+    .blitz-wrap iframe{width:100%;height:100%;border:none;}
+    /* RECORD COUNTER */
+    .record-counter{display:flex;flex-direction:column;align-items:center;padding:2rem;border:1px solid var(--border);background:var(--surface);}
+    .record-val{font-family:var(--mono);font-size:clamp(2.5rem,5vw,4rem);font-weight:700;color:var(--gold);line-height:1;}
+    .record-unit{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.25rem;}
+    .record-label{font-size:.9rem;color:var(--white);margin-top:.5rem;text-align:center;}
+    /* CURIOSITY CARDS */
+    .curiosity-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .curiosity-card{background:var(--surface);border:1px solid var(--border);padding:1.25rem;}
+    .curiosity-card .c-icon{font-size:1.8rem;margin-bottom:.5rem;}
+    .curiosity-card h4{font-size:.85rem;margin-bottom:.3rem;}
+    .curiosity-card p{font-size:.8rem;color:var(--muted);margin:0;}
+    /* MOLECULE CARDS */
+    .molecule-grid{display:flex;flex-direction:column;gap:1rem;}
+    .molecule-card{background:var(--surface);border:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;}
+    .molecule-formula{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--gold);min-width:3.5rem;}
+    .molecule-card p{font-size:.85rem;margin:0;}
+    /* ITALIA TABLE */
+    .italia-table{width:100%;border-collapse:collapse;}
+    .italia-table th{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border);text-align:left;}
+    .italia-table td{padding:.6rem .75rem;border-bottom:1px solid rgba(201,168,76,.06);color:rgba(232,230,224,.85);font-size:.9rem;}
+    .italia-table tr:last-child td{border-bottom:none;}
+    /* DATA TABLE */
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border);text-align:left;}
+    .data-table td{padding:.5rem .75rem;border-bottom:1px solid rgba(201,168,76,.06);font-family:var(--mono);font-size:.75rem;}
+    .data-table td:first-child{color:var(--muted);}.data-table td:last-child{color:var(--white);}
+    /* PLASMA GLOW */
+    .plasma-glow{box-shadow:0 0 40px rgba(123,47,255,.15),0 0 80px rgba(123,47,255,.05);border:1px solid rgba(123,47,255,.2);}
+    /* STAT STRIP */
+    .stat-strip{display:flex;gap:2rem;flex-wrap:wrap;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);}
+    .stat-item{display:flex;flex-direction:column;gap:.2rem;}
+    .stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;color:var(--gold);}
+    /* Leaflet dark fix */
+    .leaflet-tile-container .leaflet-tile{filter:brightness(.8) saturate(.7);}
+    @media(max-width:600px){.slide-split{flex-direction:column;}.slide-left{padding:3.5rem 1.5rem 1.5rem;}}
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  <div class="nav-dots" id="nav-dots"></div>
+  <div class="slide-counter" id="slide-counter">1 / 1</div>
+  <div class="keyboard-hint">↑↓ sezioni · ←→ slide · F schermo intero</div>
+
+  <section class="section" id="hero" data-section="0">
+    <!-- HERO CONTENT -->
+  </section>
+  <section class="section" id="formazione" data-section="1">
+    <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
+    <!-- FORMAZIONE CONTENT -->
+  </section>
+  <section class="section" id="meccanismo" data-section="2">
+    <div class="section-header"><span class="section-num">02 — MECCANISMO</span></div>
+    <!-- MECCANISMO CONTENT -->
+  </section>
+  <section class="section" id="tipi" data-section="3">
+    <div class="section-header"><span class="section-num">03 — I TIPI</span></div>
+    <!-- TIPI CONTENT -->
+  </section>
+  <section class="section" id="plasma" data-section="4">
+    <div class="section-header"><span class="section-num">04 — IL PLASMA</span></div>
+    <!-- PLASMA CONTENT -->
+  </section>
+  <section class="section" id="chimica" data-section="5">
+    <div class="section-header"><span class="section-num">05 — CHIMICA &amp; NUCLEARE</span></div>
+    <!-- CHIMICA CONTENT -->
+  </section>
+  <section class="section" id="storia" data-section="6">
+    <div class="section-header"><span class="section-num">06 — STORIA &amp; CULTURA</span></div>
+    <!-- STORIA CONTENT -->
+  </section>
+  <section class="section" id="mondo" data-section="7">
+    <div class="section-header"><span class="section-num">07 — NEL MONDO</span></div>
+    <!-- MONDO CONTENT -->
+  </section>
+  <section class="section" id="curiosita" data-section="8">
+    <div class="section-header"><span class="section-num">08 — CURIOSITÀ &amp; RECORD</span></div>
+    <!-- CURIOSITA CONTENT -->
+  </section>
+  <section class="section" id="sicurezza" data-section="9">
+    <div class="section-header"><span class="section-num">09 — SICUREZZA</span></div>
+    <!-- SICUREZZA CONTENT -->
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // === SCROLL ENGINE ===
+    // === CAROUSEL ENGINE ===
+    // === HERO INIT ===
+    // === FORMAZIONE CANVAS ===
+    // === MECCANISMO CANVAS ===
+    // === PLASMA CANVAS ===
+    // === CHIMICA INIT ===
+    // === TIPI CANVAS ===
+    // === STORIA CANVAS ===
+    // === MONDO MAP ===
+    // === CURIOSITA INIT ===
+    // === SICUREZZA INIT ===
+    // === REVEAL INIT ===
+    // === BOOTSTRAP ===
+  </script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: html skeleton + complete css design system v5"
+```
+
+---
+
+## Task 2: Scroll Engine + Fixed UI JS
+
+**Files:**
+- Modify: `index.html` — sostituisce `// === SCROLL ENGINE ===`
+
+- [ ] **Step 1: Sostituisci `// === SCROLL ENGINE ===` con**
+
+```javascript
+// === SCROLL ENGINE ===
+const TOTAL_SECTIONS = 10;
+const state = {
+  currentSection: 0,
+  slideCurrent: new Array(TOTAL_SECTIONS).fill(0),
+  slideTotal: [1, 3, 4, 5, 3, 3, 4, 5, 3, 3]
+};
+
+function updateProgress(si) {
+  state.currentSection = si;
+  const pct = (si / (TOTAL_SECTIONS - 1)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i === si));
+  const sc = state.slideCurrent[si];
+  const st = state.slideTotal[si];
+  document.getElementById('slide-counter').textContent = `${sc+1} / ${st}`;
+}
+
+function scrollToSection(si) {
+  const sections = document.querySelectorAll('.section');
+  if (sections[si]) sections[si].scrollIntoView({ behavior: 'smooth' });
+}
+
+function bindScrollToLinks() {
+  document.querySelectorAll('[data-scroll-to]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const sec = document.getElementById(el.dataset.scrollTo);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+(function buildNavDots() {
+  const container = document.getElementById('nav-dots');
+  for (let i = 0; i < TOTAL_SECTIONS; i++) {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => scrollToSection(i));
+    container.appendChild(d);
+  }
+})();
+
+const sectionObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+      const si = parseInt(entry.target.dataset.section);
+      updateProgress(si);
+      entry.target.dispatchEvent(new CustomEvent('section-enter', { bubbles: false }));
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.section').forEach(s => sectionObs.observe(s));
+
+document.addEventListener('keydown', e => {
+  const si = state.currentSection;
+  if (e.key === 'ArrowDown') { scrollToSection(Math.min(si+1, TOTAL_SECTIONS-1)); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { scrollToSection(Math.max(si-1, 0)); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { carouselNext(si); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft') { carouselPrev(si); e.preventDefault(); }
+  else if (e.key === 'f' || e.key === 'F') {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+});
+// === SCROLL ENGINE END ===
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: scroll engine, section observer, fixed UI, keyboard nav"
+```
+
+---
+
+## Task 3: HC Carousel Engine JS
+
+**Files:**
+- Modify: `index.html` — sostituisce `// === CAROUSEL ENGINE ===`
+
+- [ ] **Step 1: Sostituisci `// === CAROUSEL ENGINE ===` con**
+
+```javascript
+// === CAROUSEL ENGINE ===
+const carousels = {};
+function carouselNext(si) { carousels[si] && carousels[si].next(); }
+function carouselPrev(si) { carousels[si] && carousels[si].prev(); }
+
+function initCarousel(sectionEl) {
+  const si = parseInt(sectionEl.dataset.section);
+  if (carousels[si]) return;
+  const track = sectionEl.querySelector('.hc-track');
+  if (!track) return;
+  const slides = Array.from(track.querySelectorAll('.hc-slide'));
+  const dots = Array.from(sectionEl.querySelectorAll('.hc-dot'));
+  const total = slides.length;
+  let current = 0;
+
+  function goTo(idx) {
+    current = Math.max(0, Math.min(total-1, idx));
+    track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+    dots.forEach((d,i) => d.classList.toggle('active', i === current));
+    state.slideCurrent[si] = current;
+    document.getElementById('slide-counter').textContent = `${current+1} / ${total}`;
+  }
+  function next() { goTo(current+1); }
+  function prev() { goTo(current-1); }
+
+  window.addEventListener('resize', () => {
+    track.style.transition = 'none';
+    track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+    requestAnimationFrame(() => { track.style.transition = ''; });
+  });
+
+  const prevBtn = sectionEl.querySelector('.hc-arrow-prev');
+  const nextBtn = sectionEl.querySelector('.hc-arrow-next');
+  if (prevBtn) prevBtn.addEventListener('click', prev);
+  if (nextBtn) nextBtn.addEventListener('click', next);
+  dots.forEach((d,i) => d.addEventListener('click', () => goTo(i)));
+
+  let touchX = 0;
+  track.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+  });
+
+  carousels[si] = { next, prev, goTo };
+  goTo(0);
+}
+// === CAROUSEL ENGINE END ===
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: hc carousel engine — translateX pixel-based, touch swipe, dots"
+```
+
+---
+
+## Task 4: Sezione Hero
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- HERO CONTENT -->` e `// === HERO INIT ===`
+
+- [ ] **Step 1: Sostituisci `<!-- HERO CONTENT -->` con**
+
+```html
+<div class="bolt-bg">
+  <svg class="bolt-svg" viewBox="0 0 120 300" width="120" height="300" fill="none">
+    <polyline points="75,0 40,130 65,130 25,300" stroke="#c9a84c" stroke-width="3" stroke-linejoin="round"/>
+    <polyline points="75,0 40,130 65,130 25,300" stroke="#4a9eff" stroke-width="1.5" stroke-linejoin="round" opacity=".5"/>
+  </svg>
+</div>
+<div class="hero-content">
+  <p class="hero-eyebrow">fenomeni naturali · fisica dell'atmosfera</p>
+  <h1 class="hero-title">I FULMINI</h1>
+  <p class="hero-subtitle">Fisica · Tipi · Geografia · Storia e curiosità</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="hero-stat-val">30.000 K</span><span class="hero-stat-label">temperatura canale</span></div>
+    <div class="hero-stat"><span class="hero-stat-val">30.000 A</span><span class="hero-stat-label">corrente media</span></div>
+    <div class="hero-stat"><span class="hero-stat-val">100.000 km/s</span><span class="hero-stat-label">return stroke</span></div>
+    <div class="hero-stat"><span class="hero-stat-val">8 mln/giorno</span><span class="hero-stat-label">nel mondo</span></div>
+  </div>
+  <nav class="hero-toc">
+    <a href="#formazione" data-scroll-to="formazione">01 Formazione</a>
+    <a href="#meccanismo" data-scroll-to="meccanismo">02 Meccanismo</a>
+    <a href="#tipi" data-scroll-to="tipi">03 I Tipi</a>
+    <a href="#plasma" data-scroll-to="plasma">04 Il Plasma</a>
+    <a href="#chimica" data-scroll-to="chimica">05 Chimica</a>
+    <a href="#storia" data-scroll-to="storia">06 Storia</a>
+    <a href="#mondo" data-scroll-to="mondo">07 Nel Mondo</a>
+    <a href="#curiosita" data-scroll-to="curiosita">08 Curiosità</a>
+    <a href="#sicurezza" data-scroll-to="sicurezza">09 Sicurezza</a>
+  </nav>
+  <p class="hero-cta">↓ Inizia</p>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === HERO INIT ===` con**
+
+```javascript
+// === HERO INIT ===
+(function initHero(){
+  document.getElementById('hero').addEventListener('section-enter', () => {}, {once:true});
+})();
+// === HERO INIT END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: hero section — bolt SVG, stats, TOC, animated CTA"
+```
+
+---
+
+## Task 5: Sezione Formazione (3 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- FORMAZIONE CONTENT -->` e `// === FORMAZIONE CANVAS ===`
+
+- [ ] **Step 1: Sostituisci `<!-- FORMAZIONE CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Cos'è un fulmine -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 1/3</span>
+          <h2 class="reveal reveal-d1">Cos'è un fulmine</h2>
+          <p class="reveal reveal-d2">Un fulmine è una <strong>gigantesca scarica elettrica transitoria ad altissima intensità</strong> che avviene nell'atmosfera per riequilibrare il forte dislivello di potenziale che si crea tra le nuvole e il suolo (o tra nuvole diverse).</p>
+          <p class="reveal reveal-d3">La scarica dura pochi millisecondi ma raggiunge temperature di circa <strong>30.000 K</strong> — cinque volte più calda della superficie del Sole — e una corrente che può superare i <strong>30.000 ampere</strong>.</p>
+          <div class="stat-strip reveal reveal-d4">
+            <div class="stat-item"><span class="stat-val">30.000 K</span><span class="stat-unit">temperatura canale</span></div>
+            <div class="stat-item"><span class="stat-val">30.000 A</span><span class="stat-unit">corrente media</span></div>
+            <div class="stat-item"><span class="stat-val">milioni V</span><span class="stat-unit">tensione</span></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="charge-field-canvas" aria-label="Campo elettrico crescente tra nube e suolo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: La collisione triboelettrica -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 2/3</span>
+          <h2 class="reveal reveal-d1">La collisione triboelettrica</h2>
+          <p class="reveal reveal-d2">Tutto comincia dentro il <strong>cumulonembo</strong>. Le correnti d'aria violente fanno scontrare cristalli di ghiaccio e gocce d'acqua. Quando i cristalli di ghiaccio più leggeri salgono e il <em>graupel</em> più pesante scende, un passaggio di elettroni per attrito — <strong>l'effetto triboelettrico</strong> — separa le cariche.</p>
+          <p class="reveal reveal-d3">I cristalli leggeri cedono elettroni: si caricano <strong>positivamente</strong> e salgono verso la cima. Il graupel acquista elettroni e si deposita nella parte medio-bassa: <strong>carica negativa in basso, positiva in alto</strong>.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="triboelec-canvas" aria-label="Separazione di cariche per effetto triboelettrico"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: La nube come condensatore -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 3/3</span>
+          <h2 class="reveal reveal-d1">La nube come condensatore</h2>
+          <p class="reveal reveal-d2">Per questa netta separazione, la nuvola si comporta come un enorme <strong>condensatore naturale</strong>. La sua base, negativa, respinge gli elettroni della superficie terrestre sottostante, lasciando il terreno immediatamente al di sotto carico <strong>positivamente per induzione elettrostatica</strong>.</p>
+          <p class="reveal reveal-d3">Quando la differenza di potenziale diventa abbastanza grande, l'aria — normalmente isolante — si "rompe" e scatta la scarica: il fulmine.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="capacitor-canvas" aria-label="La nube come condensatore naturale — zone di carica"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === FORMAZIONE CANVAS ===` con**
+
+```javascript
+// === FORMAZIONE CANVAS ===
+(function initFormazioneSection(){
+  const sec = document.getElementById('formazione');
+
+  function initChargeFieldCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      if(document.hidden){ requestAnimationFrame(draw); return; }
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      t+=0.008;
+      // sky bg
+      const bg=ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#050510'); bg.addColorStop(1,'#080818');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      // cloud
+      ctx.save(); ctx.fillStyle='#151528';
+      ctx.beginPath();
+      ctx.arc(W*.4,H*.1,W*.13,0,Math.PI*2);
+      ctx.arc(W*.55,H*.065,W*.1,0,Math.PI*2);
+      ctx.arc(W*.65,H*.1,W*.09,0,Math.PI*2);
+      ctx.fill(); ctx.restore();
+      // minus signs in cloud
+      ctx.font='14px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.8)';
+      ctx.fillText('− − −',W*.32,H*.12);
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.08)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      ctx.font='14px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.7)';
+      ctx.fillText('+ + + + +',W*.25,H*.95);
+      // field lines (intensify over time)
+      const charge=Math.min(1,t/8);
+      const nLines=7;
+      for(let i=0;i<nLines;i++){
+        const x0=W*(0.28+i*0.065);
+        const len=(H*0.73)*charge;
+        const alpha=0.15+charge*0.55;
+        ctx.save();
+        ctx.strokeStyle=`rgba(74,158,255,${alpha})`;
+        ctx.lineWidth=0.7; ctx.setLineDash([4,5]);
+        ctx.beginPath(); ctx.moveTo(x0,H*.15); ctx.lineTo(x0+(Math.sin(t+i)*3),H*.15+len);
+        ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+        // arrowhead
+        if(charge>0.1){
+          const ay=H*.15+len;
+          ctx.save(); ctx.fillStyle=`rgba(74,158,255,${alpha})`; ctx.globalAlpha=alpha;
+          ctx.beginPath(); ctx.moveTo(x0,ay); ctx.lineTo(x0-3,ay-8); ctx.lineTo(x0+3,ay-8); ctx.closePath(); ctx.fill(); ctx.restore();
+        }
+      }
+      // flash at breakpoint
+      if(charge>=1){
+        const flash=Math.abs(Math.sin(t*10))*0.7;
+        ctx.save(); ctx.globalAlpha=flash;
+        ctx.strokeStyle='#ffffff'; ctx.lineWidth=2.5;
+        ctx.shadowColor='#4a9eff'; ctx.shadowBlur=25;
+        ctx.beginPath();
+        ctx.moveTo(W*.5,H*.15); ctx.lineTo(W*.47,H*.5); ctx.lineTo(W*.53,H*.5); ctx.lineTo(W*.5,H*.87);
+        ctx.stroke(); ctx.restore();
+      }
+      if(t>16) t=0;
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initTriboelecCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    const particles=[];
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; initParticles(); }
+    function initParticles(){
+      particles.length=0;
+      const W=canvas.width,H=canvas.height;
+      for(let i=0;i<20;i++){
+        // graupel (large, will go down)
+        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:0.4+Math.random()*0.4,r:5+Math.random()*4,type:'graupel',charge:-1});
+        // crystal (small, will go up)
+        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*0.5,r:2+Math.random()*2,type:'crystal',charge:1});
+      }
+    }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // bg gradient (cold atmosphere)
+      const bg=ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#0a0a1a'); bg.addColorStop(1,'#05050f');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      // zones
+      ctx.fillStyle='rgba(201,168,76,.04)'; ctx.fillRect(0,0,W,H*.35); // positive zone
+      ctx.fillStyle='rgba(74,158,255,.04)'; ctx.fillRect(0,H*.65,W,H*.35); // negative zone
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(201,168,76,.4)'; ctx.fillText('zona +',8,18);
+      ctx.fillStyle='rgba(74,158,255,.4)'; ctx.fillText('zona −',8,H-8);
+
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<p.r||p.x>W-p.r) p.vx*=-1;
+        if(p.y<p.r) p.vy=Math.abs(p.vy);
+        if(p.y>H-p.r) p.vy=-Math.abs(p.vy);
+        ctx.save();
+        if(p.type==='graupel'){
+          ctx.fillStyle='rgba(74,158,255,.75)';
+          ctx.shadowColor='#4a9eff'; ctx.shadowBlur=6;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
+          ctx.fillText('−',p.x-3,p.y+3);
+        } else {
+          ctx.fillStyle='rgba(201,168,76,.75)';
+          ctx.shadowColor='#c9a84c'; ctx.shadowBlur=6;
+          // hexagonal crystal shape
+          ctx.beginPath();
+          for(let a=0;a<6;a++){ const ang=a*Math.PI/3; ctx.lineTo(p.x+p.r*Math.cos(ang),p.y+p.r*Math.sin(ang)); }
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
+          ctx.fillText('+',p.x-3,p.y+3);
+        }
+        ctx.restore();
+      });
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initCapacitorCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; draw(); }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // bg
+      ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      // cloud body (− zone bottom, + zone top)
+      // cloud negative bottom
+      ctx.save(); ctx.fillStyle='#151528';
+      ctx.beginPath();
+      ctx.arc(W*.35,H*.18,W*.14,0,Math.PI*2); ctx.arc(W*.5,H*.13,W*.12,0,Math.PI*2);
+      ctx.arc(W*.62,H*.18,W*.11,0,Math.PI*2); ctx.fill(); ctx.restore();
+      // − charges in bottom of cloud
+      ctx.font='12px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.85)';
+      ['−','−','−','−','−'].forEach((c,i)=>ctx.fillText(c,W*(0.27+i*0.1),H*.22));
+      // + charges in top of cloud
+      ctx.fillStyle='rgba(201,168,76,.7)';
+      ['·','+','·','+','·'].forEach((c,i)=>ctx.fillText(c,W*(0.28+i*0.1),H*.12));
+      // dividing line in cloud
+      ctx.strokeStyle='rgba(102,102,128,.3)'; ctx.lineWidth=0.5; ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(W*.2,H*.17); ctx.lineTo(W*.75,H*.17); ctx.stroke(); ctx.setLineDash([]);
+      // electric field lines
+      const nLines=6;
+      for(let i=0;i<nLines;i++){
+        const x=W*(0.25+i*0.1);
+        ctx.save(); ctx.strokeStyle='rgba(74,158,255,.35)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(x,H*.23); ctx.lineTo(x,H*.83); ctx.stroke(); ctx.setLineDash([]);
+        // arrow
+        ctx.fillStyle='rgba(74,158,255,.5)';
+        ctx.beginPath(); ctx.moveTo(x,H*.83); ctx.lineTo(x-3,H*.75); ctx.lineTo(x+3,H*.75); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      // ground (+)
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.87,W,H*.13);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.87); ctx.lineTo(W,H*.87); ctx.stroke();
+      ctx.fillStyle='rgba(201,168,76,.7)'; ctx.font='11px JetBrains Mono';
+      ['+','+','+','+','+','+','+'].forEach((c,i)=>ctx.fillText(c,W*(0.1+i*0.12),H*.94));
+      // labels
+      ctx.fillStyle='rgba(74,158,255,.6)'; ctx.font='10px JetBrains Mono';
+      ctx.fillText('base nube (−)',W*.02,H*.31);
+      ctx.fillStyle='rgba(201,168,76,.6)';
+      ctx.fillText('suolo (+ per induzione)',W*.02,H*.84);
+      // E-field label
+      ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='10px JetBrains Mono';
+      ctx.fillText('E →',W*.78,H*.55);
+    }
+    resize(); window.addEventListener('resize',resize);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initChargeFieldCanvas(document.getElementById('charge-field-canvas'));
+    initTriboelecCanvas(document.getElementById('triboelec-canvas'));
+    initCapacitorCanvas(document.getElementById('capacitor-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === FORMAZIONE CANVAS END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: formazione section — charge field, triboelec, capacitor canvases"
+```
+
+---
+
+## Task 6: Sezione Meccanismo (4 slide + phase controls)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- MECCANISMO CONTENT -->` e `// === MECCANISMO CANVAS ===`
+
+- [ ] **Step 1: Sostituisci `<!-- MECCANISMO CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Stepped Leader -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 1/4</span>
+          <h2 class="reveal reveal-d1">Fase 1 — Lo Stepped Leader</h2>
+          <p class="reveal reveal-d2">Quando l'accumulo di cariche negative alla base della nube vince la resistenza locale dell'aria, dal cumulonembo si propaga verso il basso un canale di pre-ionizzazione: lo <strong>stepped leader</strong>. È quasi invisibile a occhio nudo, ha diametro microscopico.</p>
+          <p class="reveal reveal-d3">Avanza <strong>a scatti</strong> (gradini) lunghi circa 50 metri: ogni scatto dura circa un microsecondo, seguito da una pausa di circa 50 microsecondi. La velocità media è di circa 150–200 km/s. La traiettoria si ramifica in modo frattale.</p>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="phase-btn active" data-mec-phase="0">Fase 1</button>
+            <button class="phase-btn" data-mec-phase="1">Fase 2</button>
+            <button class="phase-btn" data-mec-phase="2">Fase 3</button>
+            <button class="phase-btn" data-mec-phase="3">Fase 4</button>
+            <button class="play-btn" data-mec-play>▶ Play</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="leader-canvas" aria-label="Stepped leader discendente"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Upward Streamer -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 2/4</span>
+          <h2 class="reveal reveal-d1">Fase 2 — L'Upward Streamer</h2>
+          <p class="reveal reveal-d2">Man mano che il leader si avvicina alla Terra, il campo elettrico al suolo — caricato positivamente per induzione — cresce in modo parossistico. Quando la punta del precursore si trova a poche centinaia di metri dal terreno, l'aria vicino al suolo si ionizza violentemente.</p>
+          <p class="reveal reveal-d3">Dai punti più prominenti, appuntiti o conduttivi (alberi, edifici, antenne, parafulmini) partono verso l'alto piccole scariche di plasma bluastro: gli <strong>upward streamers</strong>. Salgono a cercare il leader discendente.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="streamer-canvas" aria-label="Upward streamers ascendenti"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Connessione -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 3/4</span>
+          <h2 class="reveal reveal-d1">Fase 3 — La connessione</h2>
+          <p class="reveal reveal-d2">A una quota compresa di solito tra 30 e 50 metri dal suolo, lo stepped leader incontra uno degli upward streamers. In quel millisecondo il circuito tra cielo e terra si chiude: si forma un <strong>"cavetto di rame" virtuale</strong> fatto di aria ionizzata (plasma) che collega la nuvola al terreno.</p>
+          <p class="reveal reveal-d3">Questo canale inizialmente sottilissimo diventerà la via percorsa dall'ondata di corrente principale. La posizione del punto di giunzione determina dove colpirà il fulmine.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="connessione-canvas" aria-label="Punto di connessione leader-streamer"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Return Stroke -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 4/4</span>
+          <h2 class="reveal reveal-d1">Fase 4 — Il colpo di ritorno</h2>
+          <p class="reveal reveal-d2">Chiuso il circuito, in un millesimo di secondo avviene il <strong>colpo di ritorno</strong>: una massiccia ondata di elettroni fluisce verso il basso, ma l'effetto visivo — la luce accecante — risale dal suolo verso la nuvola a circa <strong>un terzo della velocità della luce</strong>.</p>
+          <p class="reveal reveal-d3">È questo il fulmine che effettivamente vediamo. La corrente media è di 20–30 kA ma può superare i 200.000 A nei fulmini positivi. Il canale raggiunge <strong>30.000 K</strong>.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="return-canvas" aria-label="Return stroke ascendente — il fulmine visibile"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === MECCANISMO CANVAS ===` con**
+
+```javascript
+// === MECCANISMO CANVAS ===
+(function initMeccanismoSection(){
+  const sec = document.getElementById('meccanismo');
+
+  function genBolt(W,H,fromY,toY,x0,spread){
+    const pts=[{x:x0,y:fromY}];
+    let x=x0,y=fromY;
+    while(y<toY){
+      x=Math.max(15,Math.min(W-15,x+(Math.random()-.5)*spread));
+      y+=20+Math.random()*18;
+      pts.push({x,y});
+    }
+    return pts;
+  }
+
+  function drawBolt(ctx,pts,color,lw,alpha,glow){
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.globalAlpha=alpha;
+    if(glow){ ctx.shadowColor=color; ctx.shadowBlur=glow; }
+    ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+    ctx.restore();
+  }
+
+  function initLeaderCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.015;
+      // cloud
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // stepped leader — redraw every 0.5s for "step" effect
+      if(Math.floor(t*2)%2===0){
+        const depth=Math.min(1,(t%4)/2);
+        const toY=H*.15+depth*(H*.55);
+        const pts=genBolt(W,H,H*.15,toY,W*.5,55);
+        drawBolt(ctx,pts,'#4a9eff',1.5,0.7,12);
+        // branches
+        pts.forEach((p,i)=>{
+          if(i>1 && i<pts.length-1 && Math.random()<0.4){
+            const bPts=genBolt(W,H,p.y,p.y+60+Math.random()*60,p.x,30);
+            drawBolt(ctx,bPts,'#4a9eff',0.7,0.3,6);
+          }
+        });
+      }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.5)';
+      ctx.fillText('~50 m/gradino · 150 km/s',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initStreamerCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.012;
+      // cloud with leader
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      const leaderPts=genBolt(W,H,H*.15,H*.55,W*.5,50);
+      drawBolt(ctx,leaderPts,'#4a9eff',1.5,0.6,10);
+      // ground objects (tree + building)
+      ctx.fillStyle='rgba(201,168,76,.2)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      // tree
+      ctx.fillStyle='#1a2010'; ctx.fillRect(W*.25-4,H*.7,8,H*.18);
+      ctx.fillStyle='#1a2518'; ctx.beginPath(); ctx.arc(W*.25,H*.68,18,0,Math.PI*2); ctx.fill();
+      // building
+      ctx.fillStyle='#141428'; ctx.fillRect(W*.65-15,H*.72,30,H*.16);
+      // upward streamers
+      const sX=[W*.25,W*.65,W*.4,W*.55];
+      sX.forEach((sx,idx)=>{
+        const phase=(t+idx*0.8)%3;
+        if(phase<2){
+          const h=Math.min(H*.18,phase*H*.09);
+          const sPts=genBolt(W,H,H*.88-h,H*.88,sx,20);
+          drawBolt(ctx,sPts,'#c9a84c',1,0.6,8);
+        }
+      });
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.5)';
+      ctx.fillText('upward streamers',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initConnessioneCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      // cloud
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.08)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      // junction point at ~40% height
+      const jY=H*.55;
+      const leaderPts=genBolt(W,H,H*.15,jY,W*.5,50);
+      const streamerPts=genBolt(W,H,jY,H*.88,W*.5,25);
+      drawBolt(ctx,leaderPts,'#4a9eff',1.5,0.7,10);
+      drawBolt(ctx,streamerPts,'#c9a84c',1.5,0.7,10);
+      // junction flash
+      const flash=0.4+Math.abs(Math.sin(t*6))*0.6;
+      ctx.save(); ctx.fillStyle=`rgba(255,255,255,${flash})`;
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=30;
+      ctx.beginPath(); ctx.arc(W*.5,jY,8+flash*4,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(255,255,255,.5)';
+      ctx.fillText('connessione ~30-50 m dal suolo',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initReturnCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.018;
+      // cloud
+      ctx.fillStyle='#1a1a30'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      const phase=t%4;
+      if(phase<2){
+        // return stroke rising from bottom up
+        const progress=Math.min(1,phase/1.5);
+        const toY=H*.88-progress*(H*.75);
+        const pts=genBolt(W,H,toY,H*.88,W*.5,30);
+        const bright=Math.min(1,progress*2);
+        // white core
+        drawBolt(ctx,pts,'#ffffff',3,bright,35);
+        // gold halo
+        drawBolt(ctx,pts,'#c9a84c',6,bright*0.5,20);
+        // screen flash
+        if(bright>0.5){
+          ctx.save(); ctx.fillStyle=`rgba(255,255,200,${(bright-0.5)*0.3})`; ctx.fillRect(0,0,W,H); ctx.restore();
+        }
+      } else {
+        // fading
+        const fade=Math.max(0,1-(phase-2)*2);
+        const pts=genBolt(W,H,H*.15,H*.88,W*.5,30);
+        drawBolt(ctx,pts,'#c9a84c',2,fade*0.5,15);
+      }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.6)';
+      ctx.fillText('100.000 km/s · ⅓ velocità luce',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initLeaderCanvas(document.getElementById('leader-canvas'));
+    initStreamerCanvas(document.getElementById('streamer-canvas'));
+    initConnessioneCanvas(document.getElementById('connessione-canvas'));
+    initReturnCanvas(document.getElementById('return-canvas'));
+    initCarousel(sec);
+    // Phase buttons → navigate carousel
+    const phaseButtons=sec.querySelectorAll('[data-mec-phase]');
+    phaseButtons.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const idx=parseInt(btn.dataset.mecPhase);
+        carousels[2]?.goTo(idx);
+        phaseButtons.forEach(b=>b.classList.toggle('active',b===btn));
+      });
+    });
+    // Play button
+    sec.querySelector('[data-mec-play]')?.addEventListener('click',async function(){
+      this.textContent='⏳'; this.classList.add('playing');
+      for(let i=0;i<4;i++){
+        carousels[2]?.goTo(i);
+        phaseButtons.forEach(b=>b.classList.toggle('active',parseInt(b.dataset.mecPhase)===i));
+        await new Promise(r=>setTimeout(r,1800));
+      }
+      this.textContent='▶ Play'; this.classList.remove('playing');
+    });
+  },{once:true});
+})();
+// === MECCANISMO CANVAS END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: meccanismo section — stepped leader, streamer, connessione, return stroke"
+```
+
+---
+
+## Task 7: Sezione Il Plasma (3 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- PLASMA CONTENT -->` e `// === PLASMA CANVAS ===`
+
+- [ ] **Step 1: Sostituisci `<!-- PLASMA CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Cos'è il plasma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 1/3</span>
+          <h2 class="reveal reveal-d1">Il quarto stato della materia</h2>
+          <p class="reveal reveal-d2">Per capire a fondo il fulmine dobbiamo guardarlo non come un semplice "lampo elettrico", ma come un <strong>laboratorio di fisica del plasma</strong>. Il fulmine non è fatto di fuoco e non è "elettricità pura": la sua sostanza fisica è il <strong>plasma</strong>, il quarto stato della materia.</p>
+          <p class="reveal reveal-d3">Quando il campo elettrico supera la rigidità dielettrica dell'aria (~3×10⁶ V/m), gli elettroni vengono strappati violentemente dai nuclei. L'aria ionizzata — plasma — conduce l'elettricità come un metallo: <strong>resistività bassissima</strong>, fortemente emettitore di luce per ricombinazione degli elettroni.</p>
+          <div class="stat-strip reveal reveal-d4">
+            <div class="stat-item"><span class="stat-val">3×10⁶ V/m</span><span class="stat-unit">soglia ionizzazione aria</span></div>
+            <div class="stat-item"><span class="stat-val">~0 Ω</span><span class="stat-unit">resistività plasma</span></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="plasma-canvas" class="plasma-glow" aria-label="Plasma ionizzato — particelle animate"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Termodinamica e il tuono -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 2/3</span>
+          <h2 class="reveal reveal-d1">L'esplosione e il tuono</h2>
+          <p class="reveal reveal-d2">Il canale di plasma ha un diametro sorprendentemente piccolo — inizialmente pochi millimetri, poi qualche centimetro. La densità di corrente è talmente alta che la temperatura schizza a circa <strong>30.000 K</strong> in meno di un microsecondo.</p>
+          <p class="reveal reveal-d3">Secondo la legge dei gas perfetti P = ρRT, un aumento così verticale e istantaneo della temperatura provoca un picco di pressione interno al canale stimato tra <strong>10 e 100 atmosfere</strong>. Il canale di plasma non può contenere questa pressione e si espande radialmente verso l'esterno a velocità <strong>supersonica</strong>, generando un'<strong>onda d'urto</strong> — il tuono.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="thunder-canvas" aria-label="Espansione supersonica del canale plasma — onda d'urto"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Effetto pinch -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 3/3</span>
+          <h2 class="reveal reveal-d1">L'effetto pinch (Z-pinch)</h2>
+          <p class="reveal reveal-d2">Il fulmine è governato dalle equazioni di Maxwell. Quando una corrente di intensità I (fino a 200.000 A) attraversa il canale di plasma, genera attorno al canale un campo magnetico <strong>B circolare</strong>, calcolabile con la legge di Ampère.</p>
+          <p class="reveal reveal-d3">Questo campo magnetico genera una <strong>forza di Lorentz</strong> che spinge le particelle cariche verso l'interno del canale: è il fenomeno noto nella fisica dei plasmi come <strong>Z-pinch (strizione magnetica)</strong>. La forza comprime il plasma, confinandolo e densificandolo, e contrasta temporaneamente l'espansione termica in un equilibrio dinamico violentissimo che dura solo pochi microsecondi.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="pinch-canvas" aria-label="Z-pinch — strizione magnetica del canale plasma"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === PLASMA CANVAS ===` con**
+
+```javascript
+// === PLASMA CANVAS ===
+(function initPlasmaSection(){
+  const sec = document.getElementById('plasma');
+
+  function initPlasmaCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    const particles=[];
+    function resize(){
+      canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500;
+      particles.length=0;
+      const W=canvas.width,H=canvas.height;
+      for(let i=0;i<60;i++){
+        particles.push({
+          x:W*(0.1+Math.random()*0.8), y:H*(0.1+Math.random()*0.8),
+          vx:(Math.random()-.5)*3, vy:(Math.random()-.5)*3,
+          type:Math.random()<0.4?'electron':'ion',
+          life:Math.random()*100, photon:0
+        });
+      }
+    }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // dark plasma bg
+      ctx.fillStyle='#020208'; ctx.fillRect(0,0,W,H);
+      // background glow
+      const grd=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.4);
+      grd.addColorStop(0,'rgba(123,47,255,.08)'); grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<5||p.x>W-5){ p.vx*=-1; p.x=Math.max(5,Math.min(W-5,p.x)); }
+        if(p.y<5||p.y>H-5){ p.vy*=-1; p.y=Math.max(5,Math.min(H-5,p.y)); }
+        // random recombination flash
+        if(Math.random()<0.002 && p.type==='electron') p.photon=15;
+        if(p.photon>0){
+          p.photon--;
+          ctx.save(); ctx.fillStyle=`rgba(255,220,100,${p.photon/15})`;
+          ctx.shadowColor='#ffdc64'; ctx.shadowBlur=p.photon*2;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.photon/3,0,Math.PI*2); ctx.fill(); ctx.restore();
+        }
+        ctx.save();
+        if(p.type==='electron'){
+          ctx.fillStyle='rgba(74,158,255,.8)';
+          ctx.shadowColor='#4a9eff'; ctx.shadowBlur=4;
+          ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
+        } else {
+          ctx.fillStyle='rgba(255,100,60,.7)';
+          ctx.shadowColor='#ff643c'; ctx.shadowBlur=3;
+          ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+          // plus sign
+          ctx.strokeStyle='rgba(255,150,100,.5)'; ctx.lineWidth=0.7;
+          ctx.beginPath(); ctx.moveTo(p.x-4,p.y); ctx.lineTo(p.x+4,p.y);
+          ctx.moveTo(p.x,p.y-4); ctx.lineTo(p.x,p.y+4); ctx.stroke();
+        }
+        ctx.restore();
+      });
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(74,158,255,.5)'; ctx.fillText('e⁻  elettroni liberi',12,H-20);
+      ctx.fillStyle='rgba(255,100,60,.5)'; ctx.fillText('⊕  ioni positivi',12,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initThunderCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#030308'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      const cycle=t%6;
+      const phase=Math.min(1,cycle/3);
+      const cx=W*.5,cy=H*.5;
+
+      // lightning channel (thin vertical line)
+      ctx.save(); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5+phase*1.5;
+      ctx.shadowColor='#c9a84c'; ctx.shadowBlur=10+phase*20;
+      ctx.beginPath(); ctx.moveTo(cx,H*.05); ctx.lineTo(cx,H*.95); ctx.stroke(); ctx.restore();
+
+      // shock wave rings
+      const maxR=Math.max(W,H)*0.8*phase;
+      const nRings=5;
+      for(let i=0;i<nRings;i++){
+        const r=maxR*(i+1)/nRings;
+        const alpha=Math.max(0,0.6-phase*0.5-(i*0.1));
+        const hue=i===0?'255,240,200':i===1?'255,180,80':i===2?'200,120,60':'100,120,200';
+        ctx.save(); ctx.strokeStyle=`rgba(${hue},${alpha})`;
+        ctx.lineWidth=2; ctx.shadowColor=`rgba(${hue},.5)`; ctx.shadowBlur=8;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke(); ctx.restore();
+      }
+
+      // labels
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(255,240,200,.5)'; ctx.fillText('onda d\'urto supersonica',10,H-20);
+      ctx.fillStyle='rgba(100,120,200,.5)'; ctx.fillText('→ il tuono',10,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initPinchCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#030308'; ctx.fillRect(0,0,W,H);
+      t+=0.03;
+      const cx=W*.5;
+      const pinch=0.5+Math.sin(t*2)*0.35; // channel width oscillates (pinch)
+      const cw=8+pinch*20;
+
+      // magnetic field rings (circular around current)
+      const nRings=4;
+      for(let i=0;i<nRings;i++){
+        const r=(50+i*60)*Math.min(W,H)/600;
+        const alpha=0.15+0.1*(nRings-i)/nRings;
+        ctx.save(); ctx.strokeStyle=`rgba(123,47,255,${alpha})`;
+        ctx.lineWidth=1; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.arc(cx,H*.5,r,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+        // B field direction indicators (dots/crosses)
+        for(let a=0;a<8;a++){
+          const ang=a*Math.PI/4+t*0.3;
+          const bx=cx+r*Math.cos(ang), by=H*.5+r*Math.sin(ang);
+          ctx.fillStyle=`rgba(123,47,255,${alpha*2})`;
+          ctx.beginPath(); ctx.arc(bx,by,2.5,0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // current channel (vertical, pulsing width)
+      const grd=ctx.createLinearGradient(cx-cw,0,cx+cw,0);
+      grd.addColorStop(0,'rgba(74,158,255,0)');
+      grd.addColorStop(0.5,'rgba(200,220,255,0.9)');
+      grd.addColorStop(1,'rgba(74,158,255,0)');
+      ctx.save(); ctx.shadowColor='#4a9eff'; ctx.shadowBlur=20+pinch*15;
+      ctx.fillStyle=grd; ctx.fillRect(cx-cw,H*.05,cw*2,H*.9); ctx.restore();
+
+      // Lorentz force arrows pointing inward
+      const arrowPositions=[H*.2,H*.35,H*.5,H*.65,H*.8];
+      arrowPositions.forEach(ay=>{
+        // left arrow →
+        ctx.save(); ctx.strokeStyle='rgba(255,100,50,.6)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(cx-80,ay); ctx.lineTo(cx-cw-3,ay); ctx.stroke();
+        ctx.fillStyle='rgba(255,100,50,.6)';
+        ctx.beginPath(); ctx.moveTo(cx-cw-3,ay); ctx.lineTo(cx-cw-10,ay-4); ctx.lineTo(cx-cw-10,ay+4); ctx.closePath(); ctx.fill();
+        // right arrow ←
+        ctx.beginPath(); ctx.moveTo(cx+80,ay); ctx.lineTo(cx+cw+3,ay); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx+cw+3,ay); ctx.lineTo(cx+cw+10,ay-4); ctx.lineTo(cx+cw+10,ay+4); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(123,47,255,.6)'; ctx.fillText('B circolare (Ampère)',10,H-20);
+      ctx.fillStyle='rgba(255,100,50,.6)'; ctx.fillText('F Lorentz → strizione',10,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initPlasmaCanvas(document.getElementById('plasma-canvas'));
+    initThunderCanvas(document.getElementById('thunder-canvas'));
+    initPinchCanvas(document.getElementById('pinch-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === PLASMA CANVAS END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: plasma section — ionized particles, shock wave, Z-pinch canvases"
+```
+
+---
+
+## Task 8: Sezione Chimica & Nucleare (3 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- CHIMICA CONTENT -->` e `// === CHIMICA INIT ===`
+
+- [ ] **Step 1: Sostituisci `<!-- CHIMICA CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Chimica ad alta energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 1/3</span>
+          <h2 class="reveal reveal-d1">Chimica ad alta energia</h2>
+          <p class="reveal reveal-d2">Il fulmine altera la chimica dell'atmosfera circostante, a causa delle altissime temperature e dei legami molecolari spezzati. Tre prodotti notevoli:</p>
+          <div class="molecule-grid reveal reveal-d3">
+            <div class="molecule-card"><span class="molecule-formula">O₃</span><div><h4>Ozono</h4><p>L'energia del fulmine dissocia le molecole stabili di N₂ e O₂. Gli atomi liberi si ricombinano formando ozono (da cui il tipico odore "fresco" di bruciato dopo un fulmine) e ossidi di azoto.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">NOₓ</span><div><h4>Ossidi di azoto</h4><p>Il processo è fondamentale per la Terra, perché "fissa" l'azoto atmosferico nel terreno, rendendolo un fertilizzante naturale. I fulmini producono globalmente milioni di tonnellate di NOₓ all'anno.</p></div></div>
+            <div class="molecule-card"><span class="molecule-formula">SiO₂</span><div><h4>Fulgurite</h4><p>Quando il fulmine colpisce un terreno sabbioso, la corrente e i 30.000 K fondono istantaneamente il quarzo (SiO₂) lungo il percorso sotterraneo della scarica. Il risultato è la <strong>fulgurite</strong>, una roccia vetrosa e tubolare che ricalca letteralmente la forma della scarica nel terreno.</p></div></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);font-size:2.5rem;color:var(--gold);">N₂ + O₂</div>
+          <div class="reveal reveal-d1" style="font-size:2rem;color:var(--muted);">↓ 30.000 K</div>
+          <div class="reveal reveal-d2" style="text-align:center;font-family:var(--mono);font-size:1.5rem;display:flex;gap:1.5rem;">
+            <span style="color:var(--blue);">O₃</span>
+            <span style="color:var(--muted);">+</span>
+            <span style="color:var(--green);">NOₓ</span>
+          </div>
+          <div class="reveal reveal-d3" style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;">fertilizzante naturale · odore caratteristico</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TGF e raggi gamma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 2/3</span>
+          <h2 class="reveal reveal-d1">TGF — Raggi gamma dal temporale</h2>
+          <p class="reveal reveal-d2">Negli ultimi decenni si è scoperto che i fulmini sono anche <strong>acceleratori di particelle naturali</strong>. I campi elettrici dei temporali accelerano gli elettroni a velocità relativistiche (vicine a quella della luce). Quando questi elettroni frenano contro i nuclei dell'aria, emettono <strong>raggi X e raggi gamma</strong> ad alta energia: i <strong>Terrestrial Gamma-ray Flashes (TGF)</strong>.</p>
+          <p class="reveal reveal-d3">Rilevabili persino dai satelliti nello spazio. In rari casi i fotoni gamma prodotti dal fulmine possono colpire il nucleo di azoto-14 (¹⁴N), strappandone un neutrone e generando isotopi instabili come l'azoto-13, innescando una brevissima reazione nucleare spontanea in atmosfera.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="tgf-canvas" aria-label="TGF — emissione gamma da temporale"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Parametri ed energia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Chimica &amp; Nucleare — 3/3</span>
+          <h2 class="reveal reveal-d1">Parametri ed energia in gioco</h2>
+          <p class="reveal reveal-d2">I numeri legati a un singolo fulmine sono impressionanti, eppure quasi tutta l'energia si dissipa in calore. Un impianto elettrico domestico standard regge appena 16 A, contro i 30.000 A medi di un fulmine.</p>
+          <table class="data-table reveal reveal-d3">
+            <thead><tr><th>Caratteristica</th><th>Valore</th></tr></thead>
+            <tbody>
+              <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
+              <tr><td>Corrente media</td><td>20.000–30.000 A (picchi &gt;200.000 A)</td></tr>
+              <tr><td>Tensione</td><td>100 milioni–1 miliardo di Volt</td></tr>
+              <tr><td>Durata totale</td><td>~0,2 s (con più scariche successive)</td></tr>
+              <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
+              <tr><td>Energia utilizzabile</td><td>solo ~1 kWh (il resto è calore)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
+          <div class="reveal" style="text-align:center;">
+            <div id="cnt-temp" class="record-val">0 K</div>
+            <div class="record-unit">temperatura canale</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;">
+            <div id="cnt-amp" class="record-val">0 A</div>
+            <div class="record-unit">corrente media</div>
+          </div>
+          <div class="reveal reveal-d2" style="text-align:center;">
+            <div id="cnt-joule" class="record-val">0 MJ</div>
+            <div class="record-unit">energia totale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === CHIMICA INIT ===` con**
+
+```javascript
+// === CHIMICA INIT ===
+(function initChimicaSection(){
+  const sec = document.getElementById('chimica');
+
+  function initTGFCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#020208'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      // atmosphere layers
+      [['IONOSFERA ~90km','rgba(123,47,255,.08)',0,.15],
+       ['MESOSFERA ~70km','rgba(74,158,255,.06)',.15,.3],
+       ['STRATOSFERA ~50km','rgba(68,204,136,.05)',.3,.55],
+       ['TROPOSFERA','rgba(201,168,76,.04)',.55,1]
+      ].forEach(([label,color,y0,y1])=>{
+        ctx.fillStyle=color; ctx.fillRect(0,H*y0,W,H*(y1-y0));
+        ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.35)';
+        ctx.fillText(label,4,H*y0+12);
+        ctx.strokeStyle='rgba(102,102,128,.1)'; ctx.lineWidth=.5; ctx.setLineDash([3,5]);
+        ctx.beginPath(); ctx.moveTo(0,H*y0); ctx.lineTo(W,H*y0); ctx.stroke(); ctx.setLineDash([]);
+      });
+      // storm cloud
+      ctx.fillStyle='#151525';
+      ctx.beginPath(); ctx.arc(W*.4,H*.65,W*.08,0,Math.PI*2); ctx.arc(W*.5,H*.62,W*.1,0,Math.PI*2); ctx.arc(W*.62,H*.65,W*.09,0,Math.PI*2); ctx.fill();
+      // lightning bolt in cloud
+      ctx.strokeStyle='rgba(74,158,255,'+(0.3+Math.abs(Math.sin(t*5))*0.5)+')'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(W*.52,H*.62); ctx.lineTo(W*.49,H*.68); ctx.lineTo(W*.53,H*.68); ctx.lineTo(W*.5,H*.75); ctx.stroke();
+      // TGF electron beam going UP
+      const beamAlpha=0.4+Math.abs(Math.sin(t*3))*0.5;
+      ctx.save(); ctx.strokeStyle=`rgba(255,220,80,${beamAlpha})`; ctx.lineWidth=2;
+      ctx.shadowColor='#ffdc50'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(W*.5,H*.6); ctx.lineTo(W*.5,H*.02); ctx.stroke();
+      // gamma burst
+      ctx.globalAlpha=beamAlpha*0.8;
+      ctx.fillStyle='#ffdc50'; ctx.font='bold 11px JetBrains Mono';
+      ctx.fillText('γ',W*.52,H*.08); ctx.fillText('γ',W*.46,H*.14); ctx.fillText('γ',W*.54,H*.2);
+      ctx.restore();
+      // satellite icon
+      ctx.font='18px serif'; ctx.fillText('🛰',W*.75,H*.08);
+      ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(255,220,80,.5)';
+      ctx.fillText('TGF rilevato',W*.55,H*.06);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initCounters(){
+    function animCount(el,target,suffix,duration){
+      const start=Date.now();
+      function step(){
+        const p=Math.min(1,(Date.now()-start)/duration);
+        const ease=1-Math.pow(1-p,3);
+        const val=Math.round(target*ease);
+        el.textContent=val.toLocaleString('it-IT')+suffix;
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    sec.querySelector('[data-section="5"]')?.addEventListener('section-enter',()=>{},{ once:true });
+    // animate when slide 3 becomes visible (use a small observer)
+    const slide3=sec.querySelectorAll('.hc-slide')[2];
+    if(!slide3) return;
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        obs.disconnect();
+        animCount(document.getElementById('cnt-temp'),30000,' K',1800);
+        animCount(document.getElementById('cnt-amp'),30000,' A',2000);
+        animCount(document.getElementById('cnt-joule'),5000,' MJ',2200);
+      }
+    },{threshold:.3});
+    obs.observe(slide3);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initTGFCanvas(document.getElementById('tgf-canvas'));
+    initCounters();
+    initCarousel(sec);
+  },{once:true});
+})();
+// === CHIMICA INIT END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: chimica section — chemistry cards, TGF canvas, animated parameter counters"
+```
+
+---
+
+## Task 9: Sezione I Tipi (5 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- TIPI CONTENT -->` e `// === TIPI CANVAS ===`
+
+- [ ] **Step 1: Sostituisci `<!-- TIPI CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: CG- -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 1/5</span>
+          <h2 class="reveal reveal-d1">CG⁻ — Cloud-to-Ground negativo</h2>
+          <p class="reveal reveal-d2">Il tipo più comune: circa <strong>~90% di tutti i fulmini CG</strong>. Il leader negativo parte dalla base della nube (zona −) e scende verso il suolo. Ha in media 3–4 stroke e una corrente di 20–30 kA. Le ramificazioni visibili nel canale discendente sono le biforcazioni del leader a gradini.</p>
+          <p class="reveal reveal-d3">I <strong>Fulmini negativi</strong> sono i più frequenti e hanno una corrente media di circa 30.000 ampere. Il canale principale — quello del return stroke — è il singolo percorso più luminoso.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <canvas id="cg-neg-canvas" width="300" height="400" aria-label="Animazione CG negativo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: CG+ -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 2/5</span>
+          <h2 class="reveal reveal-d1">CG⁺ — Cloud-to-Ground positivo</h2>
+          <p class="reveal reveal-d2">Rappresenta il <strong>~10% dei fulmini CG</strong> ma è enormemente più potente: può superare <strong>300 kA</strong> di picco. Il leader positivo origina dalla sommità della nube (zona +), dove risiedono le cariche positive, e scende senza ramificazioni visibili.</p>
+          <p class="reveal reveal-d3">Pericolosità maggiore: durata 5–10× più lunga del CG⁻, danno meccanico e capacità incendiaria molto superiori. È <strong>responsabile della maggior parte degli incendi forestali da fulmine</strong>. Tipici dei temporali invernali e delle anvil clouds.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <canvas id="cg-pos-canvas" width="300" height="400" aria-label="Animazione CG positivo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: IC e CC -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 3/5</span>
+          <h2 class="reveal reveal-d1">IC e CC — nelle nubi</h2>
+          <p class="reveal reveal-d2">Il <strong>fulmine IC (Intra-Cloud)</strong> è in assoluto il più frequente: circa il <strong>70–75% di tutti i fulmini</strong>. Avviene interamente all'interno dello stesso cumulonembo tra la base carica negativamente e la cima carica positivamente — si manifesta come un flash diffuso senza canale esterno.</p>
+          <p class="reveal reveal-d3">Il <strong>fulmine CC (Cloud-to-Cloud)</strong> viaggia tra due nuvole temporalesche distinte con potenziali opposti. I più spettacolari da osservare: viaggiando orizzontalmente negli strati alti, possono coprire distanze immense prima di esaurirsi, creando lunghi <em>"serpenti di luce"</em> (gli <em>Anvil Crawlers</em>) che tracciano geometrie frattali nel cielo per centinaia di km.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;gap:2rem;align-items:center;justify-content:center;flex-direction:column;">
+          <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;width:100%;max-width:280px;">
+            <div class="label" style="margin-bottom:.5rem;">IC — Intra-Cloud</div>
+            <div id="ic-anim" style="height:80px;background:var(--surface2);position:relative;overflow:hidden;border-radius:2px;">
+              <canvas id="ic-canvas" width="280" height="80"></canvas>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;width:100%;max-width:280px;">
+            <div class="label" style="margin-bottom:.5rem;">CC — Cloud-to-Cloud</div>
+            <div style="height:80px;background:var(--surface2);position:relative;overflow:hidden;border-radius:2px;">
+              <canvas id="cc-canvas" width="280" height="80"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Ball Lightning + Elmo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 4/5</span>
+          <h2 class="reveal reveal-d1">Curiosità ottiche</h2>
+          <p class="reveal reveal-d2"><strong>Ball Lightning (fulmine globulare):</strong> sfera luminosa di 10–50 cm che fluttua per 1–20 secondi, poi svanisce silenziosamente o esplode. La spiegazione è ancora dibattuta: plasma toroidale? ossido di silicio vaporizzato? Migliaia di testimonianze storiche, fisica ancora aperta.</p>
+          <p class="reveal reveal-d3"><strong>Elmo di Sant'Elmo:</strong> scarica corona su oggetti appuntiti (alberi, antenne, punte degli alberi master) durante temporali intensi. Non è propriamente un fulmine ma lo stesso fenomeno di ionizzazione dell'aria in punti di alta curvatura del campo elettrico.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;gap:3rem;align-items:center;justify-content:center;">
+          <div style="text-align:center;">
+            <canvas id="ball-canvas" width="160" height="160" aria-label="Ball lightning fluttuante"></canvas>
+            <div class="label" style="margin-top:.5rem;">Ball Lightning</div>
+          </div>
+          <div style="text-align:center;">
+            <canvas id="elmo-canvas" width="160" height="160" aria-label="Elmo di Sant'Elmo — scarica corona"></canvas>
+            <div class="label" style="margin-top:.5rem;">Elmo di S. Elmo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: TLE -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 5/5</span>
+          <h2 class="reveal reveal-d1">TLE — Transient Luminous Events</h2>
+          <p class="reveal reveal-d2">Sopra i temporali più intensi si producono scariche in alta atmosfera, invisibili dal suolo ma documentate da astronauti e aerei. Durano da 1 ms a ~100 ms.</p>
+          <ul style="list-style:none;margin-top:.5rem;" class="reveal reveal-d3">
+            <li style="padding:.4rem 0;"><strong style="color:#cc2244;">Sprite</strong> — colonne rosse a 70–90 km, generate da CG⁺ potenti</li>
+            <li style="padding:.4rem 0;"><strong style="color:#aaddff;">Elve</strong> — disco espansivo a ~90 km, dura ~1 ms</li>
+            <li style="padding:.4rem 0;"><strong style="color:#0066ff;">Blue jet</strong> — cono blu dalla sommità nube fino a 50 km</li>
+          </ul>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="phase-btn" data-tle="sprite">Sprite</button>
+            <button class="phase-btn" data-tle="elve">Elve</button>
+            <button class="phase-btn" data-tle="jet">Blue Jet</button>
+            <button class="play-btn" data-tle="play">▶ Play tutto</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="tle-canvas" aria-label="TLE — Transient Luminous Events"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === TIPI CANVAS ===` con**
+
+```javascript
+// === TIPI CANVAS ===
+(function initTipiSection(){
+  const sec = document.getElementById('tipi');
+
+  function drawCGCanvas(canvas,positive){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||300; canvas.height=canvas.offsetHeight||400;
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    function gen(){
+      if(document.hidden) return;
+      ctx.clearRect(0,0,W,H);
+      const cloudY=positive?H*.85:H*.15;
+      ctx.save(); ctx.fillStyle='#1a1a2e';
+      ctx.beginPath(); ctx.arc(W*.45,cloudY+(positive?-8:8),W*.12,0,Math.PI*2);
+      ctx.arc(W*.55,cloudY+(positive?-14:14),W*.1,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,positive?H*.12:H*.88); ctx.lineTo(W,positive?H*.12:H*.88); ctx.stroke(); ctx.restore();
+      let x=W*.5,y=positive?H*.78:H*.22;
+      const target=positive?H*.15:H*.85;
+      const pts=[{x,y}];
+      while(positive?y>target:y<target){
+        const nx=Math.max(15,Math.min(W-15,x+(Math.random()-.5)*(positive?45:60)));
+        const ny=positive?y-22-Math.random()*22:y+22+Math.random()*22;
+        pts.push({x:nx,y:ny}); x=nx; y=ny;
+      }
+      ctx.save(); ctx.strokeStyle=positive?'#ffd700':'#4a9eff'; ctx.lineWidth=2;
+      ctx.shadowColor=positive?'#ffd700':'#4a9eff'; ctx.shadowBlur=18;
+      ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+      if(!positive){
+        for(let i=2;i<pts.length-1;i+=3){
+          if(Math.random()<.5){
+            let bx=pts[i].x,by=pts[i].y;
+            ctx.globalAlpha=.4; ctx.lineWidth=.7;
+            ctx.beginPath(); ctx.moveTo(bx,by);
+            for(let k=0;k<3;k++){ bx+=((Math.random()-.5)*50); by+=(20+Math.random()*15); ctx.lineTo(bx,by); if(by>H*.9) break; }
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.restore();
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle=positive?'#ffd700':'#4a9eff';
+      ctx.fillText(positive?'CG⁺ — dalla sommità nube':'CG⁻ — dalla base nube',10,positive?H*.07:H*.95);
+    }
+    gen(); setInterval(gen,3000+Math.random()*2000);
+  }
+
+  function initICCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||280; canvas.height=canvas.offsetHeight||80;
+    const ctx=canvas.getContext('2d'); let fa=0,growing=true;
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.save(); ctx.fillStyle=`rgba(74,158,255,${fa*.25})`; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#1a1a2e'; ctx.fillRect(2,2,W-4,H-4); ctx.restore();
+      ctx.save(); ctx.fillStyle=`rgba(255,255,200,${fa*.4})`; ctx.fillRect(0,0,W,H); ctx.restore();
+      if(growing){ fa=Math.min(1,fa+.05); if(fa>=1) growing=false; }
+      else{ fa=Math.max(0,fa-.04); if(fa<=0){ growing=true; setTimeout(()=>requestAnimationFrame(draw),1500); return; } }
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function initCCCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||280; canvas.height=canvas.offsetHeight||80;
+    const ctx=canvas.getContext('2d'); let progress=0,active=false;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#1a1a2e'; ctx.beginPath(); ctx.arc(W*.15,H*.5,20,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(W*.85,H*.5,20,0,Math.PI*2); ctx.fill();
+      if(!active) return;
+      const len=Math.floor(progress*10);
+      ctx.save(); ctx.strokeStyle='#4a9eff'; ctx.lineWidth=1.5; ctx.shadowColor='#4a9eff'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.moveTo(W*.15+20,H*.5);
+      for(let i=1;i<=len;i++){ const t=i/10; ctx.lineTo(W*.15+20+(W*.7*t),H*.5+(Math.random()-.5)*20); }
+      ctx.stroke(); ctx.restore();
+    }
+    function animate(){
+      if(!active){ active=true; progress=0; }
+      progress=Math.min(1,progress+.08); draw();
+      if(progress<1) requestAnimationFrame(animate);
+      else setTimeout(()=>{ active=false; draw(); setTimeout(animate,2000); },800);
+    }
+    animate();
+  }
+
+  function initBallCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||160; canvas.height=canvas.offsetHeight||160;
+    const ctx=canvas.getContext('2d');
+    let x=80,y=80,angle=0;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      x+=Math.sin(angle)*0.8; y+=Math.cos(angle*1.3)*0.4; angle+=0.03;
+      x=Math.max(40,Math.min(W-40,x)); y=Math.max(40,Math.min(H-40,y));
+      const grd=ctx.createRadialGradient(x,y,0,x,y,30);
+      grd.addColorStop(0,'rgba(255,255,200,1)'); grd.addColorStop(.4,'rgba(255,200,50,.8)'); grd.addColorStop(1,'rgba(255,100,0,0)');
+      ctx.save(); ctx.beginPath(); ctx.arc(x,y,30,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.shadowColor='#ffcc00'; ctx.shadowBlur=20; ctx.fill(); ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  function initElmoCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||160; canvas.height=canvas.offsetHeight||160;
+    const ctx=canvas.getContext('2d'); let t=0;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H); t+=0.05;
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.4)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(W*.5,H*.9); ctx.lineTo(W*.5,H*.3); ctx.stroke(); ctx.restore();
+      for(let i=0;i<12;i++){
+        const base=i/12*Math.PI*2+t;
+        const len=20+Math.sin(t*3+i)*10;
+        ctx.save(); ctx.strokeStyle=`rgba(0,200,255,${.4+Math.sin(t*2+i)*.2})`;
+        ctx.lineWidth=.8; ctx.shadowColor='#00ccff'; ctx.shadowBlur=8;
+        ctx.beginPath();
+        ctx.moveTo(W*.5+Math.cos(base)*5,H*.3+Math.sin(base)*5);
+        ctx.lineTo(W*.5+Math.cos(base)*len,H*.3+Math.sin(base)*len);
+        ctx.stroke(); ctx.restore();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  function initTLECanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let showing={},elveR=0,elveAlpha=0,elveExpanding=false;
+    function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; drawBase(); }
+    function altY(km){ return canvas.height-(km/100)*canvas.height; }
+    function drawBase(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      const bg=ctx.createLinearGradient(0,H,0,0); bg.addColorStop(0,'#0a0a0f'); bg.addColorStop(1,'#020305');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      [['TROPOSFERA',0,12],['STRATOSFERA',12,50],['MESOSFERA',50,85],['TERMOSFERA',85,100]].forEach(([n,k0,k1])=>{
+        const y=altY(k1);
+        ctx.font='7px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.35)'; ctx.fillText(n,3,y+10);
+        ctx.strokeStyle='rgba(102,102,128,.1)'; ctx.lineWidth=.5; ctx.setLineDash([3,5]);
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); ctx.setLineDash([]);
+      });
+      const cY=altY(10);
+      ctx.fillStyle='#151525';
+      ctx.beginPath(); ctx.arc(W*.35,cY,W*.09,0,Math.PI*2); ctx.arc(W*.48,cY-16,W*.12,0,Math.PI*2); ctx.arc(W*.6,cY-3,W*.1,0,Math.PI*2); ctx.fill();
+    }
+    function draw(){
+      drawBase(); const W=canvas.width,H=canvas.height;
+      if(showing.sprite){
+        for(let i=0;i<7;i++){
+          const sx=W*.3+i*W*.06,sy0=altY(90),sy1=altY(68);
+          ctx.save(); ctx.strokeStyle='#cc2244'; ctx.lineWidth=1.5; ctx.shadowColor='#cc2244'; ctx.shadowBlur=12;
+          ctx.globalAlpha=.65+Math.sin(Date.now()*.005+i)*.15;
+          ctx.beginPath(); ctx.moveTo(sx,sy0); ctx.lineTo(sx+(Math.random()-.5)*6,sy1); ctx.stroke();
+          const mY=(sy0+sy1)/2; ctx.globalAlpha=.35;
+          ctx.beginPath(); ctx.moveTo(sx,mY); ctx.lineTo(sx+18,mY+14); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(sx,mY); ctx.lineTo(sx-14,mY+18); ctx.stroke(); ctx.restore();
+        }
+      }
+      if(showing.elve&&elveAlpha>0){
+        const eY=altY(90);
+        ctx.save(); ctx.beginPath(); ctx.arc(W*.47,eY,elveR,0,Math.PI*2);
+        ctx.strokeStyle='#aaddff'; ctx.lineWidth=2; ctx.globalAlpha=elveAlpha;
+        ctx.shadowColor='#aaddff'; ctx.shadowBlur=15; ctx.stroke(); ctx.restore();
+      }
+      if(showing.jet){
+        const jBase=altY(12),jTip=altY(50);
+        ctx.save(); ctx.beginPath(); ctx.moveTo(W*.47,jBase); ctx.lineTo(W*.42,jTip); ctx.lineTo(W*.52,jTip); ctx.closePath();
+        const jg=ctx.createLinearGradient(0,jBase,0,jTip);
+        jg.addColorStop(0,'rgba(0,100,255,.8)'); jg.addColorStop(1,'rgba(0,200,255,.08)');
+        ctx.fillStyle=jg; ctx.shadowColor='#0066ff'; ctx.shadowBlur=22; ctx.fill(); ctx.restore();
+      }
+      if(showing.sprite||(showing.elve&&elveAlpha>0)) requestAnimationFrame(draw);
+    }
+    function showSprite(){ showing={sprite:true}; draw(); }
+    function showElve(){
+      if(elveExpanding) return;
+      showing={elve:true}; elveR=5; elveAlpha=1; elveExpanding=true;
+      function expand(){
+        elveR+=14; elveAlpha-=.045; draw();
+        if(elveAlpha>0&&elveR<canvas.width) requestAnimationFrame(expand);
+        else{ elveAlpha=0; elveR=0; elveExpanding=false; drawBase(); }
+      }
+      expand();
+    }
+    function showJet(){ showing={jet:true}; draw(); }
+    resize();
+    const slide=canvas.closest('.hc-slide');
+    slide?.querySelector('[data-tle="sprite"]')?.addEventListener('click',()=>{
+      showSprite(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='sprite'));
+    });
+    slide?.querySelector('[data-tle="elve"]')?.addEventListener('click',()=>{
+      showElve(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='elve'));
+    });
+    slide?.querySelector('[data-tle="jet"]')?.addEventListener('click',()=>{
+      showJet(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='jet'));
+    });
+    slide?.querySelector('[data-tle="play"]')?.addEventListener('click',async function(){
+      this.classList.add('playing'); this.textContent='⏳';
+      slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.remove('active'));
+      showSprite(); slide.querySelector('[data-tle="sprite"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,1800));
+      showElve(); slide.querySelector('[data-tle="elve"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,2000));
+      showJet(); slide.querySelector('[data-tle="jet"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,1500));
+      this.classList.remove('playing'); this.textContent='▶ Play tutto';
+    });
+    window.addEventListener('resize',resize);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    drawCGCanvas(document.getElementById('cg-neg-canvas'),false);
+    drawCGCanvas(document.getElementById('cg-pos-canvas'),true);
+    initICCanvas(document.getElementById('ic-canvas'));
+    initCCCanvas(document.getElementById('cc-canvas'));
+    initBallCanvas(document.getElementById('ball-canvas'));
+    initElmoCanvas(document.getElementById('elmo-canvas'));
+    initTLECanvas(document.getElementById('tle-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === TIPI CANVAS END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: tipi section — CG/IC/CC/Ball/Elmo/TLE canvases"
+```
+
+---
+
+## Task 10: Sezione Storia & Cultura (4 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- STORIA CONTENT -->` e `// === STORIA CANVAS ===`
+
+- [ ] **Step 1: Sostituisci `<!-- STORIA CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Mitologia -->
+    <div class="hc-slide">
+      <div class="slide-full" style="padding:4rem 5.5rem;display:flex;flex-direction:column;justify-content:center;">
+        <span class="eyebrow reveal">Storia &amp; Cultura — 1/4</span>
+        <h2 class="reveal reveal-d1" style="margin-bottom:2rem;">Le divinità del fulmine</h2>
+        <div class="card-grid reveal reveal-d2" style="padding:0;">
+          <div class="card"><span class="card-icon">⚡</span><h4>Zeus / Giove</h4><p>Grecia e Roma: signore del cielo, scaglia fulmini forgiati da Efesto/Vulcano. Il fulmine è l'attributo del potere supremo. I luoghi colpiti erano detti <em>temenos</em> (sacri).</p></div>
+          <div class="card"><span class="card-icon">🔨</span><h4>Thor</h4><p>Mitologia norrena: dio del tuono, usa il martello Mjölnir. I fulmini nascono dai colpi del suo martello nelle nubi durante le tempeste.</p></div>
+          <div class="card"><span class="card-icon">🌩</span><h4>Indra</h4><p>Vedismo indù: re degli dèi, porta il <em>vajra</em> (il fulmine). Sconfigge il demone Vritra e libera le acque cosmiche con il suo colpo.</p></div>
+          <div class="card"><span class="card-icon">🌧</span><h4>Tlaloc</h4><p>Azteca: dio della pioggia e del fulmine. I Tlaloque (servi) portano otri d'acqua e bastoni per colpire le nubi e generare i temporali.</p></div>
+          <div class="card"><span class="card-icon">🥁</span><h4>Raijin</h4><p>Giappone: dio del tuono, suona tamburi circolari per produrre il tuono. Ritratto spesso insieme a Fujin (vento) nelle stampe tradizionali.</p></div>
+        </div>
+        <p class="reveal reveal-d3" style="margin-top:1.5rem;font-size:.9rem;color:var(--muted);">I popoli antichi consideravano <strong>sacri</strong> i luoghi colpiti dai fulmini: i greci li chiamavano <em>enelysion</em>. Il fulmine era trasformazione divino in rischio ingegneristico calcolabile in pochi secoli.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Franklin — l'esperimento -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Storia &amp; Cultura — 2/4</span>
+          <h2 class="reveal reveal-d1">Franklin, Filadelfia 1752</h2>
+          <p class="reveal reveal-d2">A metà del '700 Franklin ipotizzò che i fulmini fossero di natura elettrica. L'esperimento (giugno 1752): un aquilone di seta con filo metallico appuntito, una corda di canapa bagnata (conduttore), un nastro di seta asciutto (isolamento), e una <strong>chiave di ferro</strong> al punto di giunzione.</p>
+          <p class="reveal reveal-d3">Mentre l'aquilone volava sotto la nube, le cariche scendevano lungo la corda e si accumulavano sulla chiave. Franklin avvicinò il dito alla chiave senza toccarla — <strong>la scintilla saltò</strong>: prova definitiva che l'elettricità celeste e quella di laboratorio erano la stessa cosa.</p>
+          <div class="timeline reveal reveal-d4" style="margin-top:1rem;">
+            <div class="timeline-item"><span class="timeline-year">1600</span><div class="timeline-dot"></div><div class="timeline-content"><h4>Gilbert — De Magnete</h4><div class="timeline-detail">Distingue elettricità da magnetismo; conia il termine "electrica".</div></div></div>
+            <div class="timeline-item"><span class="timeline-year">1745</span><div class="timeline-dot"></div><div class="timeline-content"><h4>Bottiglia di Leida</h4><div class="timeline-detail">Musschenbroek inventa il primo condensatore: permette di accumulare grandi cariche.</div></div></div>
+            <div class="timeline-item"><span class="timeline-year">1752</span><div class="timeline-dot"></div><div class="timeline-content"><h4>Franklin — l'aquilone</h4><div class="timeline-detail">Prova la natura elettrica dei fulmini. Brevetta il parafulmine.</div></div></div>
+            <div class="timeline-item"><span class="timeline-year">1753</span><div class="timeline-dot"></div><div class="timeline-content"><h4>Richmann — morte</h4><div class="timeline-detail">Il fisico russo replica l'esperimento a San Pietroburgo ed è fulminato: prima vittima di esperimento elettrico.</div></div></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <svg id="franklin-svg" viewBox="0 0 300 400" width="300" height="400" role="img" aria-label="Esperimento dell'aquilone di Franklin">
+            <defs><linearGradient id="skyGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a0a1a"/><stop offset="100%" stop-color="#0f1530"/></linearGradient></defs>
+            <rect width="300" height="400" fill="url(#skyGrad2)"/>
+            <ellipse cx="150" cy="60" rx="70" ry="35" fill="#1a1a2e"/>
+            <ellipse cx="110" cy="70" rx="45" ry="28" fill="#1a1a2e"/>
+            <ellipse cx="190" cy="68" rx="50" ry="30" fill="#1a1a2e"/>
+            <g stroke="rgba(74,158,255,0.4)" stroke-width="1">
+              <line x1="60" y1="100" x2="55" y2="120"><animate attributeName="y1" values="90;130" dur="0.8s" repeatCount="indefinite"/><animate attributeName="y2" values="110;150" dur="0.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" dur="0.8s" repeatCount="indefinite"/></line>
+              <line x1="120" y1="100" x2="115" y2="120"><animate attributeName="y1" values="95;135" dur="0.9s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="y2" values="115;155" dur="0.9s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" dur="0.9s" begin="0.3s" repeatCount="indefinite"/></line>
+              <line x1="200" y1="100" x2="195" y2="120"><animate attributeName="y1" values="92;132" dur="0.75s" begin="0.15s" repeatCount="indefinite"/><animate attributeName="y2" values="112;152" dur="0.75s" begin="0.15s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" dur="0.75s" begin="0.15s" repeatCount="indefinite"/></line>
+              <line x1="250" y1="100" x2="245" y2="120"><animate attributeName="y1" values="88;128" dur="0.85s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="y2" values="108;148" dur="0.85s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" dur="0.85s" begin="0.5s" repeatCount="indefinite"/></line>
+            </g>
+            <polyline points="160,50 148,72 158,72 142,90" fill="none" stroke="#4a9eff" stroke-width="2"><animate attributeName="opacity" values="0;1;0;1;0" dur="0.4s" begin="1s" repeatCount="indefinite"/></polyline>
+            <line x1="150" y1="90" x2="170" y2="180" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+            <polygon points="170,155 190,180 170,205 150,180" fill="#c9a84c" fill-opacity="0.3" stroke="#c9a84c" stroke-width="1.5"/>
+            <line x1="170" y1="155" x2="170" y2="205" stroke="#c9a84c" stroke-width="0.8" stroke-opacity="0.5"/>
+            <line x1="150" y1="180" x2="190" y2="180" stroke="#c9a84c" stroke-width="0.8" stroke-opacity="0.5"/>
+            <line x1="170" y1="205" x2="150" y2="310" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+            <rect x="142" y="308" width="16" height="8" rx="3" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+            <circle cx="142" cy="312" r="4" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+            <g stroke="#ffd700" stroke-width="1.2">
+              <line x1="158" y1="310" x2="168" y2="305"><animate attributeName="opacity" values="0;1;0" dur="0.25s" begin="1.8s" repeatCount="indefinite"/></line>
+              <line x1="158" y1="314" x2="167" y2="320"><animate attributeName="opacity" values="0;1;0" dur="0.25s" begin="2.05s" repeatCount="indefinite"/></line>
+            </g>
+            <rect x="130" y="340" width="14" height="40" rx="3" fill="#0f0f18" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+            <circle cx="137" cy="335" r="8" fill="#0f0f18" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+            <line x1="130" y1="355" x2="145" y2="315" stroke="#0f0f18" stroke-width="6"><animate attributeName="x2" values="145;130" dur="0.2s" begin="1.85s" repeatCount="indefinite" calcMode="discrete"/><animate attributeName="y2" values="315;345" dur="0.2s" begin="1.85s" repeatCount="indefinite" calcMode="discrete"/></line>
+            <text x="10" y="395" font-family="JetBrains Mono" font-size="9" fill="rgba(102,102,128,0.5)">Benjamin Franklin, Filadelfia 1752</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Il parafulmine -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Storia &amp; Cultura — 3/4</span>
+          <h2 class="reveal reveal-d1">Il parafulmine</h2>
+          <p class="reveal reveal-d2">Franklin capì che un'asta di ferro appuntita posta sulla cima di un edificio e collegata a terra con un cavo metallico avrebbe avuto un duplice effetto protettivo:</p>
+          <p class="reveal reveal-d3"><strong>A. Prevenzione (effetto punta):</strong> le cariche tendono ad accumularsi dove la curvatura della superficie è massima. La punta del parafulmine micro-ionizza costantemente l'aria circostante, disperdendo silenziosamente parte delle cariche verso la nube e riducendo localmente la differenza di potenziale.</p>
+          <p class="reveal reveal-d4"><strong>B. Canalizzazione sicura:</strong> se il fulmine scatta comunque, l'asta metallica offre al precursore il percorso a minima resistenza. La corrente devastante viene "catturata" e confinata nel conduttore, scaricandosi a terra invece di attraversare pietra, legno o mattoni.</p>
+          <p class="reveal" style="margin-top:.75rem;font-size:.9rem;color:var(--muted);">Clicca sul canvas per simulare un fulmine.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="parafulmine-canvas" aria-label="Simulazione parafulmine — clicca per testare"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Tesla e la scienza moderna -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Storia &amp; Cultura — 4/4</span>
+          <h2 class="reveal reveal-d1">Da Tesla ad oggi</h2>
+          <p class="reveal reveal-d2">A fine Ottocento <strong>Nikola Tesla</strong> studiò la trasmissione wireless dell'elettricità e creò la <strong>bobina di Tesla</strong>, capace di generare scariche artificiali spettacolari simili ai fulmini. Sognava di trasmettere energia gratuita a tutto il mondo. I suoi esperimenti contribuirono alla comprensione della fisica delle alte tensioni.</p>
+          <p class="reveal reveal-d3">Oggi i fulmini vengono studiati con:<br>
+          • <strong>Reti di rilevamento</strong> (LINET, Blitzortung) che ne triangolano la posizione in tempo reale<br>
+          • <strong>Razzi con filo metallico</strong> per "provocare" fulmini a scopo sperimentale<br>
+          • <strong>Satelliti meteorologici</strong> (GOES-R GLM, Meteosat LI) che mappano l'attività temporalesca globale</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;justify-content:center;">
+          <div class="reveal" style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:.5rem;">⚡</div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:.5rem;">BOBINA DI TESLA (1891)</div>
+            <div style="font-size:.85rem;color:var(--muted);">Trasformatore risonante ad alta frequenza — primo simulatore artificiale di fulmini</div>
+          </div>
+          <div class="reveal reveal-d1" style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:.5rem;">🛰</div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--blue);letter-spacing:.1em;margin-bottom:.5rem;">GOES-R GLM + Meteosat LI</div>
+            <div style="font-size:.85rem;color:var(--muted);">Copertura globale continua — mappa ogni fulmine in tempo reale da satellite geostazionario</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === STORIA CANVAS ===` con**
+
+```javascript
+// === STORIA CANVAS ===
+(function initStoriaSection(){
+  const sec = document.getElementById('storia');
+
+  function initTimeline(){
+    sec.querySelectorAll('.timeline-item').forEach(item=>{
+      item.addEventListener('click',()=>item.classList.toggle('open'));
+    });
+  }
+
+  function initParafulmine(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let busy=false;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; drawScene(); }
+    function drawScene(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      const bX=W*.47,bW=W*.11,bH=H*.33,rodTopY=H*.78-H*.33-H*.07;
+      ctx.fillStyle='#0f1020'; ctx.fillRect(0,H*.78,W,H*.22);
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.78); ctx.lineTo(W,H*.78); ctx.stroke(); ctx.restore();
+      ctx.fillStyle='#141428'; ctx.fillRect(bX-bW/2,H*.78-bH,bW,bH);
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.15)'; ctx.lineWidth=.5;
+      ctx.strokeRect(bX-bW/2,H*.78-bH,bW,bH); ctx.restore();
+      for(let wy=0;wy<3;wy++) for(let wx=0;wx<2;wx++){
+        ctx.fillStyle='rgba(201,168,76,.07)';
+        ctx.fillRect(bX-bW/2+bW*.15+wx*(bW*.4),H*.78-bH+bH*.18+wy*(bH*.27),bW*.25,bH*.14);
+      }
+      ctx.save(); ctx.strokeStyle='#c9a84c'; ctx.lineWidth=2.5; ctx.shadowColor='#c9a84c'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.moveTo(bX,H*.78-bH); ctx.lineTo(bX,rodTopY); ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+      const cH=bH*1.3;
+      ctx.save(); ctx.beginPath(); ctx.moveTo(bX,rodTopY); ctx.lineTo(bX-cH,H*.78); ctx.lineTo(bX+cH,H*.78); ctx.closePath();
+      ctx.fillStyle='rgba(68,204,136,.05)'; ctx.fill();
+      ctx.strokeStyle='rgba(68,204,136,.25)'; ctx.lineWidth=1; ctx.setLineDash([5,4]); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(68,204,136,.55)'; ctx.fillText('PROTETTO',bX-cH*.8,H*.73);
+      ctx.fillStyle='rgba(201,168,76,.65)'; ctx.fillText('↑ asta',bX+6,rodTopY+12);
+      ctx.fillStyle='rgba(102,102,128,.5)'; ctx.font='11px JetBrains Mono';
+      ctx.fillText('Clicca per simulare un fulmine',W*.5-110,H*.1);
+    }
+    function animateStrike(clickX){
+      const W=canvas.width,H=canvas.height;
+      const bX=W*.47,bH=H*.33,rodTopY=H*.78-bH-H*.07,cH=bH*1.3;
+      const coneRatio=cH/(H*.78-rodTopY);
+      const inCone=Math.abs(clickX-bX)<coneRatio*(H*.78-20);
+      let lx=clickX,ly=5,pts=[{x:lx,y:ly}];
+      while(ly<H*.52){ lx+=((Math.random()-.5)*65); lx=Math.max(5,Math.min(W-5,lx)); ly+=25+Math.random()*20; pts.push({x:lx,y:ly}); }
+      let step=0;
+      const iv=setInterval(()=>{
+        drawScene(); ctx.save(); ctx.strokeStyle='#4a9eff'; ctx.lineWidth=1.5; ctx.shadowColor='#4a9eff'; ctx.shadowBlur=12;
+        ctx.beginPath(); pts.slice(0,step+1).forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke(); ctx.restore();
+        step++;
+        if(step>=pts.length){
+          clearInterval(iv);
+          const fc=inCone?'#c9a84c':'#ff4444';
+          ctx.save(); ctx.strokeStyle=fc; ctx.lineWidth=3; ctx.shadowColor=fc; ctx.shadowBlur=28;
+          ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+          if(inCone){ ctx.lineTo(bX,rodTopY); ctx.lineTo(bX,H*.78); }
+          else{ ctx.lineTo(clickX,H*.78-bH*.5); }
+          ctx.stroke(); ctx.restore();
+          ctx.save(); ctx.fillStyle=`rgba(${inCone?'68,204,136':'255,68,68'},.2)`; ctx.fillRect(0,0,W,H); ctx.restore();
+          setTimeout(()=>{ drawScene(); busy=false; },2500);
+        }
+      },45);
+    }
+    canvas.addEventListener('click',e=>{ if(busy) return; busy=true; const r=canvas.getBoundingClientRect(); animateStrike(e.clientX-r.left); });
+    window.addEventListener('resize',resize); resize();
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initTimeline();
+    initParafulmine(document.getElementById('parafulmine-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === STORIA CANVAS END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: storia section — deity cards, Franklin SVG, parafulmine canvas, Tesla"
+```
+
+---
+
+## Task 11: Sezione Nel Mondo (5 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- MONDO CONTENT -->` e `// === MONDO MAP ===`
+
+- [ ] **Step 1: Sostituisci `<!-- MONDO CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Distribuzione globale -->
+    <div class="hc-slide">
+      <div class="slide-full">
+        <div id="world-map" style="width:100%;height:100%;"></div>
+        <div style="position:absolute;top:4rem;left:5.5rem;z-index:1000;pointer-events:none;">
+          <span class="eyebrow">Nel Mondo — 1/5</span>
+          <h2 style="text-shadow:0 2px 20px rgba(0,0,0,.9);">Hotspot globali</h2>
+          <p style="font-size:.85rem;color:rgba(232,230,224,.7);max-width:300px;text-shadow:0 1px 8px rgba(0,0,0,.9);">~8 milioni di fulmini al giorno · 50–100 al secondo</p>
+        </div>
+        <div style="position:absolute;bottom:4rem;left:5.5rem;z-index:1000;background:rgba(10,10,15,.85);border:1px solid var(--border);padding:.75rem 1rem;pointer-events:none;">
+          <div class="label" style="margin-bottom:.4rem;">Densità fulmini/km²/anno</div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.65rem;">
+            <div style="width:80px;height:8px;background:linear-gradient(to right,#00cc44,#ffcc00,#ff4444);border-radius:2px;"></div>
+            <span style="color:var(--muted);">bassa → alta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Lago Maracaibo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 2/5</span>
+          <h2 class="reveal reveal-d1">Il Lampo del Catatumbo</h2>
+          <p class="reveal reveal-d2">Il <strong>Lago Maracaibo</strong>, in Venezuela, detiene il <strong>Guinness World Record</strong> come luogo più fulminato del pianeta: 230–260 fulmini per km² all'anno, con tempeste che si accendono per 297 notti all'anno, in cicli che durano da 9 ore consecutive, con una media di 28 scariche al minuto.</p>
+          <p class="reveal reveal-d3">Il fenomeno fisico: il lago è circondato su tre lati dalle vette della Cordigliera delle Ande. Di giorno il sole tropicale evapora enormi masse d'acqua calda; di notte i venti freddi di montagna scendendo dai ghiacciai si scontrano con l'aria calda e umida intrappolata sopra il bacino. Si innesca una <strong>convezione forzata e violentissima</strong>.</p>
+          <div class="reveal reveal-d4" style="font-family:var(--mono);font-size:.75rem;margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div><div style="color:var(--gold);font-size:1.5rem;">297</div><div style="color:var(--muted);">notti/anno</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">28/min</div><div style="color:var(--muted);">scariche al minuto</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">260/km²</div><div style="color:var(--muted);">densità annua</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">#1</div><div style="color:var(--muted);">al mondo (Guinness WR)</div></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="maracaibo-canvas" aria-label="Lago Maracaibo di notte con fulmini"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Bacino del Congo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 3/5</span>
+          <h2 class="reveal reveal-d1">Il cuore elettrico: il Congo</h2>
+          <p class="reveal reveal-d2">Se Maracaibo detiene il record per il singolo punto più colpito, l'<strong>Africa equatoriale</strong> è la macro-regione continentale con la maggiore attività temporalesca del pianeta. La Repubblica Democratica del Congo subisce una fulminazione diffusa e costante; località come Kabare o il villaggio di Kifuka registrano picchi storici di <strong>205 fulmini/km² all'anno</strong>.</p>
+          <p class="reveal reveal-d3">La causa fisica: la foresta pluviale del Congo genera enormi quantità di calore e umidità per evapotraspirazione. L'aria caldo-umida equatoriale, sollevata dalle catene montuose dell'Africa orientale, crea costantemente giganteschi sistemi temporaleschi a mesoscala (MCS) che martellano il continente tutto l'anno.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;justify-content:center;">
+          <div class="reveal" style="border-left:3px solid var(--gold);padding:.75rem 1rem;background:var(--surface);">
+            <div class="eyebrow">Congo Basin, Africa</div>
+            <div style="font-family:var(--mono);font-size:2.5rem;color:var(--gold);">205</div>
+            <div class="stat-unit">fulmini/km²/anno — densità assoluta massima</div>
+          </div>
+          <div class="reveal reveal-d1" style="background:var(--surface);border:1px solid var(--border);padding:1rem;">
+            <div class="eyebrow" style="margin-bottom:.5rem;">Zona di Convergenza Intertropicale (ITCZ)</div>
+            <p style="font-size:.85rem;margin:0;">La ITCZ porta umidità oceanica costante + calore equatoriale = temporali quasi quotidiani 365 giorni/anno.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Florida -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 4/5</span>
+          <h2 class="reveal reveal-d1">La Florida — "Lightning Capital"</h2>
+          <p class="reveal reveal-d2">In Nord America la Florida è storicamente nota come la <em>Lightning Capital</em>. Per essere tornato più frequenti a ovest, la stabilità elettrica di questa penisola è la più precaria degli Stati Uniti: oltre <strong>1,2 milioni di fulmini all'anno</strong>, con una densità che supera le 50–70 scariche per km² nelle zone interne tra Tampa e Orlando.</p>
+          <p class="reveal reveal-d3">La causa fisica: la Florida è una striscia di terra pianeggiante stretta tra due masse d'acqua calda, il Golfo del Messico a ovest e l'Atlantico a est. D'estate il sole scalda rapidamente la terraferma, richiamando la brezza marina da entrambe le coste; le due brezze umide si scontrano al centro della penisola, l'aria sale violentemente e genera temporali pomeridiani puntuali <strong>come un orologio</strong>.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;justify-content:center;">
+          <div class="reveal" style="border-left:3px solid var(--blue);padding:.75rem 1rem;background:var(--surface);">
+            <div class="eyebrow">Florida, USA</div>
+            <div style="font-family:var(--mono);font-size:2.5rem;color:var(--blue);">1,2 mln</div>
+            <div class="stat-unit">fulmini/anno · maggiore mortalità USA</div>
+          </div>
+          <div class="reveal reveal-d1" style="background:var(--surface);border:1px solid var(--border);padding:1rem;">
+            <div class="eyebrow" style="margin-bottom:.5rem;">Meccanismo: brezze convergenti</div>
+            <p style="font-size:.85rem;margin:0;">Brezza marina da ovest (Golfo) + brezza marina da est (Atlantico) = convezione pomeridiana quotidiana in estate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Italia -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 5/5</span>
+          <h2 class="reveal reveal-d1">Il caso Italia</h2>
+          <p class="reveal reveal-d2">L'Italia, per la sua complessa orografia e la posizione al centro del Mediterraneo, è uno dei paesi europei più esposti alle tempeste elettriche, con oltre <strong>1,5 milioni di fulmini nube-suolo all'anno</strong>.</p>
+          <table class="italia-table reveal reveal-d3">
+            <thead><tr><th>Macro-area</th><th>Picco</th><th>Meccanismo</th></tr></thead>
+            <tbody>
+              <tr><td>Arco Alpino e Prealpi</td><td>Estate (giu–ago)</td><td>Sollevamento orografico: aria umida di pianura contro le pareti rocciose</td></tr>
+              <tr><td>Pianura Padana</td><td>Tarda estate / autunno</td><td>Convezione termica violenta: calore intrappolato incontra le prime correnti fredde nord-atlantiche</td></tr>
+              <tr><td>Mar Tirreno e Appennino</td><td>Autunno (set–nov)</td><td>Instabilità marittima: il mare surriscaldato d'estate alimenta le perturbazioni</td></tr>
+            </tbody>
+          </table>
+          <div class="warning-box reveal reveal-d4">
+            <div class="warning-title">Il paradosso della Pianura Padana</div>
+            <p style="font-size:.85rem;">D'estate la pianura si comporta come una conca subtropicale, accumulando umidità e calore. Quando un fronte freddo scavalca le Alpi, l'impatto con questa colonna d'aria surriscaldata provoca temporali supercellulari di inaudita violenza.</p>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="italia-canvas" aria-label="Mappa schematica Italia con zone temporalesche stagionali"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === MONDO MAP ===` con**
+
+```javascript
+// === MONDO MAP ===
+(function initMondoSection(){
+  const sec = document.getElementById('mondo');
+  let mapInitialized=false;
+
+  function initMap(){
+    if(mapInitialized) return; mapInitialized=true;
+    const map=L.map('world-map',{zoomControl:false,attributionControl:false}).setView([10,10],2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©CartoDB',maxZoom:19}).addTo(map);
+    L.control.attribution({prefix:false,position:'bottomright'}).addTo(map);
+    const hotspots=[
+      {lat:9.8,lng:-71.5,name:'Lago Maracaibo',data:'297 notti/anno · 28 scariche/min<br>Guinness World Record',color:'#ff4444'},
+      {lat:1,lng:24,name:'Congo Basin',data:'~205 fulmini/km²/anno<br>macro-regione più attiva',color:'#ff6600'},
+      {lat:27.5,lng:-82,name:'Florida (USA)',data:'1,2 milioni fulmini/anno<br>Lightning Capital USA',color:'#ffaa00'},
+      {lat:44.2,lng:11.1,name:'Appennino Tosco-Emiliano',data:'~20 fulmini/km²/anno<br>area più colpita d\'Italia',color:'#4a9eff'}
+    ];
+    hotspots.forEach(h=>{
+      const marker=L.circleMarker([h.lat,h.lng],{radius:12,color:h.color,fillColor:h.color,fillOpacity:.25,weight:2}).addTo(map);
+      marker.bindPopup(`<strong style="color:${h.color};font-family:JetBrains Mono">${h.name}</strong><br><span style="font-size:.85rem">${h.data}</span>`);
+    });
+  }
+
+  function initMaracaiboCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d'); let flashTO=null;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; drawNight(0); schedule(); }
+    function drawNight(fi){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      const sky=ctx.createLinearGradient(0,0,0,H*.65);
+      sky.addColorStop(0,fi>0?'rgba(18,28,58,1)':'#05080f'); sky.addColorStop(1,'#0a0a1a');
+      ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*.65);
+      if(fi>0){ ctx.save(); ctx.fillStyle=`rgba(180,210,255,${fi*.45})`; ctx.fillRect(0,0,W,H*.65); ctx.restore(); }
+      if(fi<.3){
+        ctx.save(); ctx.fillStyle=`rgba(255,255,255,${.35-fi*.35})`;
+        for(let i=0;i<80;i++){ const sx=(i*73.1)%W,sy=(i*47.3)%(H*.45); ctx.fillRect(sx,sy,1,1); }
+        ctx.restore();
+      }
+      ctx.save(); ctx.fillStyle='#050810';
+      ctx.beginPath(); ctx.moveTo(0,H*.5); ctx.lineTo(W*.1,H*.31); ctx.lineTo(W*.25,H*.45); ctx.lineTo(W*.35,H*.29); ctx.lineTo(W*.5,H*.43); ctx.lineTo(W*.6,H*.32); ctx.lineTo(W*.75,H*.44); ctx.lineTo(W*.88,H*.3); ctx.lineTo(W,H*.39); ctx.lineTo(W,H*.65); ctx.lineTo(0,H*.65); ctx.closePath(); ctx.fill(); ctx.restore();
+      const lk=ctx.createLinearGradient(0,H*.65,0,H);
+      lk.addColorStop(0,fi>0?'rgba(15,25,55,1)':'#080a14'); lk.addColorStop(1,'#050810');
+      ctx.fillStyle=lk; ctx.fillRect(0,H*.65,W,H*.35);
+      if(fi>0){ ctx.save(); ctx.fillStyle=`rgba(120,170,255,${fi*.12})`; ctx.fillRect(0,H*.65,W,H*.35); ctx.restore(); }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.4)';
+      ctx.fillText('LAGO MARACAIBO, VENEZUELA',10,H-8);
+    }
+    function doFlash(){
+      if(!canvas._init) return;
+      let fi=0;
+      const up=setInterval(()=>{ fi=Math.min(1,fi+.2); drawNight(fi);
+        if(fi>=1){ clearInterval(up); let fd=1;
+          const dn=setInterval(()=>{ fd=Math.max(0,fd-.1); drawNight(fd);
+            if(fd<=0){ clearInterval(dn); schedule(); }
+          },40);
+        }
+      },40);
+    }
+    function schedule(){ if(!canvas._init) return; flashTO=setTimeout(doFlash,900+Math.random()*2800); }
+    window.addEventListener('resize',()=>{ clearTimeout(flashTO); resize(); });
+    resize();
+  }
+
+  function initItaliaCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; draw(); }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#030310'; ctx.fillRect(0,0,W,H);
+      const sX=W/300, sY=H/400;
+      function sc(x,y){ return [x*sX,y*sY]; }
+      // Italy outline (simplified peninsula + Sicily)
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.5)'; ctx.lineWidth=1.5;
+      ctx.fillStyle='rgba(20,20,40,.8)';
+      ctx.beginPath();
+      const outline=[[80,20],[190,25],[215,60],[205,100],[215,140],[200,170],[215,185],[200,200],[175,195],[145,185],[115,175],[90,150],[75,110],[65,70],[75,40]];
+      outline.forEach(([x,y],i)=>i===0?ctx.moveTo(...sc(x,y)):ctx.lineTo(...sc(x,y)));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Sicily
+      ctx.beginPath();
+      const sicily=[[70,240],[120,245],[130,260],[105,270],[65,265]];
+      sicily.forEach(([x,y],i)=>i===0?ctx.moveTo(...sc(x,y)):ctx.lineTo(...sc(x,y)));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Sardinia
+      ctx.beginPath();
+      const sardinia=[[20,100],[40,95],[45,140],[25,145]];
+      sardinia.forEach(([x,y],i)=>i===0?ctx.moveTo(...sc(x,y)):ctx.lineTo(...sc(x,y)));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      // Zone 1: Arco Alpino (north) — blue arrow summer
+      ctx.save(); ctx.strokeStyle='rgba(74,158,255,.8)'; ctx.lineWidth=2;
+      ctx.shadowColor='#4a9eff'; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(...sc(120,15)); ctx.lineTo(...sc(130,35)); ctx.stroke();
+      ctx.fillStyle='#4a9eff'; ctx.beginPath(); ctx.moveTo(...sc(130,35)); ctx.lineTo(...sc(125,27)); ctx.lineTo(...sc(135,27)); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(74,158,255,.7)'; ctx.font=`${9*sX}px JetBrains Mono`;
+      ctx.fillText('Alpi (estate)',5,sc(0,12)[1]);
+      ctx.restore();
+      // Zone 2: Pianura Padana — gold arrow late summer
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.8)'; ctx.lineWidth=2;
+      ctx.shadowColor='#c9a84c'; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(...sc(60,70)); ctx.lineTo(...sc(110,75)); ctx.stroke();
+      ctx.fillStyle='#c9a84c'; ctx.beginPath(); ctx.moveTo(...sc(110,75)); ctx.lineTo(...sc(100,69)); ctx.lineTo(...sc(100,81)); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(201,168,76,.7)';
+      ctx.fillText('Pianura Padana',5,sc(0,60)[1]);
+      ctx.restore();
+      // Zone 3: Tirreno+Appennino — red arrow autumn
+      ctx.save(); ctx.strokeStyle='rgba(255,68,68,.8)'; ctx.lineWidth=2;
+      ctx.shadowColor='#ff4444'; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.moveTo(...sc(20,150)); ctx.lineTo(...sc(95,145)); ctx.stroke();
+      ctx.fillStyle='#ff4444'; ctx.beginPath(); ctx.moveTo(...sc(95,145)); ctx.lineTo(...sc(86,139)); ctx.lineTo(...sc(86,151)); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(255,68,68,.7)';
+      ctx.fillText('Tirreno (autunno)',5,sc(0,170)[1]);
+      ctx.restore();
+      // sea label
+      ctx.fillStyle='rgba(74,158,255,.2)'; ctx.font=`${8*sX}px JetBrains Mono`;
+      ctx.fillText('Mediterraneo',sc(60,320)[0],sc(60,320)[1]);
+    }
+    resize(); window.addEventListener('resize',resize);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initMap();
+    initMaracaiboCanvas(document.getElementById('maracaibo-canvas'));
+    initItaliaCanvas(document.getElementById('italia-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === MONDO MAP END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: mondo section — Leaflet map, Maracaibo, Congo, Florida, Italia canvas"
+```
+
+---
+
+## Task 12: Sezione Curiosità & Record (3 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- CURIOSITA CONTENT -->` e `// === CURIOSITA INIT ===`
+
+- [ ] **Step 1: Sostituisci `<!-- CURIOSITA CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Record WMO -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Curiosità &amp; Record — 1/3</span>
+          <h2 class="reveal reveal-d1">Record WMO ufficiali</h2>
+          <p class="reveal reveal-d2">Un fulmine nube-suolo standard è lungo in media circa 8 km. Ma i fulmini orizzontali all'interno dei sistemi nuvolosi (<em>megaflash</em>) raggiungono dimensioni spaventose. L'Organizzazione Meteorologica Mondiale ha registrato e certificato nel 2021 i due record assoluti:</p>
+          <div class="reveal reveal-d3" style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+            <div style="border-left:3px solid var(--gold);padding:.75rem 1rem;background:var(--surface);">
+              <div class="eyebrow">Record di lunghezza</div>
+              <div id="rec-len" style="font-family:var(--mono);font-size:2.5rem;font-weight:700;color:var(--gold);">0 km</div>
+              <p style="font-size:.85rem;margin:.25rem 0 0;">Un singolo fulmine lungo quanto la distanza tra Texas e Mississippi (USA), 29 aprile 2020.</p>
+            </div>
+            <div style="border-left:3px solid var(--blue);padding:.75rem 1rem;background:var(--surface);">
+              <div class="eyebrow">Record di durata</div>
+              <div id="rec-dur" style="font-family:var(--mono);font-size:2.5rem;font-weight:700;color:var(--blue);">0 s</div>
+              <p style="font-size:.85rem;margin:.25rem 0 0;">Un singolo fulmine rimasto acceso per 17,1 secondi su Uruguay e Argentina, 18 giugno 2020.</p>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;">lunghezza media</div>
+            <div style="font-size:2rem;color:var(--muted);">~8 km</div>
+            <div style="font-size:.65rem;letter-spacing:.2em;color:var(--muted);margin:.5rem 0;">vs record</div>
+            <div style="font-size:3rem;font-weight:700;color:var(--gold);">768 km</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Velocità e il tuono -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Curiosità &amp; Record — 2/3</span>
+          <h2 class="reveal reveal-d1">Velocità e il tuono</h2>
+          <p class="reveal reveal-d2">La fase di discesa del precursore è "lenta" (~200.000 km/h), ma il colpo di ritorno — il guizzo luminoso che sale dalla terra — viaggia a velocità relativistiche, fino a circa <strong>100.000 km/s</strong> (un terzo della velocità della luce): a quella velocità farebbe il giro della Terra in meno di mezzo secondo.</p>
+          <p class="reveal reveal-d3">Poiché la luce è istantanea per le distanze terrestri, il suono percorre circa 1 km ogni 3 secondi. <strong>Regola infallibile: conta i secondi tra il lampo e il tuono e dividi per 3</strong> — ottieni la distanza in km. Non si sente il tuono oltre i 20–25 km (rifrazione acustica).</p>
+          <div class="thunder-calc reveal reveal-d4">
+            <label for="thunder-slider">Secondi tra lampo e tuono</label>
+            <input type="range" min="1" max="60" value="15" id="thunder-slider">
+            <span class="thunder-val" id="thunder-val">15 s</span>
+            <div class="thunder-result">
+              <span class="thunder-km" id="thunder-km">5,0 km</span>
+              <span class="risk-badge risk-yellow" id="thunder-risk">ATTENZIONE</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.15em;color:var(--muted);">RETURN STROKE</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--white);">100.000 km/s</div>
+            <div style="font-size:.75rem;color:var(--gold);">= ⅓ velocità della luce</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.15em;color:var(--muted);">SUONO</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--muted);">0,343 km/s</div>
+            <div style="font-size:.75rem;color:var(--muted);">1 km ogni 3 secondi</div>
+          </div>
+          <div class="reveal reveal-d2" style="font-family:var(--mono);font-size:.7rem;color:var(--blue);text-align:center;border:1px solid var(--border);padding:.75rem 1rem;">
+            velocità luce / velocità suono ≈ <strong style="color:var(--gold);">874.000×</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Altre curiosità -->
+    <div class="hc-slide">
+      <div class="slide-full" style="display:flex;flex-direction:column;justify-content:center;padding:3rem 5.5rem;">
+        <span class="eyebrow reveal">Curiosità &amp; Record — 3/3</span>
+        <h2 class="reveal reveal-d1" style="margin-bottom:1.5rem;">Altre curiosità</h2>
+        <div class="curiosity-grid reveal reveal-d2">
+          <div class="curiosity-card">
+            <div class="c-icon">🌿</div>
+            <h4>Figure di Lichtenberg</h4>
+            <p>Chi viene colpito da un fulmine e sopravvive può presentare sulla pelle segni rossastri a forma di felce o di ramo, dovuti alla rottura dei capillari per il passaggio della corrente sulla superficie del corpo.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🪐</div>
+            <h4>Fulmini su altri pianeti</h4>
+            <p>Tempeste di fulmini colossali — migliaia di volte più potenti delle nostre — avvengono regolarmente su Giove e Saturno, alimentate da tempeste di idrogeno ed elio. Rilevate dalle sonde Voyager, Cassini e Juno.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🌋</div>
+            <h4>Fulmini vulcanici</h4>
+            <p>Durante le eruzioni violente l'attrito tra cenere, polvere e roccia espulsa dal cratere genera una separazione di cariche tale da provocare fulmini spettacolari all'interno del pennacchio di fumo, senza bisogno di nuvole di pioggia.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🏙</div>
+            <h4>Il mito del "non colpisce due volte"</h4>
+            <p>Completamente falso. L'Empire State Building a New York viene colpito in media <strong>23 volte all'anno</strong>. I punti elevati e conduttivi vengono colpiti ripetutamente perché favoriscono la formazione degli upward streamers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === CURIOSITA INIT ===` con**
+
+```javascript
+// === CURIOSITA INIT ===
+(function initCuriositaSection(){
+  const sec = document.getElementById('curiosita');
+
+  function animCount(el,target,suffix,duration,toFixed){
+    if(!el) return;
+    const start=Date.now();
+    function step(){
+      const p=Math.min(1,(Date.now()-start)/duration);
+      const ease=1-Math.pow(1-p,3);
+      const val=target*ease;
+      el.textContent=(toFixed?val.toFixed(1):Math.round(val))+suffix;
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function initRecordCounters(){
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        obs.disconnect();
+        animCount(document.getElementById('rec-len'),768,' km',2000,false);
+        animCount(document.getElementById('rec-dur'),17.1,' s',2000,true);
+      }
+    },{threshold:.3});
+    const slide1=sec.querySelectorAll('.hc-slide')[0];
+    if(slide1) obs.observe(slide1);
+  }
+
+  function initThunderCalc(){
+    const slider=document.getElementById('thunder-slider');
+    const valEl=document.getElementById('thunder-val');
+    const kmEl=document.getElementById('thunder-km');
+    const riskEl=document.getElementById('thunder-risk');
+    if(!slider) return;
+    function update(){
+      const s=parseInt(slider.value);
+      const km=(s/3).toFixed(1).replace('.',',');
+      valEl.textContent=s+' s';
+      kmEl.textContent=km+' km';
+      riskEl.className='risk-badge';
+      if(s<=10){ riskEl.classList.add('risk-red'); riskEl.textContent='PERICOLO IMMEDIATO'; }
+      else if(s<=30){ riskEl.classList.add('risk-yellow'); riskEl.textContent='ATTENZIONE'; }
+      else{ riskEl.classList.add('risk-green'); riskEl.textContent='MONITORARE'; }
+    }
+    slider.addEventListener('input',update); update();
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initCarousel(sec);
+    initRecordCounters();
+    initThunderCalc();
+  },{once:true});
+})();
+// === CURIOSITA INIT END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: curiosita section — WMO records, thunder calc, curiosity cards"
+```
+
+---
+
+## Task 13: Sezione Sicurezza (3 slide)
+
+**Files:**
+- Modify: `index.html` — sostituisce `<!-- SICUREZZA CONTENT -->` e `// === SICUREZZA INIT ===`
+
+- [ ] **Step 1: Sostituisci `<!-- SICUREZZA CONTENT -->` con**
+
+```html
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: All'aperto -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 1/3</span>
+          <h2 class="reveal reveal-d1">All'aperto</h2>
+          <div class="do-dont reveal reveal-d2">
+            <div class="do-col">
+              <div class="col-title">✓ DA FARE</div>
+              <div class="do-item">Cerca rifugio in un edificio solido o in un'auto (la carrozzeria metallica protegge)</div>
+              <div class="do-item">Evita alberi isolati, tralicci e recinzioni metalliche</div>
+              <div class="do-item">Non sostare su terreni aperti o in cima alle colline</div>
+              <div class="do-item">Se sei in acqua, esci subito e allontanati</div>
+              <div class="do-item">Se sei all'aperto senza riparo: accovacciati, piedi uniti, non sdraiato a terra</div>
+            </div>
+            <div class="dont-col">
+              <div class="col-title">✗ DA EVITARE</div>
+              <div class="dont-item">Sotto alberi isolati o in bosco rado</div>
+              <div class="dont-item">In acqua aperta (lago, mare, piscina)</div>
+              <div class="dont-item">Su picchi, creste e colline esposte</div>
+              <div class="dont-item">Vicino a recinzioni, binari, antenne metalliche</div>
+              <div class="dont-item">Sdraiato sul terreno durante il temporale</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="outdoor-canvas" aria-label="Zone di rischio all'aperto — edificio vs albero"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: In casa + Step voltage -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 2/3</span>
+          <h2 class="reveal reveal-d1">In casa e lo step voltage</h2>
+          <div class="do-dont reveal reveal-d2">
+            <div class="do-col">
+              <div class="col-title">✓ IN CASA</div>
+              <div class="do-item">Installa scaricatori di sovratensione per proteggere gli elettrodomestici</div>
+              <div class="do-item">Stacca le spine dei dispositivi durante i temporali forti</div>
+            </div>
+            <div class="dont-col">
+              <div class="col-title">✗ EVITA</div>
+              <div class="dont-item">Usare apparecchi collegati alla presa durante il temporale</div>
+              <div class="dont-item">Fare la doccia o il bagno (i tubi conducono l'elettricità)</div>
+            </div>
+          </div>
+          <div class="warning-box reveal reveal-d3">
+            <div class="warning-title">⚠ Step voltage — pericolo sottovalutato</div>
+            <p>Se un fulmine colpisce il suolo vicino, la corrente si diffonde radialmente nel terreno. La <strong>differenza di potenziale tra i tuoi due piedi</strong> (step voltage) può essere letale anche a 10–15 m dall'impatto. Posizione di sicurezza: piedi uniti, non sdraiato.</p>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="stepvoltage-canvas" aria-label="Step voltage — diffusione radiale della corrente nel suolo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Rilevamento moderno -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 3/3</span>
+          <h2 class="reveal reveal-d1">Rilevamento moderno</h2>
+          <p class="reveal reveal-d2">Le reti di rilevamento fulmini (come <strong>LINET</strong> in Europa o il sistema <strong>SIRF</strong> in Italia, gestito da ISPRA) usano sensori elettromagnetici distribuiti sul territorio. Ogni fulmine emette un impulso radio captato da più stazioni: dalla differenza dei tempi di arrivo del segnale si calcola la <strong>posizione esatta con precisione di pochi metri</strong>.</p>
+          <div class="reveal reveal-d3" style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-family:var(--mono);font-size:.75rem;">
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--gold);font-size:1.3rem;">600+</div><div style="color:var(--muted);">sensori LINET Europa</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--blue);font-size:1.3rem;">&lt;200 m</div><div style="color:var(--muted);">precisione localizzazione</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--white);font-size:1.3rem;">2.000+</div><div style="color:var(--muted);">stazioni Blitzortung</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--green);font-size:1.3rem;">&lt;1 s</div><div style="color:var(--muted);">latenza rilevamento</div></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <div class="blitz-wrap">
+            <iframe id="blitz-iframe" title="Fulmini in tempo reale Blitzortung" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
+```
+
+- [ ] **Step 2: Sostituisci `// === SICUREZZA INIT ===` con**
+
+```javascript
+// === SICUREZZA INIT ===
+(function initSicurezzaSection(){
+  const sec = document.getElementById('sicurezza');
+
+  function initOutdoorCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; draw(); }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      // sky
+      ctx.fillStyle='#07070e'; ctx.fillRect(0,0,W,H*.75);
+      // dark storm clouds
+      ctx.fillStyle='#101020';
+      ctx.beginPath(); ctx.arc(W*.3,H*.08,W*.18,0,Math.PI*2); ctx.arc(W*.5,H*.05,W*.2,0,Math.PI*2); ctx.arc(W*.7,H*.09,W*.16,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='#0a1208'; ctx.fillRect(0,H*.75,W,H*.25);
+      ctx.strokeStyle='rgba(201,168,76,.15)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.75); ctx.lineTo(W,H*.75); ctx.stroke();
+      // SAFE SIDE: building + lightning rod (left)
+      const bX=W*.22,bW=W*.15,bH=H*.3,rodY=H*.75-bH-H*.08;
+      ctx.fillStyle='#141428'; ctx.fillRect(bX-bW/2,H*.75-bH,bW,bH);
+      ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=.5; ctx.strokeRect(bX-bW/2,H*.75-bH,bW,bH);
+      // windows
+      for(let r=0;r<2;r++) for(let c=0;c<2;c++){
+        ctx.fillStyle='rgba(201,168,76,.1)';
+        ctx.fillRect(bX-bW*.35+c*bW*.4,H*.75-bH+bH*.2+r*bH*.35,bW*.25,bH*.2);
+      }
+      // rod
+      ctx.strokeStyle='#c9a84c'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(bX,H*.75-bH); ctx.lineTo(bX,rodY); ctx.stroke();
+      // protection cone (green, dashed)
+      const coneH=bH*1.1;
+      ctx.save(); ctx.beginPath(); ctx.moveTo(bX,rodY); ctx.lineTo(bX-coneH,H*.75); ctx.lineTo(bX+coneH,H*.75); ctx.closePath();
+      ctx.fillStyle='rgba(68,204,136,.06)'; ctx.fill();
+      ctx.strokeStyle='rgba(68,204,136,.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      // lightning hitting rod (gold)
+      ctx.save(); ctx.strokeStyle='#c9a84c'; ctx.lineWidth=2; ctx.shadowColor='#c9a84c'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(bX-5,H*.08); ctx.lineTo(bX+2,H*.4); ctx.lineTo(bX-2,H*.4); ctx.lineTo(bX,rodY); ctx.stroke(); ctx.restore();
+      ctx.fillStyle='rgba(68,204,136,.7)'; ctx.font='9px JetBrains Mono'; ctx.fillText('PROTETTO',bX-coneH*.7,H*.72);
+      // DANGEROUS SIDE: isolated tree (right)
+      const tX=W*.72;
+      ctx.fillStyle='#1a1208'; ctx.fillRect(tX-4,H*.55,8,H*.2);
+      ctx.fillStyle='#0f1808'; ctx.beginPath(); ctx.arc(tX,H*.52,22,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#111808'; ctx.beginPath(); ctx.arc(tX-8,H*.56,14,0,Math.PI*2); ctx.arc(tX+8,H*.56,14,0,Math.PI*2); ctx.fill();
+      // lightning hitting tree (red)
+      ctx.save(); ctx.strokeStyle='#ff4444'; ctx.lineWidth=2; ctx.shadowColor='#ff4444'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(tX+5,H*.08); ctx.lineTo(tX-3,H*.3); ctx.lineTo(tX+2,H*.3); ctx.lineTo(tX,H*.5); ctx.stroke(); ctx.restore();
+      // danger zone circle (red)
+      ctx.save(); ctx.strokeStyle='rgba(255,68,68,.25)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.arc(tX,H*.7,60,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.fillStyle='rgba(255,68,68,.6)'; ctx.font='9px JetBrains Mono'; ctx.fillText('PERICOLO',tX-27,H*.72);
+    }
+    resize(); window.addEventListener('resize',resize);
+  }
+
+  function initStepVoltageCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d'); let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      const cx=W*.5,cy=H*.5;
+      // ground label
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.4,W,H*.6);
+      ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.4); ctx.lineTo(W,H*.4); ctx.stroke();
+      // impact point
+      ctx.save(); ctx.fillStyle='rgba(255,255,255,.8)';
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=20;
+      ctx.beginPath(); ctx.arc(cx,H*.4,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(255,255,255,.5)';
+      ctx.fillText('impatto',cx-20,H*.4-10);
+      // isopotential rings
+      const maxR=Math.min(W,H)*.45;
+      const nRings=6;
+      for(let i=0;i<nRings;i++){
+        const r=(i+1)*maxR/nRings;
+        const ratio=i/nRings;
+        const red=Math.round(255*(1-ratio));
+        const grn=Math.round(200*ratio);
+        const alpha=0.35-ratio*.15;
+        ctx.save(); ctx.strokeStyle=`rgba(${red},${grn},50,${alpha})`;
+        ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+        ctx.beginPath(); ctx.arc(cx,H*.4,r,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle=`rgba(${red},${grn},50,${alpha*.8})`;
+        ctx.font='8px JetBrains Mono';
+        ctx.fillText(`V${nRings-i}`,cx+r+4,H*.4+4);
+        ctx.restore();
+      }
+      // person figure with step voltage arrows
+      const pX=cx+maxR*.5,pY=H*.38;
+      // body
+      ctx.save(); ctx.fillStyle='rgba(232,230,224,.6)';
+      ctx.beginPath(); ctx.arc(pX,pY-30,8,0,Math.PI*2); ctx.fill(); // head
+      ctx.fillRect(pX-4,pY-22,8,20); // torso
+      // legs spread (showing step voltage)
+      const footLeft=pX-15, footRight=pX+15;
+      ctx.strokeStyle='rgba(232,230,224,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(pX,pY-2); ctx.lineTo(footLeft,pY+15); ctx.moveTo(pX,pY-2); ctx.lineTo(footRight,pY+15); ctx.stroke();
+      // step voltage arrows (current through body)
+      const stepV=0.3+Math.abs(Math.sin(t*2))*0.4;
+      ctx.strokeStyle=`rgba(255,68,68,${stepV})`; ctx.lineWidth=2;
+      ctx.shadowColor='#ff4444'; ctx.shadowBlur=8;
+      ctx.beginPath();
+      ctx.moveTo(footLeft,pY+15); ctx.lineTo(footLeft,H*.4+5);
+      ctx.moveTo(footRight,pY+15); ctx.lineTo(footRight,H*.4+5); ctx.stroke();
+      ctx.restore();
+      ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(255,68,68,.7)';
+      ctx.fillText('ΔV tra i piedi → pericolo',cx-80,H*.9);
+      ctx.fillStyle='rgba(68,204,136,.5)';
+      ctx.fillText('soluzione: piedi uniti',cx-65,H*.95);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initBlitzortung(){
+    const iframe=document.getElementById('blitz-iframe');
+    if(iframe) iframe.src='https://www.blitzortung.org/en/live_lightning_maps.php?map=6';
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initCarousel(sec);
+    initOutdoorCanvas(document.getElementById('outdoor-canvas'));
+    initStepVoltageCanvas(document.getElementById('stepvoltage-canvas'));
+    initBlitzortung();
+  },{once:true});
+})();
+// === SICUREZZA INIT END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: sicurezza section — outdoor risk canvas, step voltage canvas, Blitzortung"
+```
+
+---
+
+## Task 14: Reveal Observer + Polish + Bootstrap
+
+**Files:**
+- Modify: `index.html` — sostituisce `// === REVEAL INIT ===` e aggiorna `// === BOOTSTRAP ===`
+
+- [ ] **Step 1: Sostituisci `// === REVEAL INIT ===` con**
+
+```javascript
+// === REVEAL INIT ===
+(function initReveal(){
+  const revealObs = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  },{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+    document.querySelectorAll('canvas').forEach(c=>{ c._skipAnim=true; });
+  }
+})();
+// === REVEAL INIT END ===
+```
+
+- [ ] **Step 2: Sostituisci il blocco `// === BOOTSTRAP ===` con**
+
+Trova il blocco attuale `// === BOOTSTRAP ===` (può contenere solo il commento o qualcosa di più), sostituiscilo con:
+
+```javascript
+// === BOOTSTRAP ===
+bindScrollToLinks();
+updateProgress(0);
+document.querySelectorAll('.section').forEach(s=>{
+  const track=s.querySelector('.hc-track');
+  if(track) initCarousel(s);
+});
+// === BOOTSTRAP END ===
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: reveal observer, prefers-reduced-motion, bootstrap carousel init"
+```
+
+---
+
+## Task 15: Push a GitHub
+
+**Files:** nessuna modifica
+
+- [ ] **Step 1: Verifica stato finale**
+
+```bash
+git log --oneline -15
+git status
+```
+
+Expected: working tree clean, 13+ commit recenti.
+
+- [ ] **Step 2: Push**
+
+```bash
+git push origin main
+```
+
+- [ ] **Step 3: Verifica deploy**
+
+Attendi 2–3 minuti. Verifica che il sito sia online su Cloudflare Pages. Naviga attraverso tutte le 10 sezioni e verifica:
+- [ ] Hero: bolt SVG lampeggia, TOC link funzionano, ↓ Inizia scrolla
+- [ ] Formazione: 3 slide, campo elettrico + triboelettrico + condensatore animati
+- [ ] Meccanismo: 4 slide, phase buttons navigano il carousel, ▶ Play sequenzia
+- [ ] I Tipi: 5 slide, CG canvases, IC/CC, ball/elmo, TLE + buttons
+- [ ] Il Plasma: 3 slide, particelle plasma, onda d'urto, Z-pinch
+- [ ] Chimica & Nucleare: chimica cards, TGF canvas, contatori animati
+- [ ] Storia & Cultura: deity cards, Franklin SVG SMIL, parafulmine interattivo, Tesla
+- [ ] Nel Mondo: Leaflet map, Maracaibo flash, Congo, Florida, Italia canvas
+- [ ] Curiosità & Record: contatori WMO, calcolatore ÷3, curiosity cards
+- [ ] Sicurezza: outdoor canvas, step voltage canvas, Blitzortung iframe
+- [ ] ↑↓ keyboard, ←→ keyboard, F fullscreen
+- [ ] Nav dots laterali, progress bar, slide counter
