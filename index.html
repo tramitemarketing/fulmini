@@ -347,7 +347,67 @@
   </section>
   <section class="section" id="plasma" data-section="4">
     <div class="section-header"><span class="section-num">04 — IL PLASMA</span></div>
-    <!-- PLASMA CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Cos'è il plasma -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 1/3</span>
+          <h2 class="reveal reveal-d1">Il quarto stato della materia</h2>
+          <p class="reveal reveal-d2">Per capire a fondo il fulmine dobbiamo guardarlo non come un semplice "lampo elettrico", ma come un <strong>laboratorio di fisica del plasma</strong>. Il fulmine non è fatto di fuoco e non è "elettricità pura": la sua sostanza fisica è il <strong>plasma</strong>, il quarto stato della materia.</p>
+          <p class="reveal reveal-d3">Quando il campo elettrico supera la rigidità dielettrica dell'aria (~3×10⁶ V/m), gli elettroni vengono strappati violentemente dai nuclei. L'aria ionizzata — plasma — conduce l'elettricità come un metallo: <strong>resistività bassissima</strong>, fortemente emettitore di luce per ricombinazione degli elettroni.</p>
+          <div class="stat-strip reveal reveal-d4">
+            <div class="stat-item"><span class="stat-val">3×10⁶ V/m</span><span class="stat-unit">soglia ionizzazione aria</span></div>
+            <div class="stat-item"><span class="stat-val">~0 Ω</span><span class="stat-unit">resistività plasma</span></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="plasma-canvas" class="plasma-glow" aria-label="Plasma ionizzato — particelle animate"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Termodinamica e il tuono -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 2/3</span>
+          <h2 class="reveal reveal-d1">L'esplosione e il tuono</h2>
+          <p class="reveal reveal-d2">Il canale di plasma ha un diametro sorprendentemente piccolo — inizialmente pochi millimetri, poi qualche centimetro. La densità di corrente è talmente alta che la temperatura schizza a circa <strong>30.000 K</strong> in meno di un microsecondo.</p>
+          <p class="reveal reveal-d3">Secondo la legge dei gas perfetti P = ρRT, un aumento così verticale e istantaneo della temperatura provoca un picco di pressione interno al canale stimato tra <strong>10 e 100 atmosfere</strong>. Il canale di plasma non può contenere questa pressione e si espande radialmente verso l'esterno a velocità <strong>supersonica</strong>, generando un'<strong>onda d'urto</strong> — il tuono.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="thunder-canvas" aria-label="Espansione supersonica del canale plasma — onda d'urto"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Effetto pinch -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Il Plasma — 3/3</span>
+          <h2 class="reveal reveal-d1">L'effetto pinch (Z-pinch)</h2>
+          <p class="reveal reveal-d2">Il fulmine è governato dalle equazioni di Maxwell. Quando una corrente di intensità I (fino a 200.000 A) attraversa il canale di plasma, genera attorno al canale un campo magnetico <strong>B circolare</strong>, calcolabile con la legge di Ampère.</p>
+          <p class="reveal reveal-d3">Questo campo magnetico genera una <strong>forza di Lorentz</strong> che spinge le particelle cariche verso l'interno del canale: è il fenomeno noto nella fisica dei plasmi come <strong>Z-pinch (strizione magnetica)</strong>. La forza comprime il plasma, confinandolo e densificandolo, e contrasta temporaneamente l'espansione termica in un equilibrio dinamico violentissimo che dura solo pochi microsecondi.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="pinch-canvas" aria-label="Z-pinch — strizione magnetica del canale plasma"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="chimica" data-section="5">
     <div class="section-header"><span class="section-num">05 — CHIMICA &amp; NUCLEARE</span></div>
@@ -882,6 +942,182 @@
 })();
 // === MECCANISMO CANVAS END ===
     // === PLASMA CANVAS ===
+(function initPlasmaSection(){
+  const sec = document.getElementById('plasma');
+
+  function initPlasmaCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    const particles=[];
+    function resize(){
+      canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500;
+      particles.length=0;
+      const W=canvas.width,H=canvas.height;
+      for(let i=0;i<60;i++){
+        particles.push({
+          x:W*(0.1+Math.random()*0.8), y:H*(0.1+Math.random()*0.8),
+          vx:(Math.random()-.5)*3, vy:(Math.random()-.5)*3,
+          type:Math.random()<0.4?'electron':'ion',
+          life:Math.random()*100, photon:0
+        });
+      }
+    }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // dark plasma bg
+      ctx.fillStyle='#020208'; ctx.fillRect(0,0,W,H);
+      // background glow
+      const grd=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.4);
+      grd.addColorStop(0,'rgba(123,47,255,.08)'); grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<5||p.x>W-5){ p.vx*=-1; p.x=Math.max(5,Math.min(W-5,p.x)); }
+        if(p.y<5||p.y>H-5){ p.vy*=-1; p.y=Math.max(5,Math.min(H-5,p.y)); }
+        // random recombination flash
+        if(Math.random()<0.002 && p.type==='electron') p.photon=15;
+        if(p.photon>0){
+          p.photon--;
+          ctx.save(); ctx.fillStyle=`rgba(255,220,100,${p.photon/15})`;
+          ctx.shadowColor='#ffdc64'; ctx.shadowBlur=p.photon*2;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.photon/3,0,Math.PI*2); ctx.fill(); ctx.restore();
+        }
+        ctx.save();
+        if(p.type==='electron'){
+          ctx.fillStyle='rgba(74,158,255,.8)';
+          ctx.shadowColor='#4a9eff'; ctx.shadowBlur=4;
+          ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fill();
+        } else {
+          ctx.fillStyle='rgba(255,100,60,.7)';
+          ctx.shadowColor='#ff643c'; ctx.shadowBlur=3;
+          ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+          // plus sign
+          ctx.strokeStyle='rgba(255,150,100,.5)'; ctx.lineWidth=0.7;
+          ctx.beginPath(); ctx.moveTo(p.x-4,p.y); ctx.lineTo(p.x+4,p.y);
+          ctx.moveTo(p.x,p.y-4); ctx.lineTo(p.x,p.y+4); ctx.stroke();
+        }
+        ctx.restore();
+      });
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(74,158,255,.5)'; ctx.fillText('e⁻  elettroni liberi',12,H-20);
+      ctx.fillStyle='rgba(255,100,60,.5)'; ctx.fillText('⊕  ioni positivi',12,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initThunderCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#030308'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      const cycle=t%6;
+      const phase=Math.min(1,cycle/3);
+      const cx=W*.5,cy=H*.5;
+
+      // lightning channel (thin vertical line)
+      ctx.save(); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.5+phase*1.5;
+      ctx.shadowColor='#c9a84c'; ctx.shadowBlur=10+phase*20;
+      ctx.beginPath(); ctx.moveTo(cx,H*.05); ctx.lineTo(cx,H*.95); ctx.stroke(); ctx.restore();
+
+      // shock wave rings
+      const maxR=Math.max(W,H)*0.8*phase;
+      const nRings=5;
+      for(let i=0;i<nRings;i++){
+        const r=maxR*(i+1)/nRings;
+        const alpha=Math.max(0,0.6-phase*0.5-(i*0.1));
+        const hue=i===0?'255,240,200':i===1?'255,180,80':i===2?'200,120,60':'100,120,200';
+        ctx.save(); ctx.strokeStyle=`rgba(${hue},${alpha})`;
+        ctx.lineWidth=2; ctx.shadowColor=`rgba(${hue},.5)`; ctx.shadowBlur=8;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke(); ctx.restore();
+      }
+
+      // labels
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(255,240,200,.5)'; ctx.fillText('onda d\'urto supersonica',10,H-20);
+      ctx.fillStyle='rgba(100,120,200,.5)'; ctx.fillText('→ il tuono',10,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initPinchCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#030308'; ctx.fillRect(0,0,W,H);
+      t+=0.03;
+      const cx=W*.5;
+      const pinch=0.5+Math.sin(t*2)*0.35; // channel width oscillates (pinch)
+      const cw=8+pinch*20;
+
+      // magnetic field rings (circular around current)
+      const nRings=4;
+      for(let i=0;i<nRings;i++){
+        const r=(50+i*60)*Math.min(W,H)/600;
+        const alpha=0.15+0.1*(nRings-i)/nRings;
+        ctx.save(); ctx.strokeStyle=`rgba(123,47,255,${alpha})`;
+        ctx.lineWidth=1; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.arc(cx,H*.5,r,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+        // B field direction indicators (dots/crosses)
+        for(let a=0;a<8;a++){
+          const ang=a*Math.PI/4+t*0.3;
+          const bx=cx+r*Math.cos(ang), by=H*.5+r*Math.sin(ang);
+          ctx.fillStyle=`rgba(123,47,255,${alpha*2})`;
+          ctx.beginPath(); ctx.arc(bx,by,2.5,0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // current channel (vertical, pulsing width)
+      const grd=ctx.createLinearGradient(cx-cw,0,cx+cw,0);
+      grd.addColorStop(0,'rgba(74,158,255,0)');
+      grd.addColorStop(0.5,'rgba(200,220,255,0.9)');
+      grd.addColorStop(1,'rgba(74,158,255,0)');
+      ctx.save(); ctx.shadowColor='#4a9eff'; ctx.shadowBlur=20+pinch*15;
+      ctx.fillStyle=grd; ctx.fillRect(cx-cw,H*.05,cw*2,H*.9); ctx.restore();
+
+      // Lorentz force arrows pointing inward
+      const arrowPositions=[H*.2,H*.35,H*.5,H*.65,H*.8];
+      arrowPositions.forEach(ay=>{
+        // left arrow →
+        ctx.save(); ctx.strokeStyle='rgba(255,100,50,.6)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(cx-80,ay); ctx.lineTo(cx-cw-3,ay); ctx.stroke();
+        ctx.fillStyle='rgba(255,100,50,.6)';
+        ctx.beginPath(); ctx.moveTo(cx-cw-3,ay); ctx.lineTo(cx-cw-10,ay-4); ctx.lineTo(cx-cw-10,ay+4); ctx.closePath(); ctx.fill();
+        // right arrow ←
+        ctx.beginPath(); ctx.moveTo(cx+80,ay); ctx.lineTo(cx+cw+3,ay); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx+cw+3,ay); ctx.lineTo(cx+cw+10,ay-4); ctx.lineTo(cx+cw+10,ay+4); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      });
+
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(123,47,255,.6)'; ctx.fillText('B circolare (Ampère)',10,H-20);
+      ctx.fillStyle='rgba(255,100,50,.6)'; ctx.fillText('F Lorentz → strizione',10,H-6);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initPlasmaCanvas(document.getElementById('plasma-canvas'));
+    initThunderCanvas(document.getElementById('thunder-canvas'));
+    initPinchCanvas(document.getElementById('pinch-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === PLASMA CANVAS END ===
     // === CHIMICA INIT ===
     // === TIPI CANVAS ===
     // === STORIA CANVAS ===
