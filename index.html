@@ -26,18 +26,15 @@
 }
 
 html {
+  scroll-snap-type: y mandatory;
   background: var(--bg);
   color: var(--white);
   font-family: 'Source Serif 4', serif;
   cursor: none;
-  height: 100%;
-  overflow: hidden;
 }
 
 body {
-  height: 100%;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
+  overflow-x: hidden;
 }
 
 /* ===== SLIDES ===== */
@@ -1669,6 +1666,8 @@ function initVerticalCarousel(slideEl) {
 
 /* ===== HORIZONTAL CAROUSEL ===== */
 function initHorizontalCarousel(wrapEl) {
+  if (!wrapEl) return;
+  if (wrapEl._hcObj) return wrapEl._hcObj; // prevent double-init
   const track = wrapEl.querySelector('.hc-track');
   const hcSlides = [...wrapEl.querySelectorAll('.hc-slide')];
   const tabs = [...wrapEl.querySelectorAll('.hc-tab')];
@@ -1690,11 +1689,10 @@ function initHorizontalCarousel(wrapEl) {
 
   tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
   window.addEventListener('resize', () => go(idx));
-
-  // Init after layout
   requestAnimationFrame(() => go(0));
 
-  return { go, getIdx: () => idx };
+  wrapEl._hcObj = { go, getIdx: () => idx };
+  return wrapEl._hcObj;
 }
 
 /* ===== THUNDER SLIDER ===== */
@@ -2609,6 +2607,11 @@ function onSlideEnter(i) {
 slides.forEach((s, i) => {
   const vc = initVerticalCarousel(s);
   vcControls[i] = vc;
+});
+
+/* ===== INIT ALL HC (eagerly, after layout) ===== */
+requestAnimationFrame(() => {
+  document.querySelectorAll('.hc-wrap').forEach(w => initHorizontalCarousel(w));
 });
 
 /* ===== INTERSECTION OBSERVER ===== */
