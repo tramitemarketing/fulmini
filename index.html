@@ -983,7 +983,100 @@
   </section>
   <section class="section" id="sicurezza" data-section="9">
     <div class="section-header"><span class="section-num">09 — SICUREZZA</span></div>
-    <!-- SICUREZZA CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: All'aperto -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 1/3</span>
+          <h2 class="reveal reveal-d1">All'aperto</h2>
+          <div class="do-dont reveal reveal-d2">
+            <div class="do-col">
+              <div class="col-title">✓ DA FARE</div>
+              <div class="do-item">Cerca rifugio in un edificio solido o in un'auto (la carrozzeria metallica protegge)</div>
+              <div class="do-item">Evita alberi isolati, tralicci e recinzioni metalliche</div>
+              <div class="do-item">Non sostare su terreni aperti o in cima alle colline</div>
+              <div class="do-item">Se sei in acqua, esci subito e allontanati</div>
+              <div class="do-item">Se sei all'aperto senza riparo: accovacciati, piedi uniti, non sdraiato a terra</div>
+            </div>
+            <div class="dont-col">
+              <div class="col-title">✗ DA EVITARE</div>
+              <div class="dont-item">Sotto alberi isolati o in bosco rado</div>
+              <div class="dont-item">In acqua aperta (lago, mare, piscina)</div>
+              <div class="dont-item">Su picchi, creste e colline esposte</div>
+              <div class="dont-item">Vicino a recinzioni, binari, antenne metalliche</div>
+              <div class="dont-item">Sdraiato sul terreno durante il temporale</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="outdoor-canvas" aria-label="Zone di rischio all'aperto — edificio vs albero"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: In casa + Step voltage -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 2/3</span>
+          <h2 class="reveal reveal-d1">In casa e lo step voltage</h2>
+          <div class="do-dont reveal reveal-d2">
+            <div class="do-col">
+              <div class="col-title">✓ IN CASA</div>
+              <div class="do-item">Installa scaricatori di sovratensione per proteggere gli elettrodomestici</div>
+              <div class="do-item">Stacca le spine dei dispositivi durante i temporali forti</div>
+            </div>
+            <div class="dont-col">
+              <div class="col-title">✗ EVITA</div>
+              <div class="dont-item">Usare apparecchi collegati alla presa durante il temporale</div>
+              <div class="dont-item">Fare la doccia o il bagno (i tubi conducono l'elettricità)</div>
+            </div>
+          </div>
+          <div class="warning-box reveal reveal-d3">
+            <div class="warning-title">⚠ Step voltage — pericolo sottovalutato</div>
+            <p>Se un fulmine colpisce il suolo vicino, la corrente si diffonde radialmente nel terreno. La <strong>differenza di potenziale tra i tuoi due piedi</strong> (step voltage) può essere letale anche a 10–15 m dall'impatto. Posizione di sicurezza: piedi uniti, non sdraiato.</p>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="stepvoltage-canvas" aria-label="Step voltage — diffusione radiale della corrente nel suolo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Rilevamento moderno -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 3/3</span>
+          <h2 class="reveal reveal-d1">Rilevamento moderno</h2>
+          <p class="reveal reveal-d2">Le reti di rilevamento fulmini (come <strong>LINET</strong> in Europa o il sistema <strong>SIRF</strong> in Italia, gestito da ISPRA) usano sensori elettromagnetici distribuiti sul territorio. Ogni fulmine emette un impulso radio captato da più stazioni: dalla differenza dei tempi di arrivo del segnale si calcola la <strong>posizione esatta con precisione di pochi metri</strong>.</p>
+          <div class="reveal reveal-d3" style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-family:var(--mono);font-size:.75rem;">
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--gold);font-size:1.3rem;">600+</div><div style="color:var(--muted);">sensori LINET Europa</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--blue);font-size:1.3rem;">&lt;200 m</div><div style="color:var(--muted);">precisione localizzazione</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--white);font-size:1.3rem;">2.000+</div><div style="color:var(--muted);">stazioni Blitzortung</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--green);font-size:1.3rem;">&lt;1 s</div><div style="color:var(--muted);">latenza rilevamento</div></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <div class="blitz-wrap">
+            <iframe id="blitz-iframe" title="Fulmini in tempo reale Blitzortung" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2250,6 +2343,138 @@
 })();
 // === CURIOSITA INIT END ===
     // === SICUREZZA INIT ===
+(function initSicurezzaSection(){
+  const sec = document.getElementById('sicurezza');
+
+  function initOutdoorCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; draw(); }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      // sky
+      ctx.fillStyle='#07070e'; ctx.fillRect(0,0,W,H*.75);
+      // dark storm clouds
+      ctx.fillStyle='#101020';
+      ctx.beginPath(); ctx.arc(W*.3,H*.08,W*.18,0,Math.PI*2); ctx.arc(W*.5,H*.05,W*.2,0,Math.PI*2); ctx.arc(W*.7,H*.09,W*.16,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='#0a1208'; ctx.fillRect(0,H*.75,W,H*.25);
+      ctx.strokeStyle='rgba(201,168,76,.15)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.75); ctx.lineTo(W,H*.75); ctx.stroke();
+      // SAFE SIDE: building + lightning rod (left)
+      const bX=W*.22,bW=W*.15,bH=H*.3,rodY=H*.75-bH-H*.08;
+      ctx.fillStyle='#141428'; ctx.fillRect(bX-bW/2,H*.75-bH,bW,bH);
+      ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=.5; ctx.strokeRect(bX-bW/2,H*.75-bH,bW,bH);
+      // windows
+      for(let r=0;r<2;r++) for(let c=0;c<2;c++){
+        ctx.fillStyle='rgba(201,168,76,.1)';
+        ctx.fillRect(bX-bW*.35+c*bW*.4,H*.75-bH+bH*.2+r*bH*.35,bW*.25,bH*.2);
+      }
+      // rod
+      ctx.strokeStyle='#c9a84c'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(bX,H*.75-bH); ctx.lineTo(bX,rodY); ctx.stroke();
+      // protection cone (green, dashed)
+      const coneH=bH*1.1;
+      ctx.save(); ctx.beginPath(); ctx.moveTo(bX,rodY); ctx.lineTo(bX-coneH,H*.75); ctx.lineTo(bX+coneH,H*.75); ctx.closePath();
+      ctx.fillStyle='rgba(68,204,136,.06)'; ctx.fill();
+      ctx.strokeStyle='rgba(68,204,136,.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      // lightning hitting rod (gold)
+      ctx.save(); ctx.strokeStyle='#c9a84c'; ctx.lineWidth=2; ctx.shadowColor='#c9a84c'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(bX-5,H*.08); ctx.lineTo(bX+2,H*.4); ctx.lineTo(bX-2,H*.4); ctx.lineTo(bX,rodY); ctx.stroke(); ctx.restore();
+      ctx.fillStyle='rgba(68,204,136,.7)'; ctx.font='9px JetBrains Mono'; ctx.fillText('PROTETTO',bX-coneH*.7,H*.72);
+      // DANGEROUS SIDE: isolated tree (right)
+      const tX=W*.72;
+      ctx.fillStyle='#1a1208'; ctx.fillRect(tX-4,H*.55,8,H*.2);
+      ctx.fillStyle='#0f1808'; ctx.beginPath(); ctx.arc(tX,H*.52,22,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#111808'; ctx.beginPath(); ctx.arc(tX-8,H*.56,14,0,Math.PI*2); ctx.arc(tX+8,H*.56,14,0,Math.PI*2); ctx.fill();
+      // lightning hitting tree (red)
+      ctx.save(); ctx.strokeStyle='#ff4444'; ctx.lineWidth=2; ctx.shadowColor='#ff4444'; ctx.shadowBlur=15;
+      ctx.beginPath(); ctx.moveTo(tX+5,H*.08); ctx.lineTo(tX-3,H*.3); ctx.lineTo(tX+2,H*.3); ctx.lineTo(tX,H*.5); ctx.stroke(); ctx.restore();
+      // danger zone circle (red)
+      ctx.save(); ctx.strokeStyle='rgba(255,68,68,.25)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.arc(tX,H*.7,60,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.fillStyle='rgba(255,68,68,.6)'; ctx.font='9px JetBrains Mono'; ctx.fillText('PERICOLO',tX-27,H*.72);
+    }
+    resize(); window.addEventListener('resize',resize);
+  }
+
+  function initStepVoltageCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d'); let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      const cx=W*.5,cy=H*.5;
+      // ground label
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.4,W,H*.6);
+      ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.4); ctx.lineTo(W,H*.4); ctx.stroke();
+      // impact point
+      ctx.save(); ctx.fillStyle='rgba(255,255,255,.8)';
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=20;
+      ctx.beginPath(); ctx.arc(cx,H*.4,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(255,255,255,.5)';
+      ctx.fillText('impatto',cx-20,H*.4-10);
+      // isopotential rings
+      const maxR=Math.min(W,H)*.45;
+      const nRings=6;
+      for(let i=0;i<nRings;i++){
+        const r=(i+1)*maxR/nRings;
+        const ratio=i/nRings;
+        const red=Math.round(255*(1-ratio));
+        const grn=Math.round(200*ratio);
+        const alpha=0.35-ratio*.15;
+        ctx.save(); ctx.strokeStyle=`rgba(${red},${grn},50,${alpha})`;
+        ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+        ctx.beginPath(); ctx.arc(cx,H*.4,r,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle=`rgba(${red},${grn},50,${alpha*.8})`;
+        ctx.font='8px JetBrains Mono';
+        ctx.fillText(`V${nRings-i}`,cx+r+4,H*.4+4);
+        ctx.restore();
+      }
+      // person figure with step voltage arrows
+      const pX=cx+maxR*.5,pY=H*.38;
+      // body
+      ctx.save(); ctx.fillStyle='rgba(232,230,224,.6)';
+      ctx.beginPath(); ctx.arc(pX,pY-30,8,0,Math.PI*2); ctx.fill(); // head
+      ctx.fillRect(pX-4,pY-22,8,20); // torso
+      // legs spread (showing step voltage)
+      const footLeft=pX-15, footRight=pX+15;
+      ctx.strokeStyle='rgba(232,230,224,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(pX,pY-2); ctx.lineTo(footLeft,pY+15); ctx.moveTo(pX,pY-2); ctx.lineTo(footRight,pY+15); ctx.stroke();
+      // step voltage arrows (current through body)
+      const stepV=0.3+Math.abs(Math.sin(t*2))*0.4;
+      ctx.strokeStyle=`rgba(255,68,68,${stepV})`; ctx.lineWidth=2;
+      ctx.shadowColor='#ff4444'; ctx.shadowBlur=8;
+      ctx.beginPath();
+      ctx.moveTo(footLeft,pY+15); ctx.lineTo(footLeft,H*.4+5);
+      ctx.moveTo(footRight,pY+15); ctx.lineTo(footRight,H*.4+5); ctx.stroke();
+      ctx.restore();
+      ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(255,68,68,.7)';
+      ctx.fillText('ΔV tra i piedi → pericolo',cx-80,H*.9);
+      ctx.fillStyle='rgba(68,204,136,.5)';
+      ctx.fillText('soluzione: piedi uniti',cx-65,H*.95);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initBlitzortung(){
+    const iframe=document.getElementById('blitz-iframe');
+    if(iframe) iframe.src='https://www.blitzortung.org/en/live_lightning_maps.php?map=6';
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initCarousel(sec);
+    initOutdoorCanvas(document.getElementById('outdoor-canvas'));
+    initStepVoltageCanvas(document.getElementById('stepvoltage-canvas'));
+    initBlitzortung();
+  },{once:true});
+})();
+// === SICUREZZA INIT END ===
     // === REVEAL INIT ===
     // === BOOTSTRAP ===
   </script>
