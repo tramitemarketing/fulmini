@@ -1156,10 +1156,73 @@ function initEMPulse(){
   }
   document.getElementById('em-play')?.addEventListener('click',start);
 }
-function initThunderCalc(){}
-function initThunderCanvas(){}
-function initBlitzortung(){}
-function initSafetySimulator(){}
+function initThunderCalc(){
+  const slider=document.getElementById('thunder-slider');
+  const out=document.getElementById('thunder-out');
+  if(!slider)return;
+  function update(){out.textContent=(+slider.value/3).toFixed(1);}
+  slider.addEventListener('input',update);update();
+}
+function initThunderCanvas(){
+  const canvas=document.getElementById('thunder-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  const W=canvas.width,H=canvas.height;
+  const waves=[];let t=0;
+  (function frame(){
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='#040810';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(240,192,64,.7)';ctx.lineWidth=1.5;ctx.shadowColor='#f0c040';ctx.shadowBlur=10;
+    ctx.beginPath();ctx.moveTo(W*.08,H*.1);ctx.lineTo(W*.1,H*.35);ctx.lineTo(W*.06,H*.6);ctx.lineTo(W*.09,H*.85);ctx.stroke();ctx.shadowBlur=0;
+    t++;if(t%80===0)waves.push({r:5,cx:W*.09,speed:1.8});
+    for(let i=waves.length-1;i>=0;i--){
+      waves[i].r+=waves[i].speed;const a=Math.max(0,1-waves[i].r/(W*.9));
+      ctx.strokeStyle=`rgba(58,143,255,${a*.6})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(waves[i].cx,H*.5,waves[i].r,-.5,.5);ctx.stroke();
+      if(a<=0)waves.splice(i,1);
+    }
+    requestAnimationFrame(frame);
+  })();
+}
+function initBlitzortung(){
+  if(!window.L)return;
+  const map=L.map('map',{center:[44,12],zoom:5,zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(map);
+  const hotspots=[[9.75,-71.6,'Lago Maracaibo','230–260 fulmini/km²/anno · 297 notti/anno'],[-2.5,27.5,'Congo (Kifuka)','205 fulmini/km²/anno · foresta + orografia'],[27.9,-82.5,'Tampa, Florida','&gt;1.2M fulmini/anno · convergenza brezze marine'],[45.5,9.2,'Pianura Padana','Hotspot autunnale italiano · convezione tardiva']];
+  hotspots.forEach(([lat,lng,name,info])=>{
+    L.circleMarker([lat,lng],{radius:6,color:'#f0c040',fillColor:'#f0c040',fillOpacity:.4,weight:1.5}).bindPopup(`<b>${name}</b><br>${info}`).addTo(map);
+  });
+  const cntEl=document.getElementById('bolt-count');
+  let count=0,wt=null;
+  function addStrike(lat,lng){
+    const c=L.circle([lat,lng],{radius:15000,color:'#f0c040',fillColor:'#f0c040',fillOpacity:.5,weight:1.5}).addTo(map);
+    setTimeout(()=>map.removeLayer(c),2000);
+    count++;if(cntEl)cntEl.textContent=count;
+  }
+  function startFallback(){
+    const zones=[[9,-71],[-2,27],[27,-82],[45,9],[4,35],[14,30]];
+    setInterval(()=>{const z=zones[Math.floor(Math.random()*zones.length)];addStrike(z[0]+(Math.random()*4-2),z[1]+(Math.random()*4-2));},800);
+  }
+  let gotMsg=false;
+  wt=setTimeout(()=>{if(!gotMsg)startFallback();},5000);
+  try{
+    const ws=new WebSocket('wss://ws1.blitzortung.org:8082/');
+    ws.onmessage=e=>{
+      gotMsg=true;clearTimeout(wt);
+      try{const d=JSON.parse(e.data);if(d.lat&&d.lon)addStrike(d.lat,d.lon);}catch(_){}
+    };
+    ws.onerror=()=>{clearTimeout(wt);startFallback();};
+  }catch(_){clearTimeout(wt);startFallback();}
+  setInterval(()=>{count=0;if(cntEl)cntEl.textContent=0;},300000);
+}
+function initSafetySimulator(){
+  document.querySelectorAll('.safety-scen').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.safety-scen').forEach(s=>s.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+}
 
 /* SCROLL HINT */
 window.addEventListener('scroll',()=>document.getElementById('scroll-hint').classList.add('hidden'),{once:true});
