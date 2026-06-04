@@ -462,7 +462,114 @@
   </section>
   <section class="section" id="scarica" data-section="2">
     <div class="section-header"><span class="section-num">02 — LA SCARICA</span></div>
-    <!-- SCARICA CONTENT -->
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Stepped Leader -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">La scarica — 1/5</span>
+          <h2 class="reveal reveal-d1">Il leader a gradini</h2>
+          <p class="reveal reveal-d2">Il leader si propaga verso il suolo a step di <strong>~50 m ogni 50 μs</strong>, invisibile all'occhio umano. L'algoritmo di percorso è stocastico: si ramifica cercando il percorso di minore resistenza nell'aria ionizzata.</p>
+          <div class="phase-controls reveal reveal-d3">
+            <button class="phase-btn" data-leader-step="1">Step 1</button>
+            <button class="phase-btn" data-leader-step="2">Step 2</button>
+            <button class="phase-btn" data-leader-step="3">Step 3</button>
+            <button class="phase-btn" data-leader-step="4">Step 4</button>
+            <button class="phase-btn" data-leader-step="5">Finale</button>
+            <button class="play-btn" data-leader-play>▶ Play</button>
+          </div>
+          <p class="reveal reveal-d4" style="margin-top:1rem;font-size:.85rem;color:var(--muted);">Ogni click su Play genera una nuova geometria casuale.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="leader-canvas" aria-label="Animazione stepped leader"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Streamer ascendente -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">La scarica — 2/5</span>
+          <h2 class="reveal reveal-d1">Lo streamer ascendente</h2>
+          <p class="reveal reveal-d2">Quando il leader è a circa <strong>50–100 m dal suolo</strong>, il campo elettrico locale supera nuovamente la soglia di breakdown. Dagli oggetti elevati — alberi, antenne, il parafulmine — parte uno streamer ascendente di plasma ionizzato.</p>
+          <p class="reveal reveal-d3">La connessione tra leader e streamer chiude il circuito. Da quel momento il canale conduttore è completo e avviene la scarica principale.</p>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="play-btn" data-streamer-play>▶ Animazione connessione</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="streamer-canvas" aria-label="Animazione streamer ascendente"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Return stroke -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">La scarica — 3/5</span>
+          <h2 class="reveal reveal-d1">Il return stroke</h2>
+          <p class="reveal reveal-d2">La corrente risale lungo il canale verso la nube a <strong>~100.000 km/s</strong> (⅓ della velocità della luce). Questo è il flash visibile: dura ~70 μs ma porta una corrente media di 20 kA, con picchi fino a 300 kA.</p>
+          <p class="reveal reveal-d3">Il canale raggiunge <strong>30.000 K</strong> — cinque volte la temperatura della superficie solare. L'espansione istantanea del plasma crea l'onda di pressione che percepiamo come tuono.</p>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="play-btn" data-return-play>▶ Return stroke</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="return-canvas" aria-label="Animazione return stroke"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Colpi multipli -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">La scarica — 4/5</span>
+          <h2 class="reveal reveal-d1">I colpi multipli</h2>
+          <p class="reveal reveal-d2">Dopo il return stroke il canale rimane ionizzato per alcune centinaia di millisecondi. Un secondo <em>dart leader</em> può rifluire lungo lo stesso percorso e generare un nuovo return stroke.</p>
+          <p class="reveal reveal-d3">Un fulmine tipico ha <strong>3–4 stroke</strong>, ma sono stati registrati fino a <strong>26 impulsi</strong> sullo stesso canale. È per questo che i fulmini "lampeggiano" — ogni flash visibile è in realtà una serie di impulsi ravvicinati.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;justify-content:center;">
+          <canvas id="multistroke-canvas" aria-label="Timeline impulsi multipli"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Plasma / Z-pinch -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">La scarica — 5/5</span>
+          <h2 class="reveal reveal-d1">Il canale plasma</h2>
+          <p class="reveal reveal-d2">Il canale ha diametro di soli <strong>1–2 cm</strong> ma raggiunge 30.000 K. Il campo magnetico generato dalla corrente si auto-comprime (effetto <em>Z-pinch</em>): la forza di Lorentz J×B schiaccia il plasma verso l'asse.</p>
+          <div class="phase-controls reveal reveal-d3">
+            <button class="phase-btn" data-zpinch-phase="0">Corrente J</button>
+            <button class="phase-btn" data-zpinch-phase="1">Campo B</button>
+            <button class="phase-btn" data-zpinch-phase="2">Compressione</button>
+            <button class="phase-btn" data-zpinch-phase="3">Picco Plasma</button>
+            <button class="play-btn" data-zpinch-play>▶ Play</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="zpinch-canvas" aria-label="Animazione Z-pinch canale plasma"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="fisica" data-section="3">
     <div class="section-header"><span class="section-num">03 — FISICA ESTREMA</span></div>
@@ -850,6 +957,321 @@
     })();
     // === FORMAZIONE CANVAS END ===
     // === SCARICA CANVAS ===
+    (function initScaricaSection(){
+      const sec = document.getElementById('scarica');
+
+      // ── STEPPED LEADER ──
+      function initLeaderCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        let steps=[],playing=false;
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; generate(); draw(steps.length); }
+        function generate(){
+          steps=[];
+          const W=canvas.width,H=canvas.height;
+          let x=W*.5+(Math.random()-.5)*W*.15,y=10;
+          while(y<H-30){
+            const dx=(Math.random()-.5)*70,dy=28+Math.random()*28;
+            const nx=Math.max(15,Math.min(W-15,x+dx)),ny=y+dy;
+            const seg={x1:x,y1:y,x2:nx,y2:ny,subs:[]};
+            if(Math.random()<.3){
+              let bx=nx,by=ny; const sub=[];
+              for(let k=0;k<2+Math.floor(Math.random()*5);k++){
+                const bnx=Math.max(10,Math.min(W-10,bx+(Math.random()-.5)*90));
+                const bny=by+22+Math.random()*22;
+                sub.push({x1:bx,y1:by,x2:bnx,y2:bny});
+                bx=bnx; by=bny; if(by>H-10) break;
+              }
+              seg.subs.push(sub);
+            }
+            steps.push(seg); x=nx; y=ny;
+          }
+        }
+        function draw(n){
+          const W=canvas.width,H=canvas.height;
+          ctx.clearRect(0,0,W,H);
+          ctx.save(); ctx.fillStyle='#14142a';
+          ctx.beginPath(); ctx.arc(W*.45,6,W*.1,0,Math.PI*2); ctx.arc(W*.55,2,W*.09,0,Math.PI*2); ctx.fill(); ctx.restore();
+          const count=Math.min(n,steps.length);
+          ctx.save(); ctx.strokeStyle='#4a9eff'; ctx.shadowColor='#4a9eff';
+          for(let i=0;i<count;i++){
+            const s=steps[i];
+            ctx.lineWidth=2; ctx.shadowBlur=18; ctx.globalAlpha=1;
+            ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+            s.subs.forEach(sub=>sub.forEach((b,j)=>{
+              ctx.lineWidth=.8; ctx.shadowBlur=8; ctx.globalAlpha=Math.max(.08,.55-j*.1);
+              ctx.beginPath(); ctx.moveTo(b.x1,b.y1); ctx.lineTo(b.x2,b.y2); ctx.stroke();
+            }));
+          }
+          ctx.restore();
+        }
+        function flash(cb){
+          let a=0;
+          const up=setInterval(()=>{
+            a=Math.min(1,a+.18);
+            ctx.clearRect(0,0,canvas.width,canvas.height); draw(steps.length);
+            ctx.fillStyle=`rgba(160,210,255,${a*.75})`; ctx.fillRect(0,0,canvas.width,canvas.height);
+            if(a>=1){ clearInterval(up); let b=1;
+              const dn=setInterval(()=>{ b=Math.max(0,b-.07);
+                ctx.clearRect(0,0,canvas.width,canvas.height); draw(steps.length);
+                ctx.fillStyle=`rgba(160,210,255,${b*.75})`; ctx.fillRect(0,0,canvas.width,canvas.height);
+                if(b<=0){ clearInterval(dn); if(cb)cb(); }
+              },28);
+            }
+          },28);
+        }
+        generate(); draw(steps.length);
+        const slide=canvas.closest('.hc-slide');
+        const phaseBtns=slide.querySelectorAll('[data-leader-step]');
+        const playBtn=slide.querySelector('[data-leader-play]');
+        phaseBtns.forEach(btn=>{
+          btn.addEventListener('click',()=>{
+            if(playing) return;
+            const n=parseInt(btn.dataset.leaderStep);
+            const vis=Math.round((n/phaseBtns.length)*steps.length);
+            draw(vis);
+            phaseBtns.forEach(b=>b.classList.toggle('active',b===btn));
+          });
+        });
+        if(playBtn){
+          playBtn.addEventListener('click',()=>{
+            if(playing) return;
+            playing=true; playBtn.classList.add('playing'); playBtn.textContent='⏳';
+            generate(); draw(0); phaseBtns.forEach(b=>b.classList.remove('active'));
+            let v=0;
+            const iv=setInterval(()=>{ v=Math.min(v+1,steps.length); draw(v);
+              if(v>=steps.length){ clearInterval(iv);
+                setTimeout(()=>flash(()=>{ playing=false; playBtn.classList.remove('playing'); playBtn.textContent='▶ Play'; }),250);
+              }
+            },55);
+          });
+        }
+        window.addEventListener('resize',()=>{ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; generate(); draw(steps.length); });
+        resize();
+      }
+
+      // ── STREAMER ──
+      function initStreamerCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        let animating=false,lPath=[],sPath=[];
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; gen(); drawStatic(); }
+        function randPath(x1,y1,x2,y2,steps){
+          const pts=[{x:x1,y:y1}];
+          for(let i=1;i<steps;i++){
+            const t=i/steps;
+            pts.push({x:x1+(x2-x1)*t+(Math.random()-.5)*55,y:y1+(y2-y1)*t});
+          }
+          pts.push({x:x2,y:y2}); return pts;
+        }
+        function gen(){
+          const W=canvas.width,H=canvas.height;
+          const mx=W*.5,my=H*.52;
+          lPath=randPath(W*.48,0,mx,my,9);
+          sPath=randPath(W*.52,H,mx,my,6);
+        }
+        function drawPath(pts,color,lw,a){
+          ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=lw;
+          ctx.shadowColor=color; ctx.shadowBlur=16; ctx.globalAlpha=a;
+          ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+          ctx.stroke(); ctx.restore();
+        }
+        function drawStatic(){
+          const W=canvas.width,H=canvas.height;
+          ctx.clearRect(0,0,W,H);
+          ctx.save(); ctx.fillStyle='#14142a';
+          ctx.beginPath(); ctx.arc(W*.45,6,W*.1,0,Math.PI*2); ctx.arc(W*.55,2,W*.09,0,Math.PI*2); ctx.fill(); ctx.restore();
+          ctx.save(); ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(0,H-2); ctx.lineTo(W,H-2); ctx.stroke(); ctx.restore();
+          drawPath(lPath,'#4a9eff',2,1);
+          drawPath(sPath,'#ffaa44',1.5,.8);
+          ctx.font='10px JetBrains Mono'; ctx.fillStyle='#4a9eff'; ctx.fillText('leader ↓',W*.05,H*.22);
+          ctx.fillStyle='#ffaa44'; ctx.fillText('streamer ↑',W*.05,H*.78);
+        }
+        const slide=canvas.closest('.hc-slide');
+        slide?.querySelector('[data-streamer-play]')?.addEventListener('click',()=>{
+          if(animating) return; animating=true;
+          const W=canvas.width,H=canvas.height;
+          gen(); let p=0;
+          const iv=setInterval(()=>{
+            p=Math.min(1,p+.035);
+            ctx.clearRect(0,0,W,H);
+            ctx.save(); ctx.fillStyle='#14142a';
+            ctx.beginPath(); ctx.arc(W*.45,6,W*.1,0,Math.PI*2); ctx.arc(W*.55,2,W*.09,0,Math.PI*2); ctx.fill(); ctx.restore();
+            ctx.save(); ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.moveTo(0,H-2); ctx.lineTo(W,H-2); ctx.stroke(); ctx.restore();
+            const lc=Math.floor(lPath.length*p)+1,sc=Math.floor(sPath.length*p)+1;
+            drawPath(lPath.slice(0,lc),'#4a9eff',2,1);
+            drawPath(sPath.slice(0,sc),'#ffaa44',1.5,.8);
+            if(p>=1){ clearInterval(iv);
+              let fa=0; const fl=setInterval(()=>{
+                fa=Math.min(1,fa+.15);
+                ctx.clearRect(0,0,W,H); drawPath(lPath,'#ffffff',3,1); drawPath(sPath,'#ffffff',2,1);
+                ctx.fillStyle=`rgba(200,230,255,${fa*.55})`; ctx.fillRect(0,0,W,H);
+                if(fa>=1){ clearInterval(fl); animating=false; drawStatic();
+                  const btn=slide.querySelector('[data-streamer-play]');
+                  if(btn){btn.classList.remove('playing');btn.textContent='▶ Animazione connessione';}
+                }
+              },30);
+              const btn=slide.querySelector('[data-streamer-play]');
+              if(btn){btn.classList.add('playing');btn.textContent='⏳';}
+            }
+          },38);
+        });
+        window.addEventListener('resize',resize); resize();
+      }
+
+      // ── RETURN STROKE ──
+      function initReturnCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        let anim=null;
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; drawRest(); }
+        function drawRest(){
+          const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+          ctx.save(); ctx.strokeStyle='rgba(74,158,255,.25)'; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
+          ctx.beginPath(); ctx.moveTo(W*.5,0); ctx.lineTo(W*.5,H); ctx.stroke(); ctx.restore();
+          ctx.font='11px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.45)';
+          ctx.fillText('canale ionizzato — premi ▶',W*.5-100,H*.5);
+        }
+        const slide=canvas.closest('.hc-slide');
+        slide?.querySelector('[data-return-play]')?.addEventListener('click',()=>{
+          if(anim) return;
+          const W=canvas.width,H=canvas.height; let p=1;
+          anim=setInterval(()=>{
+            p=Math.max(0,p-.035); ctx.clearRect(0,0,W,H);
+            const sy=H*p;
+            ctx.save(); ctx.strokeStyle='rgba(74,158,255,.2)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.moveTo(W*.5,sy); ctx.lineTo(W*.5,H); ctx.stroke(); ctx.restore();
+            ctx.save(); ctx.strokeStyle='#ffffff'; ctx.lineWidth=4;
+            ctx.shadowColor='#ffffff'; ctx.shadowBlur=30;
+            ctx.beginPath(); ctx.moveTo(W*.5,sy); ctx.lineTo(W*.5,0); ctx.stroke(); ctx.restore();
+            const wr=Math.max(0,(1-p)*W*.38);
+            if(wr>0){
+              ctx.save(); ctx.strokeStyle=`rgba(255,200,100,${(1-p)*.25})`; ctx.lineWidth=1;
+              ctx.beginPath(); ctx.arc(W*.5,sy,wr,0,Math.PI*2); ctx.stroke(); ctx.restore();
+            }
+            ctx.save(); ctx.fillStyle=`rgba(200,230,255,${Math.max(0,.45-p*.7)})`; ctx.fillRect(0,0,W,H); ctx.restore();
+            if(p<=0){ clearInterval(anim); anim=null; setTimeout(drawRest,2200); }
+          },30);
+        });
+        window.addEventListener('resize',resize); resize();
+      }
+
+      // ── MULTISTROKE TIMELINE ──
+      function initMultiStrokeCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; draw(); }
+        function draw(){
+          const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+          const strokes=[{t:.08,h:.9},{t:.2,h:.7},{t:.35,h:.85},{t:.5,h:.6}];
+          ctx.save(); ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1; ctx.setLineDash([4,6]);
+          ctx.beginPath(); ctx.moveTo(0,H*.85); ctx.lineTo(W,H*.85); ctx.stroke();
+          ctx.setLineDash([]); ctx.restore();
+          ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.5)';
+          ctx.fillText('0',10,H*.88); ctx.fillText('200ms',W*.9,H*.88);
+          strokes.forEach((s,i)=>{
+            const x=W*s.t+W*.05, barH=H*s.h*.7;
+            const grad=ctx.createLinearGradient(0,H*.85-barH,0,H*.85);
+            grad.addColorStop(0,'rgba(255,255,255,.9)'); grad.addColorStop(.3,'rgba(74,158,255,.8)'); grad.addColorStop(1,'rgba(74,158,255,.1)');
+            ctx.save(); ctx.fillStyle=grad; ctx.shadowColor='#4a9eff'; ctx.shadowBlur=12;
+            ctx.fillRect(x-2,H*.85-barH,4,barH); ctx.restore();
+            ctx.save(); ctx.font='9px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.5)';
+            ctx.fillText('S'+(i+1),x-5,H*.9); ctx.restore();
+          });
+          ctx.font='bold 12px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.6)';
+          ctx.fillText('4 stroke — 200ms totali',W*.5-80,H*.1);
+        }
+        window.addEventListener('resize',resize); resize();
+      }
+
+      // ── Z-PINCH ──
+      function initZpinchCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        let ph=0;
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; draw(ph); }
+        function arrow(x1,y1,x2,y2,color,alpha){
+          const ang=Math.atan2(y2-y1,x2-x1);
+          ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=1.5;
+          ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+          ctx.translate(x2,y2); ctx.rotate(ang);
+          ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-8,-4); ctx.lineTo(-8,4); ctx.closePath(); ctx.fill();
+          ctx.restore();
+        }
+        function draw(p){
+          ph=p; const W=canvas.width,H=canvas.height; const cx=W*.5,cy=H*.5;
+          const r0=Math.min(W,H)*.18;
+          const r=p>=3?r0*.35:p===2?r0*.65:r0;
+          ctx.clearRect(0,0,W,H);
+          const colors=['#ff4400','#ff6600','#ffaa00','#ffffff'];
+          const col=colors[Math.min(p,3)];
+          ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+          ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=p>=3?45:20; ctx.globalAlpha=p>=3?1:.75;
+          ctx.fill(); ctx.restore();
+          if(p>=0){
+            for(let ay=cy-r0*2.5;ay<cy+r0*3;ay+=r0*.75)
+              arrow(cx,ay+r0*.7,cx,ay,'#ff4444',.8);
+          }
+          if(p>=1){
+            for(let br=r0*1.5;br<r0*4;br+=r0*.85){
+              ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,br,0,Math.PI*2);
+              ctx.strokeStyle='#4a9eff'; ctx.lineWidth=1; ctx.globalAlpha=.45;
+              ctx.setLineDash([4,5]); ctx.stroke(); ctx.setLineDash([]);
+              arrow(cx+br,cy,cx+br,cy-10,'#4a9eff',.7); ctx.restore();
+            }
+          }
+          if(p>=2){
+            for(let a=0;a<Math.PI*2;a+=Math.PI*.4){
+              const sr=r0*2.7,er=r0*1.2;
+              arrow(cx+Math.cos(a)*sr,cy+Math.sin(a)*sr,cx+Math.cos(a)*er,cy+Math.sin(a)*er,'#44cc88',.85);
+            }
+          }
+          ctx.save(); ctx.font='10px JetBrains Mono';
+          const lgd=[['J corrente','#ff4444'],['B campo mag.','#4a9eff'],['J×B compressione','#44cc88'],['PICCO','#ffffff']];
+          lgd.slice(0,p+1).forEach(([t,c],i)=>{ ctx.fillStyle=c; ctx.fillText('● '+t,8,18+i*17); });
+          ctx.restore();
+        }
+        resize();
+        const slide=canvas.closest('.hc-slide');
+        slide?.querySelectorAll('[data-zpinch-phase]').forEach(btn=>{
+          btn.addEventListener('click',()=>{
+            const p=parseInt(btn.dataset.zpinchPhase); draw(p);
+            slide.querySelectorAll('[data-zpinch-phase]').forEach(b=>b.classList.toggle('active',b===btn));
+          });
+        });
+        const playBtn=slide?.querySelector('[data-zpinch-play]');
+        if(playBtn){
+          playBtn.addEventListener('click',()=>{
+            if(playBtn.classList.contains('playing')) return;
+            playBtn.classList.add('playing'); playBtn.textContent='⏳';
+            draw(0); slide.querySelectorAll('[data-zpinch-phase]').forEach(b=>b.classList.remove('active'));
+            let p=0;
+            const iv=setInterval(()=>{
+              p++;
+              if(p>3){ clearInterval(iv); playBtn.classList.remove('playing'); playBtn.textContent='▶ Play';
+                slide.querySelectorAll('[data-zpinch-phase]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.zpinchPhase)===3));
+              } else {
+                draw(p);
+                slide.querySelectorAll('[data-zpinch-phase]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.zpinchPhase)===p));
+              }
+            },1300);
+          });
+        }
+        window.addEventListener('resize',()=>{ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; draw(ph); });
+      }
+
+      sec.addEventListener('section-enter',function onEnter(){
+        initLeaderCanvas(document.getElementById('leader-canvas'));
+        initStreamerCanvas(document.getElementById('streamer-canvas'));
+        initReturnCanvas(document.getElementById('return-canvas'));
+        initMultiStrokeCanvas(document.getElementById('multistroke-canvas'));
+        initZpinchCanvas(document.getElementById('zpinch-canvas'));
+        initCarousel(sec);
+      },{once:true});
+    })();
+    // === SCARICA CANVAS END ===
     // === FISICA CANVAS ===
     // === DATI INIT ===
     // === TIPI CANVAS ===
