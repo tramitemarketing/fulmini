@@ -2476,7 +2476,27 @@
 })();
 // === SICUREZZA INIT END ===
     // === REVEAL INIT ===
+(function initReveal(){
+  const revealObs = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  },{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+    document.querySelectorAll('canvas').forEach(c=>{ c._skipAnim=true; });
+  }
+})();
+// === REVEAL INIT END ===
     // === BOOTSTRAP ===
+bindScrollToLinks();
+updateProgress(0);
+document.querySelectorAll('.section').forEach(s=>{
+  const track=s.querySelector('.hc-track');
+  if(track) initCarousel(s);
+});
+// === BOOTSTRAP END ===
   </script>
 </body>
 </html>
