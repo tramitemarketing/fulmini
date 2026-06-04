@@ -260,7 +260,86 @@
   </section>
   <section class="section" id="meccanismo" data-section="2">
     <div class="section-header"><span class="section-num">02 — MECCANISMO</span></div>
-    <!-- MECCANISMO CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Stepped Leader -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 1/4</span>
+          <h2 class="reveal reveal-d1">Fase 1 — Lo Stepped Leader</h2>
+          <p class="reveal reveal-d2">Quando l'accumulo di cariche negative alla base della nube vince la resistenza locale dell'aria, dal cumulonembo si propaga verso il basso un canale di pre-ionizzazione: lo <strong>stepped leader</strong>. È quasi invisibile a occhio nudo, ha diametro microscopico.</p>
+          <p class="reveal reveal-d3">Avanza <strong>a scatti</strong> (gradini) lunghi circa 50 metri: ogni scatto dura circa un microsecondo, seguito da una pausa di circa 50 microsecondi. La velocità media è di circa 150–200 km/s. La traiettoria si ramifica in modo frattale.</p>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="phase-btn active" data-mec-phase="0">Fase 1</button>
+            <button class="phase-btn" data-mec-phase="1">Fase 2</button>
+            <button class="phase-btn" data-mec-phase="2">Fase 3</button>
+            <button class="phase-btn" data-mec-phase="3">Fase 4</button>
+            <button class="play-btn" data-mec-play>▶ Play</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="leader-canvas" aria-label="Stepped leader discendente"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Upward Streamer -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 2/4</span>
+          <h2 class="reveal reveal-d1">Fase 2 — L'Upward Streamer</h2>
+          <p class="reveal reveal-d2">Man mano che il leader si avvicina alla Terra, il campo elettrico al suolo — caricato positivamente per induzione — cresce in modo parossistico. Quando la punta del precursore si trova a poche centinaia di metri dal terreno, l'aria vicino al suolo si ionizza violentemente.</p>
+          <p class="reveal reveal-d3">Dai punti più prominenti, appuntiti o conduttivi (alberi, edifici, antenne, parafulmini) partono verso l'alto piccole scariche di plasma bluastro: gli <strong>upward streamers</strong>. Salgono a cercare il leader discendente.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="streamer-canvas" aria-label="Upward streamers ascendenti"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Connessione -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 3/4</span>
+          <h2 class="reveal reveal-d1">Fase 3 — La connessione</h2>
+          <p class="reveal reveal-d2">A una quota compresa di solito tra 30 e 50 metri dal suolo, lo stepped leader incontra uno degli upward streamers. In quel millisecondo il circuito tra cielo e terra si chiude: si forma un <strong>"cavetto di rame" virtuale</strong> fatto di aria ionizzata (plasma) che collega la nuvola al terreno.</p>
+          <p class="reveal reveal-d3">Questo canale inizialmente sottilissimo diventerà la via percorsa dall'ondata di corrente principale. La posizione del punto di giunzione determina dove colpirà il fulmine.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="connessione-canvas" aria-label="Punto di connessione leader-streamer"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Return Stroke -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Meccanismo — 4/4</span>
+          <h2 class="reveal reveal-d1">Fase 4 — Il colpo di ritorno</h2>
+          <p class="reveal reveal-d2">Chiuso il circuito, in un millesimo di secondo avviene il <strong>colpo di ritorno</strong>: una massiccia ondata di elettroni fluisce verso il basso, ma l'effetto visivo — la luce accecante — risale dal suolo verso la nube a circa <strong>un terzo della velocità della luce</strong>.</p>
+          <p class="reveal reveal-d3">È questo il fulmine che effettivamente vediamo. La corrente media è di 20–30 kA ma può superare i 200.000 A nei fulmini positivi. Il canale raggiunge <strong>30.000 K</strong>.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="return-canvas" aria-label="Return stroke ascendente — il fulmine visibile"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="tipi" data-section="3">
     <div class="section-header"><span class="section-num">03 — I TIPI</span></div>
@@ -600,6 +679,208 @@
 })();
 // === FORMAZIONE CANVAS END ===
     // === MECCANISMO CANVAS ===
+(function initMeccanismoSection(){
+  const sec = document.getElementById('meccanismo');
+
+  function genBolt(W,H,fromY,toY,x0,spread){
+    const pts=[{x:x0,y:fromY}];
+    let x=x0,y=fromY;
+    while(y<toY){
+      x=Math.max(15,Math.min(W-15,x+(Math.random()-.5)*spread));
+      y+=20+Math.random()*18;
+      pts.push({x,y});
+    }
+    return pts;
+  }
+
+  function drawBolt(ctx,pts,color,lw,alpha,glow){
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.globalAlpha=alpha;
+    if(glow){ ctx.shadowColor=color; ctx.shadowBlur=glow; }
+    ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+    ctx.restore();
+  }
+
+  function initLeaderCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.015;
+      // cloud
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // stepped leader — redraw every 0.5s for "step" effect
+      if(Math.floor(t*2)%2===0){
+        const depth=Math.min(1,(t%4)/2);
+        const toY=H*.15+depth*(H*.55);
+        const pts=genBolt(W,H,H*.15,toY,W*.5,55);
+        drawBolt(ctx,pts,'#4a9eff',1.5,0.7,12);
+        // branches
+        pts.forEach((p,i)=>{
+          if(i>1 && i<pts.length-1 && Math.random()<0.4){
+            const bPts=genBolt(W,H,p.y,p.y+60+Math.random()*60,p.x,30);
+            drawBolt(ctx,bPts,'#4a9eff',0.7,0.3,6);
+          }
+        });
+      }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.5)';
+      ctx.fillText('~50 m/gradino · 150 km/s',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initStreamerCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.012;
+      // cloud with leader
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      const leaderPts=genBolt(W,H,H*.15,H*.55,W*.5,50);
+      drawBolt(ctx,leaderPts,'#4a9eff',1.5,0.6,10);
+      // ground objects (tree + building)
+      ctx.fillStyle='rgba(201,168,76,.2)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      // tree
+      ctx.fillStyle='#1a2010'; ctx.fillRect(W*.25-4,H*.7,8,H*.18);
+      ctx.fillStyle='#1a2518'; ctx.beginPath(); ctx.arc(W*.25,H*.68,18,0,Math.PI*2); ctx.fill();
+      // building
+      ctx.fillStyle='#141428'; ctx.fillRect(W*.65-15,H*.72,30,H*.16);
+      // upward streamers
+      const sX=[W*.25,W*.65,W*.4,W*.55];
+      sX.forEach((sx,idx)=>{
+        const phase=(t+idx*0.8)%3;
+        if(phase<2){
+          const h=Math.min(H*.18,phase*H*.09);
+          const sPts=genBolt(W,H,H*.88-h,H*.88,sx,20);
+          drawBolt(ctx,sPts,'#c9a84c',1,0.6,8);
+        }
+      });
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.5)';
+      ctx.fillText('upward streamers',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initConnessioneCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.02;
+      // cloud
+      ctx.fillStyle='#151525'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.08)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      // junction point at ~40% height
+      const jY=H*.55;
+      const leaderPts=genBolt(W,H,H*.15,jY,W*.5,50);
+      const streamerPts=genBolt(W,H,jY,H*.88,W*.5,25);
+      drawBolt(ctx,leaderPts,'#4a9eff',1.5,0.7,10);
+      drawBolt(ctx,streamerPts,'#c9a84c',1.5,0.7,10);
+      // junction flash
+      const flash=0.4+Math.abs(Math.sin(t*6))*0.6;
+      ctx.save(); ctx.fillStyle=`rgba(255,255,255,${flash})`;
+      ctx.shadowColor='#ffffff'; ctx.shadowBlur=30;
+      ctx.beginPath(); ctx.arc(W*.5,jY,8+flash*4,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(255,255,255,.5)';
+      ctx.fillText('connessione ~30-50 m dal suolo',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initReturnCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+      t+=0.018;
+      // cloud
+      ctx.fillStyle='#1a1a30'; ctx.beginPath();
+      ctx.arc(W*.45,H*.1,W*.13,0,Math.PI*2); ctx.arc(W*.55,H*.07,W*.1,0,Math.PI*2); ctx.fill();
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      const phase=t%4;
+      if(phase<2){
+        // return stroke rising from bottom up
+        const progress=Math.min(1,phase/1.5);
+        const toY=H*.88-progress*(H*.75);
+        const pts=genBolt(W,H,toY,H*.88,W*.5,30);
+        const bright=Math.min(1,progress*2);
+        // white core
+        drawBolt(ctx,pts,'#ffffff',3,bright,35);
+        // gold halo
+        drawBolt(ctx,pts,'#c9a84c',6,bright*0.5,20);
+        // screen flash
+        if(bright>0.5){
+          ctx.save(); ctx.fillStyle=`rgba(255,255,200,${(bright-0.5)*0.3})`; ctx.fillRect(0,0,W,H); ctx.restore();
+        }
+      } else {
+        // fading
+        const fade=Math.max(0,1-(phase-2)*2);
+        const pts=genBolt(W,H,H*.15,H*.88,W*.5,30);
+        drawBolt(ctx,pts,'#c9a84c',2,fade*0.5,15);
+      }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.6)';
+      ctx.fillText('100.000 km/s · ⅓ velocità luce',10,H-8);
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initLeaderCanvas(document.getElementById('leader-canvas'));
+    initStreamerCanvas(document.getElementById('streamer-canvas'));
+    initConnessioneCanvas(document.getElementById('connessione-canvas'));
+    initReturnCanvas(document.getElementById('return-canvas'));
+    initCarousel(sec);
+    // Phase buttons → navigate carousel
+    const phaseButtons=sec.querySelectorAll('[data-mec-phase]');
+    phaseButtons.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const idx=parseInt(btn.dataset.mecPhase,10);
+        carousels[2]?.goTo(idx);
+        phaseButtons.forEach(b=>b.classList.toggle('active',b===btn));
+      });
+    });
+    // Play button
+    sec.querySelector('[data-mec-play]')?.addEventListener('click',async function(){
+      this.textContent='⏳'; this.classList.add('playing');
+      for(let i=0;i<4;i++){
+        carousels[2]?.goTo(i);
+        phaseButtons.forEach(b=>b.classList.toggle('active',parseInt(b.dataset.mecPhase,10)===i));
+        await new Promise(r=>setTimeout(r,1800));
+      }
+      this.textContent='▶ Play'; this.classList.remove('playing');
+    });
+  },{once:true});
+})();
+// === MECCANISMO CANVAS END ===
     // === PLASMA CANVAS ===
     // === CHIMICA INIT ===
     // === TIPI CANVAS ===
