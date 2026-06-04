@@ -1274,7 +1274,134 @@
   </section>
   <section class="section" id="sicurezza" data-section="9">
     <div class="section-header"><span class="section-num">09 — SICUREZZA</span></div>
-    <!-- SICUREZZA CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Regola 30/30 + Thunder Calculator -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 1/4</span>
+          <h2 class="reveal reveal-d1">La regola 30 / 30</h2>
+          <p class="reveal reveal-d2">Se tra il lampo e il tuono passano <strong>meno di 30 secondi</strong> sei in pericolo (il fulmine è a meno di 10 km). Dopo l'ultimo tuono, attendi almeno <strong>30 minuti</strong> prima di uscire.</p>
+          <div class="thunder-calc reveal reveal-d3">
+            <label for="thunder-slider">Secondi tra lampo e tuono</label>
+            <input type="range" min="1" max="60" value="10" id="thunder-slider">
+            <span class="thunder-val" id="thunder-val">10 s</span>
+            <div class="thunder-result">
+              <span class="thunder-km" id="thunder-km">3,3 km</span>
+              <span class="risk-badge risk-yellow" id="thunder-risk">ATTENZIONE</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;justify-content:center;gap:2rem;">
+          <div class="reveal" style="text-align:center;">
+            <div style="font-family:var(--mono);font-size:5rem;font-weight:700;color:var(--gold);line-height:1;">30</div>
+            <div class="stat-unit">secondi → pericolo vicino</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;">
+            <div style="font-family:var(--mono);font-size:5rem;font-weight:700;color:var(--blue);line-height:1;">30</div>
+            <div class="stat-unit">minuti di attesa dopo l'ultimo tuono</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Risk Meter -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 2/4</span>
+          <h2 class="reveal reveal-d1">Sei al sicuro?</h2>
+          <p class="reveal reveal-d2">Seleziona le tue condizioni attuali per valutare il tuo livello di rischio.</p>
+          <div class="risk-meter reveal reveal-d3">
+            <label class="risk-question"><input type="checkbox" data-weight="2"> Sei all'aperto?</label>
+            <label class="risk-question"><input type="checkbox" data-weight="2"> Vicino ad alberi o strutture alte?</label>
+            <label class="risk-question"><input type="checkbox" data-weight="3"> In acqua o vicino all'acqua?</label>
+            <label class="risk-question"><input type="checkbox" data-weight="2"> Su campo aperto o in quota?</label>
+            <label class="risk-question"><input type="checkbox" data-weight="1"> Usi oggetti metallici lunghi?</label>
+            <div id="risk-result"></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <div id="risk-visual" style="width:180px;height:180px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:var(--mono);transition:all .4s;">
+            <div id="risk-icon" style="font-size:3rem;">🟢</div>
+            <div id="risk-label" style="font-size:.7rem;letter-spacing:.1em;color:var(--muted);margin-top:.5rem;">IN SICUREZZA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Cosa fare/non fare -->
+    <div class="hc-slide">
+      <div class="slide-full" style="display:flex;flex-direction:column;justify-content:center;padding:3.5rem 5.5rem;">
+        <span class="eyebrow reveal">Sicurezza — 3/4</span>
+        <h2 class="reveal reveal-d1" style="margin-bottom:1.5rem;">Cosa fare e non fare</h2>
+        <div class="do-dont reveal reveal-d2">
+          <div class="do-col">
+            <div class="col-title">✓ DA FARE</div>
+            <div class="do-item">Cerca rifugio in un edificio solido con impianto elettrico</div>
+            <div class="do-item">Rimani in auto (gabbia di Faraday) con finestrini chiusi</div>
+            <div class="do-item">Posizione di sicurezza: accovacciato, piedi uniti, mani sulle orecchie</div>
+            <div class="do-item">Allontanati da oggetti elevati di almeno 30 metri</div>
+            <div class="do-item">Evita il contatto con superfici metalliche conduttive</div>
+          </div>
+          <div class="dont-col">
+            <div class="col-title">✗ DA EVITARE</div>
+            <div class="dont-item">Sotto alberi isolati o in bosco rado</div>
+            <div class="dont-item">Vicino a recinzioni, binari, antenne metalliche</div>
+            <div class="dont-item">In acqua aperta (lago, mare, piscina)</div>
+            <div class="dont-item">Su picchi, creste, colline esposte</div>
+            <div class="dont-item">Telefono fisso durante il temporale (via cavo)</div>
+          </div>
+        </div>
+        <div class="warning-box reveal reveal-d3">
+          <div class="warning-title">Step voltage — pericolo spesso sottovalutato</div>
+          <p>Se un fulmine colpisce il suolo vicino, la corrente si diffonde radialmente. La differenza di potenziale tra i tuoi due piedi (step voltage) può essere letale anche a 10–15m dall'impatto.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Rilevamento moderno -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Sicurezza — 4/4</span>
+          <h2 class="reveal reveal-d1">Monitoraggio in tempo reale</h2>
+          <p class="reveal reveal-d2"><strong>LINET</strong> (Lightning Detection Network): oltre 600 sensori in Europa, localizzazione a meno di 200 m di precisione. Usato da aviazione, protezione civile, gestori di reti elettriche.</p>
+          <p class="reveal reveal-d3"><strong>Blitzortung.org</strong>: rete citizen science con 2.000+ stazioni. Open data, gratuito, aggiornamento &lt;1s. <strong>GOES-R GLM</strong> e <strong>Meteosat LI</strong>: rilevamento da satellite in tempo reale su scala globale.</p>
+          <div class="reveal reveal-d4" style="margin-top:1.5rem;font-family:var(--mono);font-size:.75rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--gold);font-size:1.3rem;">600+</div><div style="color:var(--muted);">sensori LINET Europa</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--blue);font-size:1.3rem;">&lt;200 m</div><div style="color:var(--muted);">precisione localizzazione</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--white);font-size:1.3rem;">2.000+</div><div style="color:var(--muted);">stazioni Blitzortung</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;"><div style="color:var(--green);font-size:1.3rem;">&lt;1 s</div><div style="color:var(--muted);">latenza rilevamento</div></div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;justify-content:center;gap:2rem;">
+          <div class="reveal" style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:.5rem;">🛰</div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold);letter-spacing:.1em;margin-bottom:.5rem;">GOES-R GLM + Meteosat LI</div>
+            <div style="font-size:.9rem;color:var(--muted);">Copertura globale continua da satellite geostazionario</div>
+          </div>
+          <div class="reveal reveal-d1" style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:.5rem;">📱</div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--blue);letter-spacing:.1em;margin-bottom:.5rem;">App per il pubblico</div>
+            <div style="font-size:.9rem;color:var(--muted);">Blitzortung, MyLightningTracker, WeatherBug: notifiche in tempo reale per la tua posizione</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2529,6 +2656,65 @@
 })();
 // === MITOLOGIA INIT END ===
     // === SICUREZZA INIT ===
+(function initSicurezzaSection(){
+  const sec = document.getElementById('sicurezza');
+
+  function initThunderCalc(){
+    const slider=document.getElementById('thunder-slider');
+    const valEl=document.getElementById('thunder-val');
+    const kmEl=document.getElementById('thunder-km');
+    const riskEl=document.getElementById('thunder-risk');
+    if(!slider) return;
+    function update(){
+      const s=parseInt(slider.value);
+      const km=(s/3).toFixed(1).replace('.',',');
+      valEl.textContent=s+' s';
+      kmEl.textContent=km+' km';
+      riskEl.className='risk-badge';
+      if(s<=10){ riskEl.classList.add('risk-red'); riskEl.textContent='PERICOLO IMMEDIATO'; }
+      else if(s<=30){ riskEl.classList.add('risk-yellow'); riskEl.textContent='ATTENZIONE'; }
+      else{ riskEl.classList.add('risk-green'); riskEl.textContent='MONITORARE'; }
+    }
+    slider.addEventListener('input',update); update();
+  }
+
+  function initRiskMeter(){
+    const questions=sec.querySelectorAll('[data-weight]');
+    const resultEl=document.getElementById('risk-result');
+    const visualEl=document.getElementById('risk-visual');
+    const iconEl=document.getElementById('risk-icon');
+    const labelEl=document.getElementById('risk-label');
+    if(!questions.length) return;
+    function update(){
+      let score=0;
+      questions.forEach(q=>{ if(q.checked) score+=parseInt(q.dataset.weight); });
+      if(score<=2){
+        resultEl.innerHTML='<span style="color:var(--green);font-family:var(--mono);font-size:.8rem;">✓ Rischio basso — continua a monitorare il cielo</span>';
+        if(visualEl){ visualEl.style.borderColor='var(--green)'; visualEl.style.boxShadow='0 0 20px rgba(68,204,136,.2)'; }
+        if(iconEl) iconEl.textContent='🟢';
+        if(labelEl){ labelEl.textContent='IN SICUREZZA'; labelEl.style.color='var(--green)'; }
+      } else if(score<=5){
+        resultEl.innerHTML='<span style="color:#ffc800;font-family:var(--mono);font-size:.8rem;">⚠ Rischio medio — cerca un riparo, preparati a metterti al sicuro</span>';
+        if(visualEl){ visualEl.style.borderColor='#ffc800'; visualEl.style.boxShadow='0 0 20px rgba(255,200,0,.2)'; }
+        if(iconEl) iconEl.textContent='🟡';
+        if(labelEl){ labelEl.textContent='ATTENZIONE'; labelEl.style.color='#ffc800'; }
+      } else {
+        resultEl.innerHTML='<span style="color:var(--red);font-family:var(--mono);font-size:.8rem;">🚨 Rischio alto — mettiti immediatamente al riparo in un edificio o veicolo metallico</span>';
+        if(visualEl){ visualEl.style.borderColor='var(--red)'; visualEl.style.boxShadow='0 0 20px rgba(255,68,68,.25)'; }
+        if(iconEl) iconEl.textContent='🔴';
+        if(labelEl){ labelEl.textContent='PERICOLO'; labelEl.style.color='var(--red)'; }
+      }
+    }
+    questions.forEach(q=>q.addEventListener('change',update));
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initCarousel(sec);
+    initThunderCalc();
+    initRiskMeter();
+  },{once:true});
+})();
+// === SICUREZZA INIT END ===
     // === REVEAL INIT ===
     // === BOOTSTRAP ===
     bindScrollToLinks();
