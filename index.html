@@ -868,7 +868,97 @@ canvas { display: block; }
     </div>
   </div>
 </section>
-<section id="s-fisica"    class="slide"><!-- Task 3 --></section>
+<section id="s-fisica" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-dots">
+      <div class="vc-dot active"></div>
+      <div class="vc-dot"></div>
+      <div class="vc-dot"></div>
+    </div>
+    <div class="vc-track">
+
+      <!-- P1: Termodinamica -->
+      <div class="vc-panel panel-split">
+        <div class="left">
+          <span class="slide-eyebrow">slide 03 · fisica estrema</span>
+          <h2 class="slide-title">30.000 K in <em>un microsecondo</em></h2>
+          <p class="slide-body">
+            Durante il return stroke, l'effetto Joule scalda il canale da temperatura
+            ambiente a <strong>30.000 K</strong> in meno di 10⁻⁶ secondi.
+            Secondo P = ρRT, la pressione interna schizza a
+            <strong>10–100 atmosfere</strong>. Il canale esplode radialmente
+            a velocità supersonica (Mach&nbsp;&gt;&nbsp;1 nei primi 1–2 metri),
+            generando un'<strong>onda d'urto idrodinamica</strong> che
+            poi decade in onda acustica: il tuono.
+          </p>
+        </div>
+        <div class="right">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div class="stat-box"><span class="stat-label">Temperatura</span><span class="stat-value" style="font-size:1.2rem;">30.000 K</span></div>
+            <div class="stat-box"><span class="stat-label">Pressione picco</span><span class="stat-value" style="font-size:1.2rem;">10–100 atm</span></div>
+            <div class="stat-box"><span class="stat-label">Diametro canale</span><span class="stat-value" style="font-size:1.2rem;">2–3 cm</span></div>
+            <div class="stat-box"><span class="stat-label">Durata return stroke</span><span class="stat-value" style="font-size:1.2rem;">0,1 ms</span></div>
+            <div class="stat-box"><span class="stat-label">Espansione</span><span class="stat-value" style="font-size:1.2rem;">Mach&gt;1</span></div>
+            <div class="stat-box"><span class="stat-label">Confronto Sole</span><span class="stat-value" style="font-size:1.2rem;">5×</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- P2: EM + Z-Pinch -->
+      <div class="vc-panel panel-center">
+        <span class="slide-eyebrow">elettromagnetismo</span>
+        <h2 class="slide-title">Il fulmine come <em>laboratorio</em></h2>
+        <div class="two-cols" style="width:100%;max-width:800px;text-align:left;">
+          <div>
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--gold);margin-bottom:.5rem;">LEGGE DI AMPÈRE</h3>
+            <p class="slide-body">
+              Una corrente fino a 200.000 A genera un campo magnetico B circolare
+              e intensissimo attorno al canale. Ogni elettrone in movimento
+              è soggetto alla <strong>forza di Lorentz</strong>.
+            </p>
+          </div>
+          <div>
+            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--gold);margin-bottom:.5rem;">EFFETTO Z-PINCH</h3>
+            <p class="slide-body">
+              Il campo magnetico spinge le particelle cariche <em>verso l'interno</em>
+              del canale: è lo <strong>Z-Pinch</strong> (strizione magnetica).
+              Il plasma viene compresso e densificato per pochi microsecondi,
+              in equilibrio dinamico tra compressione magnetica ed espansione termica.
+            </p>
+          </div>
+        </div>
+        <div class="info-box" style="max-width:800px;width:100%;text-align:left;margin-top:1rem;">
+          La variazione rapidissima di corrente genera un potente <strong>impulso
+          elettromagnetico</strong> rilevabile a centinaia di chilometri.
+        </div>
+        <canvas id="em-canvas" width="500" height="180" style="max-width:100%;margin-top:1rem;"></canvas>
+        <button class="canvas-btn" id="em-play-btn">AVVIA IMPULSO</button>
+      </div>
+
+      <!-- P3: Chimica + Fisica Nucleare -->
+      <div class="vc-panel" style="padding:2rem 4rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;align-content:center;">
+        <div>
+          <span class="slide-eyebrow">chimica</span>
+          <h2 class="slide-title" style="font-size:clamp(1.8rem,3vw,2.8rem);">L'atmosfera <em>trasformata</em></h2>
+          <ul style="list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
+            <li class="slide-body">🌿 <strong>Ozono O₃</strong> — l'energia del fulmine dissocia N₂ e O₂; gli atomi liberi si ricombinano formando ozono. L'odore "fresco" dopo il temporale è ozono.</li>
+            <li class="slide-body">🌱 <strong>NOx</strong> — fissazione naturale dell'azoto atmosferico nel terreno: fertilizzante naturale per le piante.</li>
+            <li class="slide-body">💎 <strong>Fulgurite</strong> — quando colpisce sabbia, la corrente fonde il quarzo (SiO₂) a 30.000 K creando una roccia vetrosa tubolare che replica la forma sotterranea della scarica.</li>
+          </ul>
+        </div>
+        <div>
+          <span class="slide-eyebrow">fisica nucleare</span>
+          <h2 class="slide-title" style="font-size:clamp(1.8rem,3vw,2.8rem);">Acceleratore <em>naturale</em></h2>
+          <ul style="list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
+            <li class="slide-body">☢️ <strong>TGF (Terrestrial Gamma-ray Flashes)</strong> — i campi elettrici dei temporali accelerano elettroni a velocità relativistiche. Frenando contro i nuclei dell'aria, emettono raggi X e gamma rilevabili dai satelliti.</li>
+            <li class="slide-body">⚛️ <strong>Reazioni fotonucleari</strong> — i fotoni gamma colpiscono nuclei di ¹⁴N, strappando un neutrone e generando ¹³N instabile. Brevissima reazione nucleare spontanea in atmosfera.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 <section id="s-tuono"     class="slide"><!-- Task 3 --></section>
 <section id="s-tipi"      class="slide"><!-- Task 3 --></section>
 <section id="s-record"    class="slide"><!-- Task 4 --></section>
