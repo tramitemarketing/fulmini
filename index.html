@@ -1054,7 +1054,116 @@
   </section>
   <section class="section" id="mondo" data-section="7">
     <div class="section-header"><span class="section-num">07 — NEL MONDO</span></div>
-    <!-- MONDO CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Mappa Leaflet -->
+    <div class="hc-slide">
+      <div class="slide-full">
+        <div id="world-map" style="width:100%;height:100%;"></div>
+        <div style="position:absolute;top:4rem;left:5.5rem;z-index:1000;pointer-events:none;">
+          <span class="eyebrow">Nel Mondo — 1/4</span>
+          <h2 style="text-shadow:0 2px 20px rgba(0,0,0,.9);">Hotspot globali</h2>
+        </div>
+        <div style="position:absolute;bottom:4rem;left:5.5rem;z-index:1000;background:rgba(10,10,15,.85);border:1px solid var(--border);padding:.75rem 1rem;pointer-events:none;">
+          <div class="label" style="margin-bottom:.4rem;">Densità fulmini/km²/anno</div>
+          <div style="display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.65rem;">
+            <div style="width:80px;height:8px;background:linear-gradient(to right,#00cc44,#ffcc00,#ff4444);border-radius:2px;"></div>
+            <span style="color:var(--muted);">bassa → alta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Lago Maracaibo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 2/4</span>
+          <h2 class="reveal reveal-d1">Il Lampo del Catatumbo</h2>
+          <p class="reveal reveal-d2">Il <strong>Lago Maracaibo</strong>, in Venezuela, è il luogo con la maggiore attività temporalesca del pianeta: <strong>280 notti di temporali all'anno</strong>, con fino a 280 fulmini per ora. I fulmini del Catatumbo erano così costanti che i navigatori coloniali li usavano come faro naturale.</p>
+          <p class="reveal reveal-d3">Il fenomeno è causato dalla topografia unica: venti caldi umidi dell'Atlantico incanalati dalle Ande incontrano aria fredda dalle montagne, generando temporali quasi permanenti ogni notte.</p>
+          <div class="reveal reveal-d4" style="font-family:var(--mono);font-size:.75rem;margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div><div style="color:var(--gold);font-size:1.5rem;">280</div><div style="color:var(--muted);">notti/anno</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">280</div><div style="color:var(--muted);">fulmini/ora (picco)</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">400 km</div><div style="color:var(--muted);">visibilità del faro naturale</div></div>
+            <div><div style="color:var(--gold);font-size:1.5rem;">#1</div><div style="color:var(--muted);">al mondo per densità</div></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="maracaibo-canvas" aria-label="Lago Maracaibo di notte con fulmini"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Congo e Florida -->
+    <div class="hc-slide">
+      <div class="slide-split" style="align-items:stretch;">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 3/4</span>
+          <h2 class="reveal reveal-d1">Congo e Florida</h2>
+          <div class="reveal reveal-d2" style="margin-top:1rem;">
+            <div style="border-left:3px solid var(--gold);padding:.75rem 1rem;margin-bottom:1.5rem;background:var(--surface);">
+              <div class="eyebrow">Congo Basin, Africa</div>
+              <div style="font-family:var(--mono);font-size:2rem;color:var(--gold);">158</div>
+              <div class="stat-unit">fulmini/km²/anno — densità assoluta massima</div>
+              <p style="margin-top:.75rem;font-size:.9rem;">La Zona di Convergenza Intertropicale porta umidità oceanica costante sulle foreste equatoriali. La topografia e il calore generano temporali quasi quotidiani.</p>
+            </div>
+            <div style="border-left:3px solid var(--blue);padding:.75rem 1rem;background:var(--surface);">
+              <div class="eyebrow">Florida, USA</div>
+              <div style="font-family:var(--mono);font-size:2rem;color:var(--blue);">1.2 milioni</div>
+              <div class="stat-unit">fulmini/anno — "Lightning Capital" USA</div>
+              <p style="margin-top:.75rem;font-size:.9rem;">La penisola stretta tra Golfo del Messico e Atlantico crea correnti convergenti ogni pomeriggio estivo. Florida ha la maggiore mortalità da fulmine degli USA.</p>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;justify-content:center;">
+          <div class="reveal" style="background:var(--surface);border:1px solid var(--border);padding:1rem;">
+            <div class="eyebrow">Italia — Appennino Tosco-Emiliano</div>
+            <div style="font-family:var(--mono);font-size:1.8rem;color:var(--white);">~20 fulmini/km²/anno</div>
+            <p style="font-size:.9rem;margin-top:.5rem;">Rete LINET: 600+ sensori in Europa, localizzazione a &lt;200m. L'Italia è tra i Paesi europei più monitorati.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Blitzortung live -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Nel Mondo — 4/4</span>
+          <h2 class="reveal reveal-d1">Fulmini in tempo reale</h2>
+          <p class="reveal reveal-d2"><strong>Blitzortung.org</strong> è una rete citizen science con oltre 2.000 stazioni in tutto il mondo che rilevano le emissioni ELF/VLF dei fulmini. Il sistema localizza ogni fulmine con una precisione di pochi km in meno di un secondo.</p>
+          <p class="reveal reveal-d3">La mappa a destra mostra i fulmini in tempo reale sull'Europa negli ultimi minuti. Ogni punto è un fulmine rilevato dalla rete di sensori.</p>
+          <div class="reveal reveal-d4" style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-family:var(--mono);font-size:.75rem;">
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;">
+              <div style="color:var(--gold);font-size:1.4rem;">2.000+</div>
+              <div style="color:var(--muted);">stazioni globali</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;">
+              <div style="color:var(--gold);font-size:1.4rem;">&lt;1 km</div>
+              <div style="color:var(--muted);">precisione media</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <div class="blitz-wrap">
+            <iframe id="blitz-iframe" title="Fulmini in tempo reale Blitzortung" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="mitologia" data-section="8">
     <div class="section-header"><span class="section-num">08 — MITO E STORIA</span></div>
@@ -2218,6 +2327,88 @@
     })();
     // === FRANKLIN CANVAS END ===
     // === MONDO MAP ===
+    (function initMondoSection(){
+  const sec = document.getElementById('mondo');
+  let mapInitialized = false;
+
+  function initMap(){
+    if(mapInitialized) return; mapInitialized=true;
+    const map = L.map('world-map',{zoomControl:false,attributionControl:false}).setView([10,10],2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'©CartoDB',maxZoom:19
+    }).addTo(map);
+    L.control.attribution({prefix:false,position:'bottomright'}).addTo(map);
+    const hotspots=[
+      {lat:9.8,lng:-71.5,name:'Lago Maracaibo',data:'280 notti/anno<br>fino a 280 fulmini/ora',color:'#ff4444'},
+      {lat:1,lng:24,name:'Congo Basin',data:'~158 fulmini/km²/anno<br>densità assoluta massima',color:'#ff6600'},
+      {lat:27.5,lng:-82,name:'Florida (USA)',data:'1,2 milioni fulmini/anno<br>Lightning Capital USA',color:'#ffaa00'},
+      {lat:44.2,lng:11.1,name:'Appennino Tosco-Emiliano',data:'~20 fulmini/km²/anno<br>area più colpita d\'Italia',color:'#4a9eff'}
+    ];
+    hotspots.forEach(h=>{
+      const marker=L.circleMarker([h.lat,h.lng],{
+        radius:12,color:h.color,fillColor:h.color,
+        fillOpacity:.25,weight:2,className:'pulse-marker'
+      }).addTo(map);
+      marker.bindPopup(`<strong style="color:${h.color};font-family:JetBrains Mono">${h.name}</strong><br><span style="font-size:.85rem">${h.data}</span>`);
+    });
+  }
+
+  function initMaracaiboCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let flashTO=null;
+    function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; drawNight(0); schedule(); }
+    function drawNight(fi){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      const sky=ctx.createLinearGradient(0,0,0,H*.65);
+      sky.addColorStop(0,fi>0?`rgba(18,28,58,1)`:'#05080f'); sky.addColorStop(1,'#0a0a1a');
+      ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*.65);
+      if(fi>0){ ctx.save(); ctx.fillStyle=`rgba(180,210,255,${fi*.45})`; ctx.fillRect(0,0,W,H*.65); ctx.restore(); }
+      if(fi<.3){
+        ctx.save(); ctx.fillStyle=`rgba(255,255,255,${.35-fi*.35})`;
+        for(let i=0;i<80;i++){ const sx=(i*73.1)%W,sy=(i*47.3)%(H*.45); ctx.fillRect(sx,sy,1,1); }
+        ctx.restore();
+      }
+      ctx.save(); ctx.fillStyle='#050810';
+      ctx.beginPath(); ctx.moveTo(0,H*.5); ctx.lineTo(W*.1,H*.31); ctx.lineTo(W*.25,H*.45);
+      ctx.lineTo(W*.35,H*.29); ctx.lineTo(W*.5,H*.43); ctx.lineTo(W*.6,H*.32); ctx.lineTo(W*.75,H*.44);
+      ctx.lineTo(W*.88,H*.3); ctx.lineTo(W,H*.39); ctx.lineTo(W,H*.65); ctx.lineTo(0,H*.65); ctx.closePath(); ctx.fill(); ctx.restore();
+      const lk=ctx.createLinearGradient(0,H*.65,0,H);
+      lk.addColorStop(0,fi>0?`rgba(15,25,55,1)`:'#080a14'); lk.addColorStop(1,'#050810');
+      ctx.fillStyle=lk; ctx.fillRect(0,H*.65,W,H*.35);
+      if(fi>0){ ctx.save(); ctx.fillStyle=`rgba(120,170,255,${fi*.12})`; ctx.fillRect(0,H*.65,W,H*.35); ctx.restore(); }
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.4)';
+      ctx.fillText('LAGO MARACAIBO, VENEZUELA',10,H-8);
+    }
+    function doFlash(){
+      if(!canvas._init) return;
+      let fi=0;
+      const up=setInterval(()=>{ fi=Math.min(1,fi+.2); drawNight(fi);
+        if(fi>=1){ clearInterval(up); let fd=1;
+          const dn=setInterval(()=>{ fd=Math.max(0,fd-.1); drawNight(fd);
+            if(fd<=0){ clearInterval(dn); schedule(); }
+          },40);
+        }
+      },40);
+    }
+    function schedule(){ if(!canvas._init) return; flashTO=setTimeout(doFlash,900+Math.random()*2800); }
+    window.addEventListener('resize',()=>{ clearTimeout(flashTO); resize(); });
+    resize();
+  }
+
+  function initBlitzortung(){
+    const iframe=document.getElementById('blitz-iframe');
+    if(iframe) iframe.src='https://www.blitzortung.org/en/live_lightning_maps.php?map=6';
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initMap();
+    initMaracaiboCanvas(document.getElementById('maracaibo-canvas'));
+    initBlitzortung();
+    initCarousel(sec);
+  },{once:true});
+})();
+// === MONDO MAP END ===
     // === MITOLOGIA INIT ===
     // === SICUREZZA INIT ===
     // === REVEAL INIT ===
