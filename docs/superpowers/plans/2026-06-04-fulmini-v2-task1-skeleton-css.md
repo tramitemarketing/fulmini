@@ -1,0 +1,738 @@
+# Fulmini v2 — Task 1: Skeleton HTML + CSS
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Crea `index.html` da zero con tutto il CSS, i font, e 10 sezioni `.slide` vuote (senza contenuto né JS).
+
+**Architecture:** Single-file HTML statico. Tutto in `index.html`. Il CSS definisce variabili, layout, VC, HC e componenti riutilizzabili. Nessun JS in questo task.
+
+**Tech Stack:** HTML5, CSS3 custom properties, Google Fonts (Bebas Neue + Source Serif 4)
+
+**Spec di riferimento:** `docs/superpowers/specs/2026-06-04-fulmini-rebuild-v2-design.md`
+
+---
+
+### Task 1: Crea index.html con skeleton + CSS completo
+
+**Files:**
+- Create: `index.html`
+
+- [ ] **Step 1: Scrivi il file index.html**
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fulmini — La Scienza del Lampo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05070f;
+  --surface: #0a0e1a;
+  --surface2: #0f1525;
+  --gold: #f0c040;
+  --blue: #3a8fff;
+  --white: #e8eaf0;
+  --muted: #7a8099;
+  --border: rgba(240,192,64,.15);
+  --red: #ff4040;
+  --green: #50c878;
+}
+
+html {
+  scroll-snap-type: y mandatory;
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Source Serif 4', serif;
+  cursor: none;
+}
+
+body {
+  overflow: visible;
+}
+
+/* ===== SLIDES ===== */
+.slide {
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== VERTICAL CAROUSEL (VC) ===== */
+.vc-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.vc-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform .6s cubic-bezier(.4,0,.2,1);
+}
+.vc-panel {
+  height: 100vh;
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 4rem;
+}
+.vc-dots {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  z-index: 10;
+}
+.vc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  cursor: pointer;
+  transition: background .3s, transform .3s;
+}
+.vc-dot.active {
+  background: var(--gold);
+  transform: scale(1.5);
+}
+
+/* ===== HORIZONTAL CAROUSEL (HC) ===== */
+.hc-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.hc-track {
+  display: flex;
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+}
+.hc-slide {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+.hc-tabs {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.hc-tab {
+  padding: .35rem .8rem;
+  border: 1px solid rgba(240,192,64,.2);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .15em;
+  cursor: pointer;
+  color: var(--muted);
+  background: transparent;
+  transition: all .3s;
+}
+.hc-tab.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(240,192,64,.05);
+}
+
+/* ===== LAYOUT PANELS ===== */
+.panel-split {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
+  height: 100%;
+  padding: 2rem 4rem;
+}
+.panel-split .left { flex: 1; }
+.panel-split .right { flex: 1; display: flex; align-items: center; justify-content: center; }
+.panel-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  padding: 2rem 4rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.panel-full {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  display: block;
+}
+
+/* ===== TYPOGRAPHY ===== */
+.slide-eyebrow {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .58rem;
+  letter-spacing: .25em;
+  color: rgba(240,192,64,.5);
+  margin-bottom: .75rem;
+  text-transform: uppercase;
+}
+.slide-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  color: var(--white);
+  margin-bottom: 1.25rem;
+}
+.slide-title em { color: var(--gold); font-style: normal; }
+.slide-body {
+  font-size: .88rem;
+  line-height: 1.75;
+  color: rgba(232,234,240,.75);
+  max-width: 50ch;
+}
+.slide-body strong { color: var(--white); }
+
+/* ===== HERO ===== */
+.hero-eyebrow {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .65rem;
+  letter-spacing: .4em;
+  color: rgba(240,192,64,.5);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 18vw, 14rem);
+  line-height: .85;
+  color: var(--white);
+  letter-spacing: -.02em;
+}
+.hero-title em { color: var(--gold); font-style: normal; }
+.hero-line {
+  width: 80px;
+  height: 1px;
+  background: var(--gold);
+  margin: 1.5rem auto;
+  opacity: .4;
+}
+.hero-sub {
+  font-size: .85rem;
+  letter-spacing: .15em;
+  color: var(--muted);
+  font-family: 'Bebas Neue', sans-serif;
+  text-transform: uppercase;
+}
+
+/* ===== COMPONENTS ===== */
+.stat-box {
+  border: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  background: var(--surface);
+}
+.stat-box .stat-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+.stat-box .stat-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .55rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: .25rem;
+}
+.stat-box .stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.data-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.data-table th {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .2em;
+  color: var(--gold);
+  text-align: left;
+  padding: .5rem .75rem;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: .5rem .75rem;
+  border-bottom: 1px solid rgba(240,192,64,.05);
+  color: rgba(232,234,240,.8);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table td:first-child { color: var(--muted); }
+
+.tl-item { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.tl-year {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .9rem;
+  color: var(--gold);
+  min-width: 3.5rem;
+  padding-top: .1rem;
+}
+.tl-text { font-size: .82rem; color: rgba(232,234,240,.7); line-height: 1.6; }
+
+.record-cell {
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  background: var(--surface);
+  text-align: center;
+}
+.record-cell .rec-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  color: var(--gold);
+  line-height: 1;
+  display: block;
+  margin-bottom: .25rem;
+}
+.record-cell .rec-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .15em;
+  color: var(--white);
+  display: block;
+  margin-bottom: .4rem;
+}
+.record-cell .rec-sub { font-size: .72rem; color: var(--muted); line-height: 1.4; }
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  width: 100%;
+  height: 100%;
+  padding: 3rem 4rem;
+  align-content: center;
+}
+
+.deity-card {
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  background: var(--surface);
+}
+.deity-card .deity-icon { font-size: 1.75rem; margin-bottom: .5rem; display: block; }
+.deity-card .deity-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  display: block;
+  margin-bottom: .25rem;
+}
+.deity-card .deity-culture {
+  font-size: .6rem;
+  letter-spacing: .15em;
+  color: var(--muted);
+  font-family: 'Bebas Neue', sans-serif;
+  display: block;
+  margin-bottom: .5rem;
+}
+.deity-card p { font-size: .78rem; color: rgba(232,234,240,.7); line-height: 1.5; }
+
+.safety-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .2s;
+  background: var(--surface);
+}
+.safety-item:hover { background: var(--surface2); }
+.safety-item .s-icon { font-size: 1.1rem; }
+.safety-item .s-label { font-family: 'Bebas Neue', sans-serif; font-size: .65rem; letter-spacing: .12em; flex: 1; }
+.safety-item .s-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .5rem;
+  letter-spacing: .12em;
+  padding: .2rem .4rem;
+}
+.safety-item.danger .s-badge { color: var(--red); border: 1px solid var(--red); }
+.safety-item.safe .s-badge { color: var(--green); border: 1px solid var(--green); }
+.safety-item.medium .s-badge { color: var(--gold); border: 1px solid var(--gold); }
+.safety-tip {
+  margin-top: 1rem;
+  padding: .75rem 1rem;
+  border-left: 2px solid var(--gold);
+  background: var(--surface);
+  font-size: .8rem;
+  color: rgba(232,234,240,.8);
+  min-height: 3rem;
+}
+
+.myth-item {
+  border: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  font-size: .85rem;
+  line-height: 1.7;
+  color: rgba(232,234,240,.75);
+}
+
+.warn-pill {
+  margin-top: 1.25rem;
+  padding: .75rem 1rem;
+  border: 1px solid rgba(255,64,64,.3);
+  background: rgba(255,64,64,.05);
+  font-size: .78rem;
+  color: rgba(232,234,240,.7);
+  line-height: 1.6;
+}
+.warn-pill strong { color: var(--red); }
+
+.info-box {
+  padding: .875rem 1rem;
+  border: 1px solid rgba(58,143,255,.3);
+  background: rgba(58,143,255,.05);
+  font-size: .8rem;
+  color: rgba(232,234,240,.75);
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+.info-box strong { color: var(--blue); }
+
+.plasma-states {
+  display: flex;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  justify-content: center;
+}
+.plasma-states .state {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .7rem;
+  letter-spacing: .15em;
+  color: var(--muted);
+  padding: .4rem .8rem;
+  border: 1px solid rgba(122,128,153,.2);
+}
+.plasma-states .state.active {
+  color: var(--blue);
+  border-color: var(--blue);
+  background: rgba(58,143,255,.08);
+}
+
+.phase-badge {
+  display: inline-block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .55rem;
+  letter-spacing: .15em;
+  color: var(--gold);
+  border: 1px solid var(--border);
+  padding: .2rem .5rem;
+  margin-bottom: .5rem;
+}
+
+.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.detect-list { list-style: none; margin-top: .75rem; }
+.detect-list li {
+  display: flex;
+  gap: 1rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid rgba(240,192,64,.05);
+  font-size: .8rem;
+}
+.detect-list li span:first-child {
+  font-family: 'Bebas Neue', sans-serif;
+  color: var(--gold);
+  min-width: 4rem;
+  font-size: .75rem;
+  letter-spacing: .1em;
+}
+.detect-list li span:last-child { color: rgba(232,234,240,.6); }
+
+/* ===== MAP ===== */
+#map { width: 100%; height: 100%; z-index: 1; }
+.map-panel { display: block !important; padding: 0 !important; }
+.map-counter {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  background: rgba(5,7,15,.85);
+  border: 1px solid var(--border);
+  padding: .5rem 1.25rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .75rem;
+  letter-spacing: .2em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ===== FIXED UI ===== */
+#cursor {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+#cursor-ring {
+  width: 28px; height: 28px;
+  border: 1px solid rgba(240,192,64,.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s;
+}
+#progress-bar {
+  position: fixed;
+  left: 0; top: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--gold), rgba(240,192,64,.2));
+  z-index: 1000;
+  transition: height .4s;
+  height: 0%;
+}
+#nav-dots {
+  position: fixed;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  z-index: 1000;
+}
+.ndot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(122,128,153,.4);
+  cursor: pointer;
+  transition: all .3s;
+}
+.ndot.active { background: var(--gold); transform: scale(1.6); }
+#slide-counter {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .7rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  z-index: 1000;
+}
+#fullscreen-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .15em;
+  padding: .35rem .7rem;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all .3s;
+}
+#fullscreen-btn:hover { border-color: var(--gold); color: var(--gold); }
+#scroll-hint {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .25em;
+  color: var(--muted);
+  z-index: 1000;
+  transition: opacity .5s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+}
+#scroll-hint .sh-arrow {
+  width: 1px; height: 20px;
+  background: linear-gradient(to bottom, transparent, var(--muted));
+}
+
+/* ===== SLIDER ===== */
+.thunder-slider-wrap { width: 100%; max-width: 400px; margin: 1.5rem auto; }
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+.slider-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .55rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  text-align: center;
+  display: block;
+  margin-bottom: .5rem;
+}
+.thunder-out {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem;
+  color: var(--gold);
+  text-align: center;
+  line-height: 1;
+  display: block;
+}
+.thunder-formula {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  text-align: center;
+  margin-top: .5rem;
+}
+
+/* ===== CANVAS ===== */
+canvas { display: block; }
+.canvas-btn {
+  display: block;
+  margin: .75rem auto 0;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .2em;
+  padding: .4rem .9rem;
+  cursor: pointer;
+  transition: all .3s;
+}
+.canvas-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ===== ALT DIAGRAM ===== */
+.atmo-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-width: 600px;
+}
+.atmo-layer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .6rem .75rem;
+  border-bottom: 1px solid rgba(240,192,64,.06);
+}
+.atmo-layer .alt {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .65rem;
+  color: var(--muted);
+  min-width: 5rem;
+  text-align: right;
+}
+.atmo-layer .name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .65rem;
+  letter-spacing: .12em;
+  color: var(--white);
+  min-width: 6rem;
+}
+.atmo-layer .tle-name {
+  font-size: .75rem;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: .1em;
+  flex: 1;
+}
+.atmo-layer.tle-elves .tle-name { color: #a0e0ff; }
+.atmo-layer.tle-sprite .tle-name { color: #ff6080; }
+.atmo-layer.tle-jet .tle-name { color: #60a0ff; }
+.atmo-layer.tle-bolt .tle-name { color: var(--gold); }
+
+/* ===== MINI ITALY MAP ===== */
+.italy-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .panel-split { flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
+  .panel-center { padding: 1.5rem; }
+  .vc-panel { padding: 1.5rem; }
+  .two-cols { grid-template-columns: 1fr; gap: 1rem; }
+  .records-grid { grid-template-columns: repeat(2, 1fr); padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- FIXED UI -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="progress-bar"></div>
+<div id="nav-dots"></div>
+<div id="slide-counter">01 / 10</div>
+<button id="fullscreen-btn">⛶ FULLSCREEN</button>
+<div id="scroll-hint">
+  <span>SCORRI</span>
+  <div class="sh-arrow"></div>
+</div>
+
+<!-- SLIDES (contenuto aggiunto nei task successivi) -->
+<section id="s-hero"      class="slide"><!-- Task 2 --></section>
+<section id="s-cosae"     class="slide"><!-- Task 2 --></section>
+<section id="s-formazione"class="slide"><!-- Task 2 --></section>
+<section id="s-fisica"    class="slide"><!-- Task 3 --></section>
+<section id="s-tuono"     class="slide"><!-- Task 3 --></section>
+<section id="s-tipi"      class="slide"><!-- Task 3 --></section>
+<section id="s-record"    class="slide"><!-- Task 4 --></section>
+<section id="s-franklin"  class="slide"><!-- Task 4 --></section>
+<section id="s-mitologia" class="slide"><!-- Task 4 --></section>
+<section id="s-mondo"     class="slide"><!-- Task 4 --></section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// JS aggiunto nei task 5-8
+</script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: Verifica apertura nel browser**
+
+Apri `index.html` nel browser. Deve mostrare una pagina nera con 10 sezioni vuote. Scorri: lo snap deve funzionare (ogni scroll porta alla slide successiva). Nessun errore in console.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add index.html
+git commit -m "feat: add skeleton HTML + complete CSS for fulmini v2"
+```
