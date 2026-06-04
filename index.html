@@ -270,6 +270,53 @@
     });
     // === SCROLL ENGINE END ===
     // === CAROUSEL ENGINE ===
+    const carousels = {};
+    function carouselNext(si) { carousels[si] && carousels[si].next(); }
+    function carouselPrev(si) { carousels[si] && carousels[si].prev(); }
+
+    function initCarousel(sectionEl) {
+      const si = parseInt(sectionEl.dataset.section, 10);
+      if (carousels[si]) return;
+      const track = sectionEl.querySelector('.hc-track');
+      if (!track) return;
+      const slides = Array.from(track.querySelectorAll('.hc-slide'));
+      const dots = Array.from(sectionEl.querySelectorAll('.hc-dot'));
+      const total = slides.length;
+      let current = 0;
+
+      function goTo(idx) {
+        current = Math.max(0, Math.min(total-1, idx));
+        track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+        dots.forEach((d,i) => d.classList.toggle('active', i === current));
+        state.slideCurrent[si] = current;
+        document.getElementById('slide-counter').textContent = `${current+1} / ${total}`;
+      }
+      function next() { goTo(current+1); }
+      function prev() { goTo(current-1); }
+
+      window.addEventListener('resize', () => {
+        track.style.transition = 'none';
+        track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+        requestAnimationFrame(() => { track.style.transition = ''; });
+      });
+
+      const prevBtn = sectionEl.querySelector('.hc-arrow-prev');
+      const nextBtn = sectionEl.querySelector('.hc-arrow-next');
+      if (prevBtn) prevBtn.addEventListener('click', prev);
+      if (nextBtn) nextBtn.addEventListener('click', next);
+      dots.forEach((d,i) => d.addEventListener('click', () => goTo(i)));
+
+      let touchX = 0;
+      track.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+      track.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+      });
+
+      carousels[si] = { next, prev, goTo };
+      goTo(0);
+    }
+    // === CAROUSEL ENGINE END ===
     // === HERO INIT ===
     // === FORMAZIONE CANVAS ===
     // === MECCANISMO CANVAS ===
