@@ -195,7 +195,68 @@
   </section>
   <section class="section" id="formazione" data-section="1">
     <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
-    <!-- FORMAZIONE CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Cos'è un fulmine -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 1/3</span>
+          <h2 class="reveal reveal-d1">Cos'è un fulmine</h2>
+          <p class="reveal reveal-d2">Un fulmine è una <strong>gigantesca scarica elettrica transitoria ad altissima intensità</strong> che avviene nell'atmosfera per riequilibrare il forte dislivello di potenziale che si crea tra le nuvole e il suolo (o tra nuvole diverse).</p>
+          <p class="reveal reveal-d3">La scarica dura pochi millisecondi ma raggiunge temperature di circa <strong>30.000 K</strong> — cinque volte più calda della superficie del Sole — e una corrente che può superare i <strong>30.000 ampere</strong>.</p>
+          <div class="stat-strip reveal reveal-d4">
+            <div class="stat-item"><span class="stat-val">30.000 K</span><span class="stat-unit">temperatura canale</span></div>
+            <div class="stat-item"><span class="stat-val">30.000 A</span><span class="stat-unit">corrente media</span></div>
+            <div class="stat-item"><span class="stat-val">milioni V</span><span class="stat-unit">tensione</span></div>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="charge-field-canvas" aria-label="Campo elettrico crescente tra nube e suolo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: La collisione triboelettrica -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 2/3</span>
+          <h2 class="reveal reveal-d1">La collisione triboelettrica</h2>
+          <p class="reveal reveal-d2">Tutto comincia dentro il <strong>cumulonembo</strong>. Le correnti d'aria violente fanno scontrare cristalli di ghiaccio e gocce d'acqua. Quando i cristalli di ghiaccio più leggeri salgono e il <em>graupel</em> più pesante scende, un passaggio di elettroni per attrito — <strong>l'effetto triboelettrico</strong> — separa le cariche.</p>
+          <p class="reveal reveal-d3">I cristalli leggeri cedono elettroni: si caricano <strong>positivamente</strong> e salgono verso la cima. Il graupel acquista elettroni e si deposita nella parte medio-bassa: <strong>carica negativa in basso, positiva in alto</strong>.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="triboelec-canvas" aria-label="Separazione di cariche per effetto triboelettrico"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: La nube come condensatore -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Formazione — 3/3</span>
+          <h2 class="reveal reveal-d1">La nube come condensatore</h2>
+          <p class="reveal reveal-d2">Per questa netta separazione, la nuvola si comporta come un enorme <strong>condensatore naturale</strong>. La sua base, negativa, respinge gli elettroni della superficie terrestre sottostante, lasciando il terreno immediatamente al di sotto carico <strong>positivamente per induzione elettrostatica</strong>.</p>
+          <p class="reveal reveal-d3">Quando la differenza di potenziale diventa abbastanza grande, l'aria — normalmente isolante — si "rompe" e scatta la scarica: il fulmine.</p>
+        </div>
+        <div class="slide-right">
+          <canvas id="capacitor-canvas" aria-label="La nube come condensatore naturale — zone di carica"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="meccanismo" data-section="2">
     <div class="section-header"><span class="section-num">02 — MECCANISMO</span></div>
@@ -351,6 +412,193 @@
     })();
     // === HERO INIT END ===
     // === FORMAZIONE CANVAS ===
+(function initFormazioneSection(){
+  const sec = document.getElementById('formazione');
+
+  function initChargeFieldCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let t=0;
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; }
+    function draw(){
+      if(document.hidden){ requestAnimationFrame(draw); return; }
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      t+=0.008;
+      // sky bg
+      const bg=ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#050510'); bg.addColorStop(1,'#080818');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      // cloud
+      ctx.save(); ctx.fillStyle='#151528';
+      ctx.beginPath();
+      ctx.arc(W*.4,H*.1,W*.13,0,Math.PI*2);
+      ctx.arc(W*.55,H*.065,W*.1,0,Math.PI*2);
+      ctx.arc(W*.65,H*.1,W*.09,0,Math.PI*2);
+      ctx.fill(); ctx.restore();
+      // minus signs in cloud
+      ctx.font='14px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.8)';
+      ctx.fillText('− − −',W*.32,H*.12);
+      // ground
+      ctx.fillStyle='rgba(201,168,76,.08)'; ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.strokeStyle='rgba(201,168,76,.25)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.88); ctx.lineTo(W,H*.88); ctx.stroke();
+      ctx.font='14px JetBrains Mono'; ctx.fillStyle='rgba(201,168,76,.7)';
+      ctx.fillText('+ + + + +',W*.25,H*.95);
+      // field lines (intensify over time)
+      const charge=Math.min(1,t/8);
+      const nLines=7;
+      for(let i=0;i<nLines;i++){
+        const x0=W*(0.28+i*0.065);
+        const len=(H*0.73)*charge;
+        const alpha=0.15+charge*0.55;
+        ctx.save();
+        ctx.strokeStyle=`rgba(74,158,255,${alpha})`;
+        ctx.lineWidth=0.7; ctx.setLineDash([4,5]);
+        ctx.beginPath(); ctx.moveTo(x0,H*.15); ctx.lineTo(x0+(Math.sin(t+i)*3),H*.15+len);
+        ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+        // arrowhead
+        if(charge>0.1){
+          const ay=H*.15+len;
+          ctx.save(); ctx.fillStyle=`rgba(74,158,255,${alpha})`;
+          ctx.beginPath(); ctx.moveTo(x0,ay); ctx.lineTo(x0-3,ay-8); ctx.lineTo(x0+3,ay-8); ctx.closePath(); ctx.fill(); ctx.restore();
+        }
+      }
+      // flash at breakpoint
+      if(charge>=1){
+        const flash=Math.abs(Math.sin(t*10))*0.7;
+        ctx.save(); ctx.globalAlpha=flash;
+        ctx.strokeStyle='#ffffff'; ctx.lineWidth=2.5;
+        ctx.shadowColor='#4a9eff'; ctx.shadowBlur=25;
+        ctx.beginPath();
+        ctx.moveTo(W*.5,H*.15); ctx.lineTo(W*.47,H*.5); ctx.lineTo(W*.53,H*.5); ctx.lineTo(W*.5,H*.87);
+        ctx.stroke(); ctx.restore();
+      }
+      if(t>16) t=0;
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initTriboelecCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    const particles=[];
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; initParticles(); }
+    function initParticles(){
+      particles.length=0;
+      const W=canvas.width,H=canvas.height;
+      for(let i=0;i<20;i++){
+        // graupel (large, will go down)
+        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:0.4+Math.random()*0.4,r:5+Math.random()*4,type:'graupel',charge:-1});
+        // crystal (small, will go up)
+        particles.push({x:W*(0.2+Math.random()*0.6),y:H*(0.3+Math.random()*0.4),vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*0.5,r:2+Math.random()*2,type:'crystal',charge:1});
+      }
+    }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // bg gradient (cold atmosphere)
+      const bg=ctx.createLinearGradient(0,0,0,H);
+      bg.addColorStop(0,'#0a0a1a'); bg.addColorStop(1,'#05050f');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      // zones
+      ctx.fillStyle='rgba(201,168,76,.04)'; ctx.fillRect(0,0,W,H*.35); // positive zone
+      ctx.fillStyle='rgba(74,158,255,.04)'; ctx.fillRect(0,H*.65,W,H*.35); // negative zone
+      ctx.font='10px JetBrains Mono';
+      ctx.fillStyle='rgba(201,168,76,.4)'; ctx.fillText('zona +',8,18);
+      ctx.fillStyle='rgba(74,158,255,.4)'; ctx.fillText('zona −',8,H-8);
+
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<p.r||p.x>W-p.r) p.vx*=-1;
+        if(p.y<p.r) p.vy=Math.abs(p.vy);
+        if(p.y>H-p.r) p.vy=-Math.abs(p.vy);
+        ctx.save();
+        if(p.type==='graupel'){
+          ctx.fillStyle='rgba(74,158,255,.75)';
+          ctx.shadowColor='#4a9eff'; ctx.shadowBlur=6;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
+          ctx.fillText('−',p.x-3,p.y+3);
+        } else {
+          ctx.fillStyle='rgba(201,168,76,.75)';
+          ctx.shadowColor='#c9a84c'; ctx.shadowBlur=6;
+          // hexagonal crystal shape
+          ctx.beginPath();
+          for(let a=0;a<6;a++){ const ang=a*Math.PI/3; ctx.lineTo(p.x+p.r*Math.cos(ang),p.y+p.r*Math.sin(ang)); }
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='8px monospace';
+          ctx.fillText('+',p.x-3,p.y+3);
+        }
+        ctx.restore();
+      });
+      requestAnimationFrame(draw);
+    }
+    resize(); window.addEventListener('resize',resize); requestAnimationFrame(draw);
+  }
+
+  function initCapacitorCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    function resize(){ canvas.width=canvas.offsetWidth||500; canvas.height=canvas.offsetHeight||500; draw(); }
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      // bg
+      ctx.fillStyle='#06060f'; ctx.fillRect(0,0,W,H);
+      // cloud body (− zone bottom, + zone top)
+      // cloud negative bottom
+      ctx.save(); ctx.fillStyle='#151528';
+      ctx.beginPath();
+      ctx.arc(W*.35,H*.18,W*.14,0,Math.PI*2); ctx.arc(W*.5,H*.13,W*.12,0,Math.PI*2);
+      ctx.arc(W*.62,H*.18,W*.11,0,Math.PI*2); ctx.fill(); ctx.restore();
+      // − charges in bottom of cloud
+      ctx.font='12px JetBrains Mono'; ctx.fillStyle='rgba(74,158,255,.85)';
+      ['−','−','−','−','−'].forEach((c,i)=>ctx.fillText(c,W*(0.27+i*0.1),H*.22));
+      // + charges in top of cloud
+      ctx.fillStyle='rgba(201,168,76,.7)';
+      ['·','+','·','+','·'].forEach((c,i)=>ctx.fillText(c,W*(0.28+i*0.1),H*.12));
+      // dividing line in cloud
+      ctx.strokeStyle='rgba(102,102,128,.3)'; ctx.lineWidth=0.5; ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(W*.2,H*.17); ctx.lineTo(W*.75,H*.17); ctx.stroke(); ctx.setLineDash([]);
+      // electric field lines
+      const nLines=6;
+      for(let i=0;i<nLines;i++){
+        const x=W*(0.25+i*0.1);
+        ctx.save(); ctx.strokeStyle='rgba(74,158,255,.35)'; ctx.lineWidth=1; ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(x,H*.23); ctx.lineTo(x,H*.83); ctx.stroke(); ctx.setLineDash([]);
+        // arrow
+        ctx.fillStyle='rgba(74,158,255,.5)';
+        ctx.beginPath(); ctx.moveTo(x,H*.83); ctx.lineTo(x-3,H*.75); ctx.lineTo(x+3,H*.75); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      // ground (+)
+      ctx.fillStyle='rgba(201,168,76,.1)'; ctx.fillRect(0,H*.87,W,H*.13);
+      ctx.strokeStyle='rgba(201,168,76,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,H*.87); ctx.lineTo(W,H*.87); ctx.stroke();
+      ctx.fillStyle='rgba(201,168,76,.7)'; ctx.font='11px JetBrains Mono';
+      ['+','+','+','+','+','+','+'].forEach((c,i)=>ctx.fillText(c,W*(0.1+i*0.12),H*.94));
+      // labels
+      ctx.fillStyle='rgba(74,158,255,.6)'; ctx.font='10px JetBrains Mono';
+      ctx.fillText('base nube (−)',W*.02,H*.31);
+      ctx.fillStyle='rgba(201,168,76,.6)';
+      ctx.fillText('suolo (+ per induzione)',W*.02,H*.84);
+      // E-field label
+      ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='10px JetBrains Mono';
+      ctx.fillText('E →',W*.78,H*.55);
+    }
+    resize(); window.addEventListener('resize',resize);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initChargeFieldCanvas(document.getElementById('charge-field-canvas'));
+    initTriboelecCanvas(document.getElementById('triboelec-canvas'));
+    initCapacitorCanvas(document.getElementById('capacitor-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === FORMAZIONE CANVAS END ===
     // === MECCANISMO CANVAS ===
     // === PLASMA CANVAS ===
     // === CHIMICA INIT ===
