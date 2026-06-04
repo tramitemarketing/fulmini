@@ -1965,6 +1965,7 @@
     const map=L.map('world-map',{zoomControl:false,attributionControl:false}).setView([10,10],2);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©CartoDB',maxZoom:19}).addTo(map);
     L.control.attribution({prefix:false,position:'bottomright'}).addTo(map);
+    requestAnimationFrame(()=>map.invalidateSize());
     const hotspots=[
       {lat:9.8,lng:-71.5,name:'Lago Maracaibo',data:'297 notti/anno · 28 scariche/min<br>Guinness World Record',color:'#ff4444'},
       {lat:1,lng:24,name:'Congo Basin',data:'~205 fulmini/km²/anno<br>macro-regione più attiva',color:'#ff6600'},
@@ -2003,6 +2004,7 @@
     }
     function doFlash(){
       if(!canvas._init) return;
+      clearTimeout(flashTO);
       let fi=0;
       const up=setInterval(()=>{ fi=Math.min(1,fi+.2); drawNight(fi);
         if(fi>=1){ clearInterval(up); let fd=1;
