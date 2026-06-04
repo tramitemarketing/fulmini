@@ -353,6 +353,101 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // === SCROLL ENGINE ===
+    const TOTAL_SECTIONS = 10;
+    const state = {
+      currentSection: 0,
+      slideCurrent: new Array(TOTAL_SECTIONS).fill(0),
+      slideTotal: [1,4,5,4,3,5,3,4,4,4]
+    };
+
+    const sections = Array.from(document.querySelectorAll('.section'));
+
+    function scrollToSection(i) {
+      sections[Math.max(0, Math.min(i, TOTAL_SECTIONS - 1))].scrollIntoView({behavior:'smooth'});
+    }
+
+    function updateProgress(i) {
+      document.getElementById('progress-bar').style.width = ((i+1)/TOTAL_SECTIONS*100)+'%';
+    }
+
+    function updateNavDots(i) {
+      document.querySelectorAll('.nav-dot').forEach((d,j) => d.classList.toggle('active', j===i));
+    }
+
+    function updateSlideCounter(si) {
+      const cur = state.slideCurrent[si]+1;
+      const tot = state.slideTotal[si];
+      document.getElementById('slide-counter').textContent =
+        String(cur).padStart(2,'0')+' / '+String(tot).padStart(2,'0');
+    }
+
+    // Build nav dots
+    (function buildNavDots(){
+      const cont = document.getElementById('nav-dots');
+      sections.forEach((_,i) => {
+        const d = document.createElement('div');
+        d.className = 'nav-dot'+(i===0?' active':'');
+        d.title = sections[i].id;
+        d.addEventListener('click', () => scrollToSection(i));
+        cont.appendChild(d);
+      });
+    })();
+
+    // Section intersection observer
+    const sectionObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const i = parseInt(entry.target.dataset.section);
+          state.currentSection = i;
+          updateProgress(i);
+          updateNavDots(i);
+          updateSlideCounter(i);
+          // lazy canvas init dispatched via custom event
+          entry.target.dispatchEvent(new CustomEvent('section-enter'));
+          // trigger reveals in this section
+          entry.target.querySelectorAll('.reveal:not(.visible)').forEach(el => el.classList.add('visible'));
+        }
+      });
+    }, {threshold: 0.5});
+    sections.forEach(s => sectionObserver.observe(s));
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      switch(e.key) {
+        case 'ArrowDown': e.preventDefault(); scrollToSection(state.currentSection+1); break;
+        case 'ArrowUp':   e.preventDefault(); scrollToSection(state.currentSection-1); break;
+        case 'ArrowRight': e.preventDefault(); carouselNext(state.currentSection); break;
+        case 'ArrowLeft':  e.preventDefault(); carouselPrev(state.currentSection); break;
+        case 'f': case 'F':
+          if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+          else document.exitFullscreen();
+          break;
+      }
+    });
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    });
+
+    // Scroll hint hide
+    let scrollHintHidden = false;
+    window.addEventListener('scroll', () => {
+      if (!scrollHintHidden && window.scrollY > 50) {
+        document.getElementById('scroll-hint').classList.add('hidden');
+        scrollHintHidden = true;
+      }
+    }, {passive:true});
+
+    // TOC / data-scroll-to links
+    function bindScrollToLinks() {
+      document.querySelectorAll('[data-scroll-to]').forEach(el => {
+        el.addEventListener('click', () => {
+          const target = document.getElementById(el.dataset.scrollTo);
+          if (target) target.scrollIntoView({behavior:'smooth'});
+        });
+      });
+    }
+    // === SCROLL ENGINE END ===
     // === CAROUSEL ENGINE ===
     // === HERO INIT ===
     // === FORMAZIONE CANVAS ===
@@ -366,6 +461,9 @@
     // === SICUREZZA INIT ===
     // === REVEAL INIT ===
     // === BOOTSTRAP ===
+    bindScrollToLinks();
+    updateProgress(0);
+    // === BOOTSTRAP END ===
   </script>
 </body>
 </html>
