@@ -312,7 +312,43 @@
   <button id="fullscreen-btn">⛶ FS</button>
   <div id="scroll-hint">↓ scorri</div>
 
-  <section class="section" id="hero" data-section="0"><!-- HERO CONTENT --></section>
+  <section class="section" id="hero" data-section="0"><div class="hero-bg">
+  <svg class="hero-bolt" width="80" height="220" viewBox="0 0 80 220" role="img" aria-label="fulmine decorativo">
+    <polyline points="55,0 22,95 48,95 12,220" fill="none" stroke="#4a9eff" stroke-width="2"/>
+  </svg>
+  <svg class="hero-bolt" width="55" height="170" viewBox="0 0 55 170" role="img" aria-label="fulmine decorativo">
+    <polyline points="38,0 14,72 32,72 8,170" fill="none" stroke="#4a9eff" stroke-width="1.5"/>
+  </svg>
+  <svg class="hero-bolt" width="45" height="140" viewBox="0 0 45 140" role="img" aria-label="fulmine decorativo">
+    <polyline points="30,0 11,58 26,58 5,140" fill="none" stroke="#4a9eff" stroke-width="1"/>
+  </svg>
+</div>
+<div class="hero-content">
+  <div class="hero-left">
+    <span class="eyebrow reveal">Fisica dei Fulmini</span>
+    <h1 class="hero-title reveal reveal-d1">FUL<br>MI<br>NE</h1>
+    <p class="hero-subtitle reveal reveal-d2">Dal canale plasma a 30.000°C all'esperimento di Franklin: la fisica nascosta in ogni temporale</p>
+    <div class="hero-nav-guide reveal reveal-d3">
+      ← → cambia slide &nbsp;&nbsp;&nbsp; ↑ ↓ cambia sezione
+    </div>
+    <button class="hero-cta reveal reveal-d4" data-scroll-to="formazione">↓ Inizia</button>
+  </div>
+  <div class="hero-right">
+    <nav aria-label="Sommario sezioni">
+      <ol class="toc reveal reveal-d2">
+        <li><div class="toc-item" data-scroll-to="formazione"><span class="toc-num">01</span><span class="toc-title">Formazione</span></div></li>
+        <li><div class="toc-item" data-scroll-to="scarica"><span class="toc-num">02</span><span class="toc-title">La Scarica</span></div></li>
+        <li><div class="toc-item" data-scroll-to="fisica"><span class="toc-num">03</span><span class="toc-title">Fisica Estrema</span></div></li>
+        <li><div class="toc-item" data-scroll-to="dati"><span class="toc-num">04</span><span class="toc-title">I Dati</span></div></li>
+        <li><div class="toc-item" data-scroll-to="tipi"><span class="toc-num">05</span><span class="toc-title">Tassonomia</span></div></li>
+        <li><div class="toc-item" data-scroll-to="franklin"><span class="toc-num">06</span><span class="toc-title">L'Esperimento</span></div></li>
+        <li><div class="toc-item" data-scroll-to="mondo"><span class="toc-num">07</span><span class="toc-title">Nel Mondo</span></div></li>
+        <li><div class="toc-item" data-scroll-to="mitologia"><span class="toc-num">08</span><span class="toc-title">Mito e Storia</span></div></li>
+        <li><div class="toc-item" data-scroll-to="sicurezza"><span class="toc-num">09</span><span class="toc-title">Sicurezza</span></div></li>
+      </ol>
+    </nav>
+  </div>
+</div></section>
   <section class="section" id="formazione" data-section="1">
     <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
     <!-- FORMAZIONE CONTENT -->
@@ -522,6 +558,16 @@
     }
     // === CAROUSEL ENGINE END ===
     // === HERO INIT ===
+    (function initHero(){
+      const heroSection = document.getElementById('hero');
+      heroSection.addEventListener('section-enter', () => {
+        heroSection.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }, {once: false});
+      // trigger immediately if already visible
+      heroSection.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      bindScrollToLinks();
+    })();
+    // === HERO INIT END ===
     // === FORMAZIONE CANVAS ===
     // === SCARICA CANVAS ===
     // === FISICA CANVAS ===
