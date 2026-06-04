@@ -1038,7 +1038,129 @@ canvas { display: block; }
     </div>
   </div>
 </section>
-<section id="s-tipi"      class="slide"><!-- Task 3 --></section>
+<section id="s-tipi" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-dots">
+      <div class="vc-dot active"></div>
+      <div class="vc-dot"></div>
+      <div class="vc-dot"></div>
+    </div>
+    <div class="vc-track">
+
+      <!-- P1: Fulmini CG (HC) -->
+      <div class="vc-panel panel-split">
+        <div class="left">
+          <span class="slide-eyebrow">slide 05 · tipi di fulmini</span>
+          <h2 class="slide-title">Fulmini <em>comuni</em></h2>
+          <div class="hc-wrap" id="cg-hc">
+            <div class="hc-tabs">
+              <button class="hc-tab active">CG⁻</button>
+              <button class="hc-tab">CG⁺</button>
+              <button class="hc-tab">IC</button>
+              <button class="hc-tab">CC</button>
+            </div>
+            <div class="hc-track">
+              <div class="hc-slide">
+                <span class="phase-badge">NEGATIVO · ~90%</span>
+                <p class="slide-body">Dal base della nuvola verso terra. Corrente media 30.000 A. Le cariche negative si accumulano alla base del cumulonembo.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">POSITIVO · ~10%</span>
+                <p class="slide-body">Dall'incudine (sommità) verso terra. Fino a 300.000 A — 10× più potente. I tuoni più forti e sordi, udibili a decine di km. Statisticamente più pericolosi.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">INTRA-CLOUD · più frequente</span>
+                <p class="slide-body">Il tipo più frequente in natura. Avviene interamente dentro il cumulonembo tra base − e cima +. Un picco improvviso di IC segnala che il temporale si sta intensificando.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">CLOUD-TO-CLOUD</span>
+                <p class="slide-body">Scarica orizzontale tra due nuvole distinte con polarità opposta. Gli Anvil Crawlers percorrono centinaia di km con geometrie frattali nel cielo notturno.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="right">
+          <canvas id="type-canvas" width="300" height="380" style="max-width:100%;"></canvas>
+        </div>
+      </div>
+
+      <!-- P2: Fenomeni rari TLE (HC) -->
+      <div class="vc-panel panel-split">
+        <div class="left">
+          <span class="slide-eyebrow">fenomeni rari</span>
+          <h2 class="slide-title">Fulmini <em>misteriosi</em></h2>
+          <div class="hc-wrap" id="tle-hc">
+            <div class="hc-tabs">
+              <button class="hc-tab active">BALL</button>
+              <button class="hc-tab">SPRITE</button>
+              <button class="hc-tab">ELVES</button>
+              <button class="hc-tab">BLUE JET</button>
+            </div>
+            <div class="hc-track">
+              <div class="hc-slide">
+                <span class="phase-badge">BALL LIGHTNING · mistero della fisica</span>
+                <p class="slide-body">Sfera luminosa (arancione→bianca), dimensione arancia→pallone. Dura secondi, si muove lentamente, può passare attraverso vetri, si dissolve silenziosamente o esplode. La spiegazione fisica è ancora oggetto di dibattito scientifico.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">SPRITE · 50–90 km quota</span>
+                <p class="slide-body">Strutture luminose rosse a forma di medusa con tentacoli verso il basso. Compaiono dopo un CG positivo molto potente. Durano pochi millisecondi. Documentati in foto solo dal 1989.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">ELVES · ~400 km (ionosfera)</span>
+                <p class="slide-body">Emission of Light and VLF perturbations due to EMP Sources. Anelli luminosi piatti che si espandono alla velocità della luce. Diametro fino a 400 km. Causati dall'impulso EM del temporale sottostante.</p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">BLUE JET · 40–50 km</span>
+                <p class="slide-body">Getti conici di luce blu espulsi dalla cima della nuvola verso l'alto. Il colore blu = eccitazione degli atomi di N₂ molecolare negli strati atmosferici più densi.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="right">
+          <canvas id="tle-canvas" width="300" height="380" style="max-width:100%;"></canvas>
+        </div>
+      </div>
+
+      <!-- P3: Diagramma quota atmosferica -->
+      <div class="vc-panel panel-center">
+        <span class="slide-eyebrow">dove avvengono</span>
+        <h2 class="slide-title">Dalla nuvola alla <em>ionosfera</em></h2>
+        <div class="atmo-diagram" style="margin-top:1.5rem;">
+          <div class="atmo-layer tle-elves">
+            <span class="alt">~400 km</span>
+            <span class="name">IONOSFERA</span>
+            <span class="tle-name">⚪ ELVES — anelli che si espandono alla velocità della luce</span>
+          </div>
+          <div class="atmo-layer tle-sprite">
+            <span class="alt">~90 km</span>
+            <span class="name">MESOSFERA</span>
+            <span class="tle-name">🔴 SPRITES — strutture rosse a medusa</span>
+          </div>
+          <div class="atmo-layer tle-jet">
+            <span class="alt">~50 km</span>
+            <span class="name">STRATOSFERA</span>
+            <span class="tle-name">🔵 BLUE JETS — coni di luce blu verso l'alto</span>
+          </div>
+          <div class="atmo-layer tle-bolt">
+            <span class="alt">~12 km</span>
+            <span class="name">CUMULONEMBO</span>
+            <span class="tle-name">⚡ FULMINI CG / IC / CC</span>
+          </div>
+          <div class="atmo-layer">
+            <span class="alt">0 km</span>
+            <span class="name">SUOLO</span>
+            <span class="tle-name" style="color:var(--muted);">—</span>
+          </div>
+        </div>
+        <p class="slide-body" style="margin-top:1.5rem;max-width:50ch;text-align:center;font-style:italic;">
+          "Fino agli anni '90 i piloti riportavano 'luci strane' sopra i temporali.
+          Nessuno li credeva. Oggi le chiamiamo TLE e le studiamo con i satelliti."
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
 <section id="s-record"    class="slide"><!-- Task 4 --></section>
 <section id="s-franklin"  class="slide"><!-- Task 4 --></section>
 <section id="s-mitologia" class="slide"><!-- Task 4 --></section>
