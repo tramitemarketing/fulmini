@@ -343,7 +343,122 @@
   </section>
   <section class="section" id="tipi" data-section="3">
     <div class="section-header"><span class="section-num">03 — I TIPI</span></div>
-    <!-- TIPI CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: CG- -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 1/5</span>
+          <h2 class="reveal reveal-d1">CG⁻ — Cloud-to-Ground negativo</h2>
+          <p class="reveal reveal-d2">Il tipo più comune: circa <strong>~90% di tutti i fulmini CG</strong>. Il leader negativo parte dalla base della nube (zona −) e scende verso il suolo. Ha in media 3–4 stroke e una corrente di 20–30 kA. Le ramificazioni visibili nel canale discendente sono le biforcazioni del leader a gradini.</p>
+          <p class="reveal reveal-d3">I <strong>Fulmini negativi</strong> sono i più frequenti e hanno una corrente media di circa 30.000 ampere. Il canale principale — quello del return stroke — è il singolo percorso più luminoso.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <canvas id="cg-neg-canvas" width="300" height="400" aria-label="Animazione CG negativo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: CG+ -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 2/5</span>
+          <h2 class="reveal reveal-d1">CG⁺ — Cloud-to-Ground positivo</h2>
+          <p class="reveal reveal-d2">Rappresenta il <strong>~10% dei fulmini CG</strong> ma è enormemente più potente: può superare <strong>300 kA</strong> di picco. Il leader positivo origina dalla sommità della nube (zona +), dove risiedono le cariche positive, e scende senza ramificazioni visibili.</p>
+          <p class="reveal reveal-d3">Pericolosità maggiore: durata 5–10× più lunga del CG⁻, danno meccanico e capacità incendiaria molto superiori. È <strong>responsabile della maggior parte degli incendi forestali da fulmine</strong>. Tipici dei temporali invernali e delle anvil clouds.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <canvas id="cg-pos-canvas" width="300" height="400" aria-label="Animazione CG positivo"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: IC e CC -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 3/5</span>
+          <h2 class="reveal reveal-d1">IC e CC — nelle nubi</h2>
+          <p class="reveal reveal-d2">Il <strong>fulmine IC (Intra-Cloud)</strong> è in assoluto il più frequente: circa il <strong>70–75% di tutti i fulmini</strong>. Avviene interamente all'interno dello stesso cumulonembo tra la base carica negativamente e la cima carica positivamente — si manifesta come un flash diffuso senza canale esterno.</p>
+          <p class="reveal reveal-d3">Il <strong>fulmine CC (Cloud-to-Cloud)</strong> viaggia tra due nuvole temporalesche distinte con potenziali opposti. I più spettacolari da osservare: viaggiando orizzontalmente negli strati alti, possono coprire distanze immense prima di esaurirsi, creando lunghi <em>"serpenti di luce"</em> (gli <em>Anvil Crawlers</em>) che tracciano geometrie frattali nel cielo per centinaia di km.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;gap:2rem;align-items:center;justify-content:center;flex-direction:column;">
+          <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;width:100%;max-width:280px;">
+            <div class="label" style="margin-bottom:.5rem;">IC — Intra-Cloud</div>
+            <div id="ic-anim" style="height:80px;background:var(--surface2);position:relative;overflow:hidden;border-radius:2px;">
+              <canvas id="ic-canvas" width="280" height="80"></canvas>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);padding:1.5rem;width:100%;max-width:280px;">
+            <div class="label" style="margin-bottom:.5rem;">CC — Cloud-to-Cloud</div>
+            <div style="height:80px;background:var(--surface2);position:relative;overflow:hidden;border-radius:2px;">
+              <canvas id="cc-canvas" width="280" height="80"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Ball Lightning + Elmo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 4/5</span>
+          <h2 class="reveal reveal-d1">Curiosità ottiche</h2>
+          <p class="reveal reveal-d2"><strong>Ball Lightning (fulmine globulare):</strong> sfera luminosa di 10–50 cm che fluttua per 1–20 secondi, poi svanisce silenziosamente o esplode. La spiegazione è ancora dibattuta: plasma toroidale? ossido di silicio vaporizzato? Migliaia di testimonianze storiche, fisica ancora aperta.</p>
+          <p class="reveal reveal-d3"><strong>Elmo di Sant'Elmo:</strong> scarica corona su oggetti appuntiti (alberi, antenne, punte degli alberi master) durante temporali intensi. Non è propriamente un fulmine ma lo stesso fenomeno di ionizzazione dell'aria in punti di alta curvatura del campo elettrico.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;gap:3rem;align-items:center;justify-content:center;">
+          <div style="text-align:center;">
+            <canvas id="ball-canvas" width="160" height="160" aria-label="Ball lightning fluttuante"></canvas>
+            <div class="label" style="margin-top:.5rem;">Ball Lightning</div>
+          </div>
+          <div style="text-align:center;">
+            <canvas id="elmo-canvas" width="160" height="160" aria-label="Elmo di Sant'Elmo — scarica corona"></canvas>
+            <div class="label" style="margin-top:.5rem;">Elmo di S. Elmo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: TLE -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">I Tipi — 5/5</span>
+          <h2 class="reveal reveal-d1">TLE — Transient Luminous Events</h2>
+          <p class="reveal reveal-d2">Sopra i temporali più intensi si producono scariche in alta atmosfera, invisibili dal suolo ma documentate da astronauti e aerei. Durano da 1 ms a ~100 ms.</p>
+          <ul style="list-style:none;margin-top:.5rem;" class="reveal reveal-d3">
+            <li style="padding:.4rem 0;"><strong style="color:#cc2244;">Sprite</strong> — colonne rosse a 70–90 km, generate da CG⁺ potenti</li>
+            <li style="padding:.4rem 0;"><strong style="color:#aaddff;">Elve</strong> — disco espansivo a ~90 km, dura ~1 ms</li>
+            <li style="padding:.4rem 0;"><strong style="color:#0066ff;">Blue jet</strong> — cono blu dalla sommità nube fino a 50 km</li>
+          </ul>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="phase-btn" data-tle="sprite">Sprite</button>
+            <button class="phase-btn" data-tle="elve">Elve</button>
+            <button class="phase-btn" data-tle="jet">Blue Jet</button>
+            <button class="play-btn" data-tle="play">▶ Play tutto</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="tle-canvas" aria-label="TLE — Transient Luminous Events"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="plasma" data-section="4">
     <div class="section-header"><span class="section-num">04 — IL PLASMA</span></div>
@@ -1292,7 +1407,233 @@
   },{once:true});
 })();
 // === CHIMICA INIT END ===
-    // === TIPI CANVAS ===
+// === TIPI CANVAS ===
+(function initTipiSection(){
+  const sec = document.getElementById('tipi');
+
+  function drawCGCanvas(canvas,positive){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||300; canvas.height=canvas.offsetHeight||400;
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    function gen(){
+      if(document.hidden) return;
+      ctx.clearRect(0,0,W,H);
+      const cloudY=positive?H*.85:H*.15;
+      ctx.save(); ctx.fillStyle='#1a1a2e';
+      ctx.beginPath(); ctx.arc(W*.45,cloudY+(positive?-8:8),W*.12,0,Math.PI*2);
+      ctx.arc(W*.55,cloudY+(positive?-14:14),W*.1,0,Math.PI*2); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.2)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,positive?H*.12:H*.88); ctx.lineTo(W,positive?H*.12:H*.88); ctx.stroke(); ctx.restore();
+      let x=W*.5,y=positive?H*.78:H*.22;
+      const target=positive?H*.15:H*.85;
+      const pts=[{x,y}];
+      while(positive?y>target:y<target){
+        const nx=Math.max(15,Math.min(W-15,x+(Math.random()-.5)*(positive?45:60)));
+        const ny=positive?y-22-Math.random()*22:y+22+Math.random()*22;
+        pts.push({x:nx,y:ny}); x=nx; y=ny;
+      }
+      ctx.save(); ctx.strokeStyle=positive?'#ffd700':'#4a9eff'; ctx.lineWidth=2;
+      ctx.shadowColor=positive?'#ffd700':'#4a9eff'; ctx.shadowBlur=18;
+      ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+      if(!positive){
+        for(let i=2;i<pts.length-1;i+=3){
+          if(Math.random()<.5){
+            let bx=pts[i].x,by=pts[i].y;
+            ctx.globalAlpha=.4; ctx.lineWidth=.7;
+            ctx.beginPath(); ctx.moveTo(bx,by);
+            for(let k=0;k<3;k++){ bx+=((Math.random()-.5)*50); by+=(20+Math.random()*15); ctx.lineTo(bx,by); if(by>H*.9) break; }
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.restore();
+      ctx.font='10px JetBrains Mono'; ctx.fillStyle=positive?'#ffd700':'#4a9eff';
+      ctx.fillText(positive?'CG⁺ — dalla sommità nube':'CG⁻ — dalla base nube',10,positive?H*.07:H*.95);
+    }
+    gen(); setInterval(gen,3000+Math.random()*2000);
+  }
+
+  function initICCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||280; canvas.height=canvas.offsetHeight||80;
+    const ctx=canvas.getContext('2d'); let fa=0,growing=true;
+    function draw(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.save(); ctx.fillStyle=`rgba(74,158,255,${fa*.25})`; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#1a1a2e'; ctx.fillRect(2,2,W-4,H-4); ctx.restore();
+      ctx.save(); ctx.fillStyle=`rgba(255,255,200,${fa*.4})`; ctx.fillRect(0,0,W,H); ctx.restore();
+      if(growing){ fa=Math.min(1,fa+.05); if(fa>=1) growing=false; }
+      else{ fa=Math.max(0,fa-.04); if(fa<=0){ growing=true; setTimeout(()=>requestAnimationFrame(draw),1500); return; } }
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function initCCCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||280; canvas.height=canvas.offsetHeight||80;
+    const ctx=canvas.getContext('2d'); let progress=0,active=false;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#1a1a2e'; ctx.beginPath(); ctx.arc(W*.15,H*.5,20,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(W*.85,H*.5,20,0,Math.PI*2); ctx.fill();
+      if(!active) return;
+      const len=Math.floor(progress*10);
+      ctx.save(); ctx.strokeStyle='#4a9eff'; ctx.lineWidth=1.5; ctx.shadowColor='#4a9eff'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.moveTo(W*.15+20,H*.5);
+      for(let i=1;i<=len;i++){ const t=i/10; ctx.lineTo(W*.15+20+(W*.7*t),H*.5+(Math.random()-.5)*20); }
+      ctx.stroke(); ctx.restore();
+    }
+    function animate(){
+      if(!active){ active=true; progress=0; }
+      progress=Math.min(1,progress+.08); draw();
+      if(progress<1) requestAnimationFrame(animate);
+      else setTimeout(()=>{ active=false; draw(); setTimeout(animate,2000); },800);
+    }
+    animate();
+  }
+
+  function initBallCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||160; canvas.height=canvas.offsetHeight||160;
+    const ctx=canvas.getContext('2d');
+    let x=80,y=80,angle=0;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+      x+=Math.sin(angle)*0.8; y+=Math.cos(angle*1.3)*0.4; angle+=0.03;
+      x=Math.max(40,Math.min(W-40,x)); y=Math.max(40,Math.min(H-40,y));
+      const grd=ctx.createRadialGradient(x,y,0,x,y,30);
+      grd.addColorStop(0,'rgba(255,255,200,1)'); grd.addColorStop(.4,'rgba(255,200,50,.8)'); grd.addColorStop(1,'rgba(255,100,0,0)');
+      ctx.save(); ctx.beginPath(); ctx.arc(x,y,30,0,Math.PI*2);
+      ctx.fillStyle=grd; ctx.shadowColor='#ffcc00'; ctx.shadowBlur=20; ctx.fill(); ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  function initElmoCanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    canvas.width=canvas.offsetWidth||160; canvas.height=canvas.offsetHeight||160;
+    const ctx=canvas.getContext('2d'); let t=0;
+    function draw(){
+      const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H); t+=0.05;
+      ctx.save(); ctx.strokeStyle='rgba(201,168,76,.4)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(W*.5,H*.9); ctx.lineTo(W*.5,H*.3); ctx.stroke(); ctx.restore();
+      for(let i=0;i<12;i++){
+        const base=i/12*Math.PI*2+t;
+        const len=20+Math.sin(t*3+i)*10;
+        ctx.save(); ctx.strokeStyle=`rgba(0,200,255,${.4+Math.sin(t*2+i)*.2})`;
+        ctx.lineWidth=.8; ctx.shadowColor='#00ccff'; ctx.shadowBlur=8;
+        ctx.beginPath();
+        ctx.moveTo(W*.5+Math.cos(base)*5,H*.3+Math.sin(base)*5);
+        ctx.lineTo(W*.5+Math.cos(base)*len,H*.3+Math.sin(base)*len);
+        ctx.stroke(); ctx.restore();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  function initTLECanvas(canvas){
+    if(canvas._init) return; canvas._init=true;
+    const ctx=canvas.getContext('2d');
+    let showing={},elveR=0,elveAlpha=0,elveExpanding=false;
+    function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; drawBase(); }
+    function altY(km){ return canvas.height-(km/100)*canvas.height; }
+    function drawBase(){
+      const W=canvas.width,H=canvas.height;
+      ctx.clearRect(0,0,W,H);
+      const bg=ctx.createLinearGradient(0,H,0,0); bg.addColorStop(0,'#0a0a0f'); bg.addColorStop(1,'#020305');
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+      [['TROPOSFERA',0,12],['STRATOSFERA',12,50],['MESOSFERA',50,85],['TERMOSFERA',85,100]].forEach(([n,k0,k1])=>{
+        const y=altY(k1);
+        ctx.font='7px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.35)'; ctx.fillText(n,3,y+10);
+        ctx.strokeStyle='rgba(102,102,128,.1)'; ctx.lineWidth=.5; ctx.setLineDash([3,5]);
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); ctx.setLineDash([]);
+      });
+      const cY=altY(10);
+      ctx.fillStyle='#151525';
+      ctx.beginPath(); ctx.arc(W*.35,cY,W*.09,0,Math.PI*2); ctx.arc(W*.48,cY-16,W*.12,0,Math.PI*2); ctx.arc(W*.6,cY-3,W*.1,0,Math.PI*2); ctx.fill();
+    }
+    function draw(){
+      drawBase(); const W=canvas.width,H=canvas.height;
+      if(showing.sprite){
+        for(let i=0;i<7;i++){
+          const sx=W*.3+i*W*.06,sy0=altY(90),sy1=altY(68);
+          ctx.save(); ctx.strokeStyle='#cc2244'; ctx.lineWidth=1.5; ctx.shadowColor='#cc2244'; ctx.shadowBlur=12;
+          ctx.globalAlpha=.65+Math.sin(Date.now()*.005+i)*.15;
+          ctx.beginPath(); ctx.moveTo(sx,sy0); ctx.lineTo(sx+(Math.random()-.5)*6,sy1); ctx.stroke();
+          const mY=(sy0+sy1)/2; ctx.globalAlpha=.35;
+          ctx.beginPath(); ctx.moveTo(sx,mY); ctx.lineTo(sx+18,mY+14); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(sx,mY); ctx.lineTo(sx-14,mY+18); ctx.stroke(); ctx.restore();
+        }
+      }
+      if(showing.elve&&elveAlpha>0){
+        const eY=altY(90);
+        ctx.save(); ctx.beginPath(); ctx.arc(W*.47,eY,elveR,0,Math.PI*2);
+        ctx.strokeStyle='#aaddff'; ctx.lineWidth=2; ctx.globalAlpha=elveAlpha;
+        ctx.shadowColor='#aaddff'; ctx.shadowBlur=15; ctx.stroke(); ctx.restore();
+      }
+      if(showing.jet){
+        const jBase=altY(12),jTip=altY(50);
+        ctx.save(); ctx.beginPath(); ctx.moveTo(W*.47,jBase); ctx.lineTo(W*.42,jTip); ctx.lineTo(W*.52,jTip); ctx.closePath();
+        const jg=ctx.createLinearGradient(0,jBase,0,jTip);
+        jg.addColorStop(0,'rgba(0,100,255,.8)'); jg.addColorStop(1,'rgba(0,200,255,.08)');
+        ctx.fillStyle=jg; ctx.shadowColor='#0066ff'; ctx.shadowBlur=22; ctx.fill(); ctx.restore();
+      }
+      if(showing.sprite||(showing.elve&&elveAlpha>0)) requestAnimationFrame(draw);
+    }
+    function showSprite(){ showing={sprite:true}; draw(); }
+    function showElve(){
+      if(elveExpanding) return;
+      showing={elve:true}; elveR=5; elveAlpha=1; elveExpanding=true;
+      function expand(){
+        elveR+=14; elveAlpha-=.045; draw();
+        if(elveAlpha>0&&elveR<canvas.width) requestAnimationFrame(expand);
+        else{ elveAlpha=0; elveR=0; elveExpanding=false; drawBase(); }
+      }
+      expand();
+    }
+    function showJet(){ showing={jet:true}; draw(); }
+    resize();
+    const slide=canvas.closest('.hc-slide');
+    slide?.querySelector('[data-tle="sprite"]')?.addEventListener('click',()=>{
+      showSprite(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='sprite'));
+    });
+    slide?.querySelector('[data-tle="elve"]')?.addEventListener('click',()=>{
+      showElve(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='elve'));
+    });
+    slide?.querySelector('[data-tle="jet"]')?.addEventListener('click',()=>{
+      showJet(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='jet'));
+    });
+    slide?.querySelector('[data-tle="play"]')?.addEventListener('click',async function(){
+      this.classList.add('playing'); this.textContent='⏳';
+      slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.remove('active'));
+      showSprite(); slide.querySelector('[data-tle="sprite"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,1800));
+      showElve(); slide.querySelector('[data-tle="elve"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,2000));
+      showJet(); slide.querySelector('[data-tle="jet"]')?.classList.add('active');
+      await new Promise(r=>setTimeout(r,1500));
+      this.classList.remove('playing'); this.textContent='▶ Play tutto';
+    });
+    window.addEventListener('resize',resize);
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    drawCGCanvas(document.getElementById('cg-neg-canvas'),false);
+    drawCGCanvas(document.getElementById('cg-pos-canvas'),true);
+    initICCanvas(document.getElementById('ic-canvas'));
+    initCCCanvas(document.getElementById('cc-canvas'));
+    initBallCanvas(document.getElementById('ball-canvas'));
+    initElmoCanvas(document.getElementById('elmo-canvas'));
+    initTLECanvas(document.getElementById('tle-canvas'));
+    initCarousel(sec);
+  },{once:true});
+})();
+// === TIPI CANVAS END ===
     // === STORIA CANVAS ===
     // === MONDO MAP ===
     // === CURIOSITA INIT ===
