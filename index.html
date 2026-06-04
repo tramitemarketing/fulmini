@@ -1144,13 +1144,13 @@ function initEMPulse(){
         boltF--;
       }
       nextCircle--;if(nextCircle<=0&&circles.length<6){circles.push({r:10,max:Math.min(W,H)*.48});nextCircle=25;}
-      circles.forEach((c,i)=>{
+      circles.forEach(c=>{
         c.r+=3;const a=Math.max(0,1-c.r/c.max);
         const hue=c.r/c.max*180;
         ctx.strokeStyle=`hsla(${hue},80%,70%,${a})`;ctx.lineWidth=1.5;ctx.shadowColor=`hsla(${hue},80%,70%,${a*.5})`;ctx.shadowBlur=10;
         ctx.beginPath();ctx.arc(W/2,H/2,c.r,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
-        if(a<=0)circles.splice(i,1);
       });
+      for(let i=circles.length-1;i>=0;i--){if(1-circles[i].r/circles[i].max<=0)circles.splice(i,1);}
       if(circles.length>0||boltF>0)requestAnimationFrame(frame);else running=false;
     })();
   }
