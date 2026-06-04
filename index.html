@@ -782,7 +782,92 @@ canvas { display: block; }
     </div>
   </div>
 </section>
-<section id="s-formazione"class="slide"><!-- Task 2 --></section>
+<section id="s-formazione" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-dots">
+      <div class="vc-dot active"></div>
+      <div class="vc-dot"></div>
+    </div>
+    <div class="vc-track">
+
+      <!-- P1: Effetto triboelettrico + canvas -->
+      <div class="vc-panel panel-split">
+        <div class="left">
+          <span class="slide-eyebrow">slide 02 · formazione</span>
+          <h2 class="slide-title">Il condensatore <em>naturale</em></h2>
+          <p class="slide-body">
+            All'interno del cumulonembo, le correnti d'aria violente fanno scontrare
+            cristalli di ghiaccio e graupel (grandine tenera). L'attrito —
+            <strong>effetto triboelettrico</strong> — strappa elettroni:
+            i cristalli leggeri si caricano <strong>positivamente</strong> e salgono,
+            il graupel pesante si carica <strong>negativamente</strong> e scende.
+            La nuvola diventa un <strong>condensatore naturale</strong>.<br><br>
+            La terra sotto sviluppa una carica positiva per
+            <strong>induzione elettrostatica</strong>. Quando la differenza di
+            potenziale supera ~3×10⁶ V/m, l'aria si ionizza e scatta la scarica.
+          </p>
+        </div>
+        <div class="right">
+          <canvas id="formation-canvas" width="320" height="320" style="max-width:100%;"></canvas>
+        </div>
+      </div>
+
+      <!-- P2: 4 fasi (HC) + leader canvas -->
+      <div class="vc-panel panel-split">
+        <div class="left" style="max-width:45%;">
+          <span class="slide-eyebrow">meccanismo di scarica</span>
+          <div class="hc-wrap" id="leader-hc">
+            <div class="hc-tabs">
+              <button class="hc-tab active">A. STEPPED LEADER</button>
+              <button class="hc-tab">B. STREAMER</button>
+              <button class="hc-tab">C. CONNESSIONE</button>
+              <button class="hc-tab">D. RETURN STROKE</button>
+            </div>
+            <div class="hc-track">
+              <div class="hc-slide">
+                <span class="phase-badge">FASE A</span>
+                <p class="slide-body">
+                  Dal cumulonembo parte il <strong>precursore</strong>: un canale quasi
+                  invisibile che avanza a scatti da 50 m, a 150–200 km/s, cercando
+                  il percorso di minore resistenza. La sua traiettoria è frattale.
+                </p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">FASE B</span>
+                <p class="slide-body">
+                  A poche centinaia di metri dal suolo, il campo elettrico intensissimo
+                  ionizza l'aria vicino ai punti prominenti. Salgono verso l'alto
+                  filamenti di plasma blu: gli <strong>upward streamers</strong>.
+                </p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">FASE C</span>
+                <p class="slide-body">
+                  A 30–50 m dal suolo, stepped leader e upward streamer si incontrano.
+                  Il circuito si chiude: si crea un 'cavo virtuale' di plasma
+                  tra nuvola e terra.
+                </p>
+              </div>
+              <div class="hc-slide">
+                <span class="phase-badge">FASE D</span>
+                <p class="slide-body">
+                  Con il circuito chiuso, la resistenza crolla. Un'immensa ondata di
+                  carica risale dal suolo a <strong>100.000 km/s</strong> (c/3).
+                  È questo il lampo che vediamo — risale dal basso, non scende.
+                </p>
+              </div>
+            </div>
+          </div>
+          <button class="canvas-btn" id="leader-play-btn">▶ PLAY</button>
+        </div>
+        <div class="right">
+          <canvas id="leader-canvas" width="300" height="400" style="max-width:100%;"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 <section id="s-fisica"    class="slide"><!-- Task 3 --></section>
 <section id="s-tuono"     class="slide"><!-- Task 3 --></section>
 <section id="s-tipi"      class="slide"><!-- Task 3 --></section>
