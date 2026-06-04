@@ -806,7 +806,7 @@ function initHeroCanvas(){
   const ctx=canvas.getContext('2d');
   function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
   resize();window.addEventListener('resize',resize);
-  let segs=[],showing=false,bTimer=0,dTimer=0;
+  let segs=[],showing=false,bTimer=0,dTimer=0,nextBolt=120+Math.random()*120;
   function genPath(x,y,tY,depth,arr){
     if(depth<=0||y>=tY)return;
     const step=(tY-y)/(depth*2);
@@ -820,7 +820,7 @@ function initHeroCanvas(){
     }
   }
   function trigger(){
-    segs=[];
+    segs=[];nextBolt=120+Math.random()*120;bTimer=0;
     genPath(canvas.width*(.15+Math.random()*.7),0,canvas.height*.75,8,segs);
     showing=true;dTimer=0;
   }
@@ -835,7 +835,7 @@ function initHeroCanvas(){
         ctx.stroke();ctx.shadowBlur=0;
       });
       dTimer++;if(dTimer>12){showing=false;bTimer=0;}
-    }else{bTimer++;if(bTimer>120+Math.random()*120)trigger();}
+    }else{bTimer++;if(bTimer>nextBolt)trigger();}
     requestAnimationFrame(frame);
   })();
 }
