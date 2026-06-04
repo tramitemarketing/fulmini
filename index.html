@@ -163,7 +163,35 @@
   <div class="keyboard-hint">↑↓ sezioni · ←→ slide · F schermo intero</div>
 
   <section class="section" id="hero" data-section="0">
-    <!-- HERO CONTENT -->
+    <div class="bolt-bg">
+      <svg class="bolt-svg" viewBox="0 0 120 300" width="120" height="300" fill="none">
+        <polyline points="75,0 40,130 65,130 25,300" stroke="#c9a84c" stroke-width="3" stroke-linejoin="round"/>
+        <polyline points="75,0 40,130 65,130 25,300" stroke="#4a9eff" stroke-width="1.5" stroke-linejoin="round" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">fenomeni naturali · fisica dell'atmosfera</p>
+      <h1 class="hero-title">I FULMINI</h1>
+      <p class="hero-subtitle">Fisica · Tipi · Geografia · Storia e curiosità</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-val">30.000 K</span><span class="hero-stat-label">temperatura canale</span></div>
+        <div class="hero-stat"><span class="hero-stat-val">30.000 A</span><span class="hero-stat-label">corrente media</span></div>
+        <div class="hero-stat"><span class="hero-stat-val">100.000 km/s</span><span class="hero-stat-label">return stroke</span></div>
+        <div class="hero-stat"><span class="hero-stat-val">8 mln/giorno</span><span class="hero-stat-label">nel mondo</span></div>
+      </div>
+      <nav class="hero-toc">
+        <a href="#formazione" data-scroll-to="formazione">01 Formazione</a>
+        <a href="#meccanismo" data-scroll-to="meccanismo">02 Meccanismo</a>
+        <a href="#tipi" data-scroll-to="tipi">03 I Tipi</a>
+        <a href="#plasma" data-scroll-to="plasma">04 Il Plasma</a>
+        <a href="#chimica" data-scroll-to="chimica">05 Chimica</a>
+        <a href="#storia" data-scroll-to="storia">06 Storia</a>
+        <a href="#mondo" data-scroll-to="mondo">07 Nel Mondo</a>
+        <a href="#curiosita" data-scroll-to="curiosita">08 Curiosità</a>
+        <a href="#sicurezza" data-scroll-to="sicurezza">09 Sicurezza</a>
+      </nav>
+      <p class="hero-cta">↓ Inizia</p>
+    </div>
   </section>
   <section class="section" id="formazione" data-section="1">
     <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
@@ -318,6 +346,10 @@
     }
     // === CAROUSEL ENGINE END ===
     // === HERO INIT ===
+    (function initHero(){
+      document.getElementById('hero').addEventListener('section-enter', () => {}, {once:true});
+    })();
+    // === HERO INIT END ===
     // === FORMAZIONE CANVAS ===
     // === MECCANISMO CANVAS ===
     // === PLASMA CANVAS ===
