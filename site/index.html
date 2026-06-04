@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fulmini — La Scienza del Lampo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#05070f; --surface:#0a0e1a; --surface2:#0f1525;
+  --gold:#f0c040; --blue:#3a8fff; --white:#e8eaf0;
+  --muted:#7a8099; --border:rgba(240,192,64,.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;scrollbar-width:none;cursor:none;height:100%;}
+html::-webkit-scrollbar{display:none;}
+body{background:var(--bg);color:var(--white);font-family:'Source Serif 4',Georgia,serif;font-weight:300;line-height:1.75;height:100%;overflow:visible;}
+.slide{height:100vh;min-height:100vh;max-height:100vh;scroll-snap-align:start;scroll-snap-stop:always;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+
+/* CURSOR */
+#cursor{position:fixed;width:10px;height:10px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(240,192,64,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);}
+
+/* FIXED UI */
+#progress-bar{position:fixed;left:0;top:0;width:3px;height:0%;background:var(--gold);z-index:200;transition:height .6s cubic-bezier(.4,0,.2,1);}
+#nav-dots{position:fixed;right:1.8rem;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:.75rem;}
+.ndot{width:5px;height:5px;background:rgba(240,192,64,.25);border-radius:50%;cursor:pointer;transition:all .35s;}
+.ndot.active{background:var(--gold);transform:scale(1.8);}
+#slide-counter{position:fixed;left:1.8rem;bottom:.5rem;font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.2em;color:rgba(240,192,64,.3);z-index:200;}
+#fullscreen-btn{position:fixed;top:1.4rem;right:1.4rem;width:34px;height:34px;border:1px solid rgba(240,192,64,.2);background:transparent;cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;transition:border-color .3s;}
+#fullscreen-btn:hover{border-color:var(--gold);}
+#fullscreen-btn svg{width:13px;height:13px;fill:none;stroke:rgba(240,192,64,.5);stroke-width:1.5;}
+#scroll-hint{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;z-index:200;pointer-events:none;transition:opacity .6s;}
+#scroll-hint.hidden{opacity:0;}
+.scroll-mouse{width:18px;height:28px;border:1px solid rgba(240,192,64,.2);border-radius:9px;position:relative;}
+.scroll-mouse::after{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:2px;height:7px;background:rgba(240,192,64,.35);border-radius:1px;animation:scrollBob 1.6s infinite;}
+@keyframes scrollBob{0%,100%{top:5px;opacity:1;}80%{top:13px;opacity:0;}}
+.scroll-label{font-family:'Bebas Neue',sans-serif;font-size:.5rem;letter-spacing:.25em;color:rgba(240,192,64,.25);}
+
+/* VERTICAL CAROUSEL */
+.vc-wrap{width:100%;height:100%;overflow:hidden;position:relative;}
+.vc-track{display:flex;flex-direction:column;transition:transform .65s cubic-bezier(.4,0,.2,1);will-change:transform;}
+.vc-panel{height:100vh;min-height:100vh;flex-shrink:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;}
+.vc-dots{position:absolute;left:1.4rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:50;}
+.vc-dot{width:3px;height:3px;background:rgba(240,192,64,.2);border-radius:50%;cursor:pointer;transition:all .3s;}
+.vc-dot.active{background:rgba(240,192,64,.8);transform:scale(2);}
+
+/* PANEL LAYOUTS */
+.panel-split{display:flex;width:100%;height:100%;align-items:center;}
+.panel-left{flex:1;padding:4rem 2rem 4rem 5.5rem;display:flex;flex-direction:column;justify-content:center;max-width:50%;}
+.panel-right{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 3rem 2rem 2rem;position:relative;height:100%;}
+.panel-center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 5.5rem;width:100%;height:100%;}
+.panel-full{display:block!important;padding:0!important;width:100%;height:100%;}
+
+/* TYPOGRAPHY */
+.slide-eyebrow{font-family:'Bebas Neue',sans-serif;font-size:.58rem;letter-spacing:.45em;color:rgba(240,192,64,.4);margin-bottom:.6rem;display:block;}
+.slide-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4.5rem);line-height:1;color:var(--white);margin-bottom:1.5rem;}
+.slide-title em{color:var(--gold);font-style:normal;}
+.slide-body{font-size:.88rem;line-height:1.8;color:rgba(232,234,240,.78);}
+.slide-body strong{color:var(--gold);font-weight:600;}
+.slide-body p+p{margin-top:1rem;}
+
+/* PHASE ANIMATION UI */
+.phase-ui{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem;}
+.phase-strip{display:flex;gap:.35rem;flex-wrap:wrap;}
+.phase-btn{flex:1;min-width:70px;padding:.4rem .25rem;border:1px solid rgba(240,192,64,.15);background:transparent;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.5rem;letter-spacing:.1em;cursor:pointer;transition:all .3s;text-align:center;line-height:1.3;}
+.phase-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.05);}
+.phase-desc{font-size:.78rem;color:rgba(232,234,240,.7);line-height:1.55;min-height:3.2em;}
+.phase-controls{display:flex;gap:.5rem;}
+.phase-play-btn{padding:.35rem .9rem;border:1px solid rgba(240,192,64,.25);background:transparent;color:rgba(240,192,64,.7);font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.15em;cursor:pointer;transition:all .25s;}
+.phase-play-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* HERO */
+#s-hero{background:radial-gradient(ellipse 60% 80% at 50% 60%,#0d1f4a 0%,#05070f 70%);}
+.hero-eyebrow{font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:.5em;color:rgba(240,192,64,.5);margin-bottom:1rem;display:block;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(6rem,18vw,16rem);line-height:.9;color:var(--white);text-shadow:0 0 80px rgba(240,192,64,.3),0 0 160px rgba(58,143,255,.2);}
+.hero-title em{color:var(--gold);font-style:normal;}
+.hero-sub{font-family:'Source Serif 4',serif;font-size:1.05rem;font-weight:300;font-style:italic;color:var(--muted);margin-top:1.5rem;}
+.hero-line{width:60px;height:1px;background:var(--border);margin:1.5rem auto;}
+
+/* S1 — stat + plasma */
+.stat-trio{display:flex;gap:1.5rem;margin:2rem 0;flex-wrap:wrap;}
+.stat-box{flex:1;min-width:140px;border:1px solid var(--border);padding:1.4rem 1.2rem;text-align:center;background:var(--surface2);}
+.stat-icon{font-size:1.3rem;margin-bottom:.3rem;}
+.stat-label{font-family:'Bebas Neue',sans-serif;font-size:.52rem;letter-spacing:.3em;color:var(--muted);display:block;margin-bottom:.25rem;}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;color:var(--gold);line-height:1;}
+.stat-unit{font-size:.65rem;color:var(--muted);}
+.plasma-box{border:1px solid rgba(58,143,255,.25);padding:1.5rem;margin-top:1.5rem;max-width:680px;}
+.plasma-title{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.2em;color:var(--blue);margin-bottom:.8rem;}
+.plasma-text{font-size:.82rem;line-height:1.7;color:rgba(232,234,240,.7);}
+.plasma-states{display:flex;gap:1.5rem;margin-top:1rem;font-size:.72rem;color:var(--muted);}
+.plasma-state-active{color:var(--blue);font-weight:600;}
+
+/* S3 — physics cols */
+.physics-cols{display:flex;width:100%;height:100%;}
+.physics-col{flex:1;padding:4rem 1.5rem 3rem 2rem;display:flex;flex-direction:column;border-right:1px solid rgba(240,192,64,.06);}
+.physics-col:last-child{border-right:none;}
+.physics-col-icon{font-size:2rem;margin-bottom:.75rem;}
+.physics-col-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);letter-spacing:.1em;margin-bottom:1rem;}
+.physics-col ul{list-style:none;display:flex;flex-direction:column;gap:.75rem;}
+.physics-col li{font-size:.8rem;color:rgba(232,234,240,.72);line-height:1.6;padding-left:1rem;border-left:2px solid rgba(240,192,64,.18);}
+.physics-col li strong{color:var(--white);}
+
+/* S4 — type cards */
+.types-cards{display:flex;flex-direction:column;gap:.65rem;width:100%;}
+.type-card{border:1px solid rgba(240,192,64,.1);padding:.8rem 1rem;cursor:pointer;transition:all .3s;background:rgba(10,14,26,.5);}
+.type-card:hover{border-color:rgba(240,192,64,.3);}
+.type-card.selected{border-color:var(--gold);background:rgba(240,192,64,.04);}
+.type-card-head{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.2rem;}
+.type-badge{font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.15em;color:var(--gold);}
+.type-name{font-size:.8rem;color:var(--white);}
+.type-pct{font-family:'Bebas Neue',sans-serif;font-size:.6rem;color:var(--muted);margin-left:auto;}
+.type-desc{font-size:.73rem;color:var(--muted);line-height:1.45;}
+
+/* S5 — records + thunder */
+.records-grid{display:grid;grid-template-columns:repeat(3,1fr);width:100%;height:100%;}
+.record-cell{display:flex;flex-direction:column;justify-content:center;padding:2.5rem 1.8rem;border:1px solid rgba(240,192,64,.06);background:var(--surface);transition:background .3s;}
+.record-cell:hover{background:var(--surface2);}
+.record-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,3vw,2.8rem);color:var(--gold);line-height:1;margin-bottom:.3rem;}
+.record-label{font-size:.75rem;color:var(--muted);line-height:1.4;}
+.record-sub{font-size:.62rem;color:rgba(122,128,153,.55);margin-top:.2rem;}
+.thunder-calc{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:460px;}
+.thunder-calc label{font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.3em;color:var(--muted);display:block;text-align:center;margin-bottom:.2rem;}
+.thunder-calc input[type=range]{width:100%;accent-color:var(--gold);}
+.thunder-output{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--gold);text-align:center;line-height:1;}
+.thunder-output span{font-size:.75rem;color:var(--muted);letter-spacing:.1em;}
+.lich-btn{padding:.4rem .9rem;border:1px solid rgba(240,192,64,.25);background:transparent;color:rgba(240,192,64,.7);font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.15em;cursor:pointer;transition:all .25s;}
+.lich-btn:hover{border-color:var(--gold);color:var(--gold);}
+.lich-controls{display:flex;gap:.5rem;margin-top:.5rem;}
+
+/* S6 — timeline + warn */
+.tl-list{display:flex;flex-direction:column;gap:1.2rem;}
+.tl-item{display:flex;gap:1rem;align-items:flex-start;}
+.tl-year{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--gold);min-width:3.5rem;padding-top:.1rem;flex-shrink:0;}
+.tl-text{font-size:.8rem;color:rgba(232,234,240,.72);line-height:1.5;}
+.warn-pill{display:inline-flex;align-items:flex-start;gap:.6rem;border:1px solid rgba(240,192,64,.3);padding:.5rem 1rem;margin-top:.75rem;background:rgba(240,192,64,.04);}
+.warn-pill-text{font-size:.75rem;color:rgba(240,192,64,.85);line-height:1.5;}
+
+/* S7 — map + deity + safety */
+.map-panel{display:block!important;padding:0!important;position:relative;}
+#map{width:100%;height:100%;background:#000;}
+.map-counter{position:absolute;top:1.5rem;left:50%;transform:translateX(-50%);background:rgba(5,7,15,.88);border:1px solid var(--border);padding:.5rem 1.4rem;z-index:1000;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.2em;color:var(--gold);white-space:nowrap;text-align:center;pointer-events:none;}
+.deity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:100%;max-width:700px;}
+.deity-card{border:1px solid rgba(240,192,64,.1);padding:1.2rem;background:var(--surface);transition:border-color .3s;}
+.deity-card:hover{border-color:rgba(240,192,64,.3);}
+.deity-icon{font-size:1.8rem;margin-bottom:.5rem;}
+.deity-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold);letter-spacing:.1em;margin-bottom:.2rem;}
+.deity-culture{font-family:'Bebas Neue',sans-serif;font-size:.52rem;letter-spacing:.2em;color:var(--muted);margin-bottom:.5rem;display:block;}
+.deity-desc{font-size:.75rem;color:rgba(232,234,240,.65);line-height:1.5;}
+.safety-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;width:100%;}
+.safety-scen{border:2px solid rgba(240,192,64,.1);padding:1rem;text-align:center;cursor:pointer;transition:all .3s;}
+.safety-scen:hover{border-color:rgba(240,192,64,.3);}
+.safety-scen.safe{border-color:#50c878;background:rgba(80,200,120,.05);}
+.safety-scen.medium{border-color:#c8a820;background:rgba(200,168,32,.05);}
+.safety-scen.danger{border-color:#c84040;background:rgba(200,64,64,.05);}
+.safety-icon{font-size:2rem;margin-bottom:.3rem;display:block;}
+.safety-label{font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:.15em;color:var(--muted);}
+.safety-advice{font-size:.72rem;color:rgba(232,234,240,.75);margin-top:.5rem;line-height:1.4;display:none;}
+.safety-scen.selected .safety-advice{display:block;}
+.detect-list{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem;}
+.detect-item{display:flex;gap:.8rem;align-items:flex-start;font-size:.8rem;color:rgba(232,234,240,.72);}
+.detect-lbl{font-family:'Bebas Neue',sans-serif;font-size:.6rem;letter-spacing:.12em;color:var(--gold);min-width:4rem;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="progress-bar"></div>
+<nav id="nav-dots">
+  <div class="ndot active" data-idx="0"></div>
+  <div class="ndot" data-idx="1"></div>
+  <div class="ndot" data-idx="2"></div>
+  <div class="ndot" data-idx="3"></div>
+  <div class="ndot" data-idx="4"></div>
+  <div class="ndot" data-idx="5"></div>
+  <div class="ndot" data-idx="6"></div>
+  <div class="ndot" data-idx="7"></div>
+</nav>
+<div id="slide-counter">01 / 08</div>
+<button id="fullscreen-btn" aria-label="Fullscreen">
+  <svg viewBox="0 0 16 16"><path d="M1 1h5M1 1v5M15 1h-5M15 1v5M1 15h5M1 15v-5M15 15h-5M15 15v-5" stroke="inherit"/></svg>
+</button>
+<div id="scroll-hint">
+  <div class="scroll-mouse"></div>
+  <span class="scroll-label">Scorri</span>
+</div>
+
+<!-- ═══════════════ S0: HERO ═══════════════ -->
+<section id="s-hero" class="slide">
+  <canvas id="hero-canvas" style="position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%;"></canvas>
+  <div style="position:relative;z-index:2;text-align:center;padding:2rem;">
+    <span class="hero-eyebrow">la scienza del lampo</span>
+    <h1 class="hero-title">FUL<em>MI</em>NI</h1>
+    <div class="hero-line"></div>
+    <p class="hero-sub">Scariche elettriche atmosferiche — fisica, storia, misteri</p>
+  </div>
+</section>
+
+<!-- ═══════════════ S1: COS'È ═══════════════ -->
+<section id="s-cosae" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 01 · cos'è un fulmine</span>
+            <h2 class="slide-title">Una scarica <em>gigantesca</em></h2>
+            <div class="slide-body">
+              <p>Un fulmine è una scarica elettrica transitoria ad altissima intensità che si verifica nell'atmosfera per riequilibrare un forte dislivello di potenziale tra nuvola e suolo. La scarica dura pochissimi millisecondi ma raggiunge temperature di circa <strong>30.000 K</strong> — 5 volte la superficie del sole — e una corrente che può superare i <strong>30.000 ampere</strong>.</p>
+              <p>La sostanza fisica del fulmine non è fuoco né semplice elettricità: è il <strong>plasma</strong> — il quarto stato della materia, con resistività bassissima e temperatura stellare.</p>
+            </div>
+            <div class="phase-ui">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="plasma-canvas" data-phase="0">Aria normale</button>
+                <button class="phase-btn" data-target="plasma-canvas" data-phase="1">Campo cresce</button>
+                <button class="phase-btn" data-target="plasma-canvas" data-phase="2">Ionizzazione</button>
+                <button class="phase-btn" data-target="plasma-canvas" data-phase="3">Plasma</button>
+              </div>
+              <p class="phase-desc" id="plasma-desc">Molecole di N₂ e O₂ in moto termico casuale — aria normale, ottimo isolante.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="plasma-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="plasma-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="plasma-canvas" style="width:100%;height:70vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-center">
+          <span class="slide-eyebrow">parametri fisici</span>
+          <h2 class="slide-title">Numeri <em>estremi</em></h2>
+          <div class="stat-trio">
+            <div class="stat-box"><div class="stat-icon">⚡</div><span class="stat-label">tensione</span><div class="stat-value">100M–1B<span class="stat-unit"> Volt</span></div></div>
+            <div class="stat-box"><div class="stat-icon">⚡</div><span class="stat-label">corrente media</span><div class="stat-value">30.000<span class="stat-unit"> A</span></div></div>
+            <div class="stat-box"><div class="stat-icon">⚡</div><span class="stat-label">energia</span><div class="stat-value">1–5 mld<span class="stat-unit"> J</span></div></div>
+          </div>
+          <div class="plasma-box">
+            <div class="plasma-title">IL PLASMA — il quarto stato della materia</div>
+            <p class="plasma-text">Quando il campo supera i <strong>3×10⁶ V/m</strong>, azoto (N₂) e ossigeno (O₂) si ionizzano istantaneamente: si separano in ioni positivi ed elettroni liberi. Il canale plasma ha resistività bassissima, temperatura di ~30.000 K e irradia fotoni con intensità stellare.</p>
+            <div class="plasma-states"><span>● Solido</span><span>● Liquido</span><span>● Gas</span><span class="plasma-state-active">● Plasma</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S2: FORMAZIONE ═══════════════ -->
+<section id="s-formazione" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 02 · formazione</span>
+            <h2 class="slide-title">Il condensatore <em>naturale</em></h2>
+            <div class="slide-body">
+              <p>All'interno del cumulonembo, correnti d'aria violente fanno scontrare cristalli di ghiaccio (più leggeri) e graupel (grandine tenera, più pesante). L'attrito — <strong>effetto triboelettrico</strong> — strappa elettroni: i cristalli si caricano positivamente e salgono, il graupel negativamente e scende.</p>
+              <p>La nuvola diventa un <strong>condensatore naturale</strong>. Il terreno sotto sviluppa carica positiva per <strong>induzione elettrostatica</strong>. Quando ΔV supera ~<strong>3×10⁶ V/m</strong>, l'aria si ionizza e scatta la scarica.</p>
+            </div>
+            <div class="phase-ui">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="tribo-canvas" data-phase="0">Nuvola neutra</button>
+                <button class="phase-btn" data-target="tribo-canvas" data-phase="1">Collisione</button>
+                <button class="phase-btn" data-target="tribo-canvas" data-phase="2">Separazione</button>
+                <button class="phase-btn" data-target="tribo-canvas" data-phase="3">Induzione</button>
+              </div>
+              <p class="phase-desc" id="tribo-desc">Il cumulonembo contiene una miscela di cristalli di ghiaccio e graupel — ancora elettricamente neutri.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="tribo-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="tribo-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="tribo-canvas" style="width:100%;height:70vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left" style="max-width:42%;">
+            <span class="slide-eyebrow">meccanismo di scarica</span>
+            <h2 class="slide-title" style="font-size:clamp(1.8rem,3.5vw,3rem);">Come si <em>buca</em> l'aria</h2>
+            <div class="phase-ui">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="leader-canvas" data-phase="0">A. Stepped Leader</button>
+                <button class="phase-btn" data-target="leader-canvas" data-phase="1">B. Upward Streamer</button>
+                <button class="phase-btn" data-target="leader-canvas" data-phase="2">C. Connessione</button>
+                <button class="phase-btn" data-target="leader-canvas" data-phase="3">D. Return Stroke</button>
+              </div>
+              <p class="phase-desc" id="leader-desc">Dalla base della nuvola parte il precursore — quasi invisibile, avanza a scatti di 50 m cercando il percorso di minore resistenza. Traiettoria frattale.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="leader-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="leader-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right" style="flex:1.4;">
+            <canvas id="leader-canvas" style="width:100%;height:85vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S3: FISICA ESTREMA ═══════════════ -->
+<section id="s-fisica" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 03 · fisica estrema</span>
+            <h2 class="slide-title">30.000 K in <em>un microsecondo</em></h2>
+            <div class="slide-body">
+              <p>Il return stroke riscalda il canale di plasma da temperatura ambiente a <strong>30.000 K</strong> in meno di 10⁻⁶ s — 5 volte la fotosfera solare. Secondo <em>P = ρRT</em>, la pressione interna schizza a <strong>10–100 atm</strong>.</p>
+              <p>Il canale esplode radialmente a velocità <strong>supersonica</strong> (Mach &gt; 1 nei primi 1–2 m), generando un'<strong>onda d'urto idrodinamica</strong>. Man mano che perde energia, decade in onda acustica lineare: il <strong>tuono</strong>.</p>
+            </div>
+            <div class="phase-ui">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="thermo-canvas" data-phase="0">Canale a riposo</button>
+                <button class="phase-btn" data-target="thermo-canvas" data-phase="1">Corrente fluisce</button>
+                <button class="phase-btn" data-target="thermo-canvas" data-phase="2">Riscaldamento</button>
+                <button class="phase-btn" data-target="thermo-canvas" data-phase="3">Pressione picco</button>
+                <button class="phase-btn" data-target="thermo-canvas" data-phase="4">Onda d'urto</button>
+              </div>
+              <p class="phase-desc" id="thermo-desc">Canale plasma a riposo: diametro 2–3 mm, temperatura ambiente, pressione 1 atm.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="thermo-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="thermo-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="thermo-canvas" style="width:100%;height:70vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">elettromagnetismo</span>
+            <h2 class="slide-title">Il fulmine come <em>laboratorio</em></h2>
+            <div class="slide-body">
+              <p>Una corrente fino a <strong>200.000 A</strong> genera un campo magnetico B circolare e intensissimo attorno al canale (Legge di Ampère). Ogni particella carica è soggetta alla forza di Lorentz <em>F = qv×B</em> — diretta verso l'interno.</p>
+              <p>Questo è lo <strong>Z-Pinch</strong> (strizione magnetica): il plasma viene compresso e densificato in un violentissimo equilibrio dinamico tra compressione magnetica ed espansione termica.</p>
+            </div>
+            <div class="phase-ui">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="zpinch-canvas" data-phase="0">Corrente I</button>
+                <button class="phase-btn" data-target="zpinch-canvas" data-phase="1">Campo B</button>
+                <button class="phase-btn" data-target="zpinch-canvas" data-phase="2">Forza di Lorentz</button>
+                <button class="phase-btn" data-target="zpinch-canvas" data-phase="3">Z-Pinch</button>
+              </div>
+              <p class="phase-desc" id="zpinch-desc">Corrente di 200.000 A fluisce lungo il canale di plasma verticale.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="zpinch-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="zpinch-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="zpinch-canvas" style="width:100%;height:70vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel" style="align-items:stretch;">
+        <span class="slide-eyebrow" style="position:absolute;top:2rem;left:5.5rem;z-index:10;">slide 03 · effetti collaterali</span>
+        <div class="physics-cols">
+          <div class="physics-col">
+            <div class="physics-col-icon">🧪</div>
+            <div class="physics-col-title">Chimica ad Alta Energia</div>
+            <ul>
+              <li>🌿 <strong>Ozono O₃</strong> — l'energia dissocia N₂ e O₂; gli atomi liberi si ricombinano in O₃. L'odore "fresco" dopo il temporale è ozono.</li>
+              <li>🌱 <strong>NOx</strong> — fissazione naturale dell'azoto atmosferico nel terreno: fertilizzante naturale fondamentale per le piante.</li>
+              <li>💎 <strong>Fulgurite</strong> — colpendo sabbia (SiO₂) a 30.000 K, la corrente fonde il quarzo creando una roccia vetrosa tubolare che replica la forma della scarica sotterranea.</li>
+            </ul>
+          </div>
+          <div class="physics-col">
+            <div class="physics-col-icon">☢️</div>
+            <div class="physics-col-title">Fisica Nucleare</div>
+            <ul>
+              <li>☢️ <strong>TGF</strong> (Terrestrial Gamma-ray Flashes) — il campo EM accelera elettroni a velocità relativistiche. Frenando contro i nuclei dell'aria, emettono raggi gamma rilevabili dai satelliti.</li>
+              <li>⚛️ <strong>Reazioni fotonucleari</strong> — fotoni gamma colpiscono ¹⁴N, strappano un neutrone e generano ¹³N instabile: breve reazione nucleare spontanea in atmosfera.</li>
+              <li>📡 L'impulso EM emesso è rilevabile a centinaia di km dalle reti di monitoraggio terrestri e satellitari.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S4: TIPI ═══════════════ -->
+<section id="s-tipi" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 04 · tipi di fulmini</span>
+            <h2 class="slide-title" style="margin-bottom:1rem;">Fulmini <em>comuni</em></h2>
+            <div class="types-cards" id="type-cards">
+              <div class="type-card selected" data-type="cg-neg"><div class="type-card-head"><span class="type-badge">CG⁻</span><span class="type-name">Negativo nube-suolo</span><span class="type-pct">~90%</span></div><div class="type-desc">Dal base nuvoloso verso terra. Corrente media 30.000 A. Il tipo più comune e studiato.</div></div>
+              <div class="type-card" data-type="cg-pos"><div class="type-card-head"><span class="type-badge">CG⁺</span><span class="type-name">Positivo nube-suolo</span><span class="type-pct">~10%</span></div><div class="type-desc">Dall'incudine verso terra. Fino a 300.000 A, 10× più potente. Responsabile dei tuoni più forti.</div></div>
+              <div class="type-card" data-type="ic"><div class="type-card-head"><span class="type-badge">IC</span><span class="type-name">Intra-cloud</span><span class="type-pct">più frequente</span></div><div class="type-desc">Interamente dentro la nuvola. Un picco di IC segnala che il temporale si sta intensificando.</div></div>
+              <div class="type-card" data-type="cc"><div class="type-card-head"><span class="type-badge">CC</span><span class="type-name">Cloud-to-Cloud</span></div><div class="type-desc">Scarica orizzontale tra due nuvole. Gli Anvil Crawlers percorrono centinaia di km con geometria frattale.</div></div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="type-canvas" style="width:100%;height:75vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">eventi luminosi transitori</span>
+            <h2 class="slide-title" style="margin-bottom:.5rem;">Fulmini verso <em>lo spazio</em></h2>
+            <p class="slide-body" style="margin-bottom:1rem;">Fino agli anni '90 i piloti riportavano "luci strane" sopra i temporali. Nessuno li credeva. Oggi le chiamiamo <strong>TLE</strong> (Transient Luminous Events).</p>
+            <div class="types-cards" id="tle-cards">
+              <div class="type-card selected" data-type="ball"><div class="type-card-head"><span class="type-badge">BALL</span><span class="type-name">Ball Lightning</span></div><div class="type-desc">Sfera luminosa che dura secondi, può attraversare vetri. La spiegazione fisica è ancora aperta.</div></div>
+              <div class="type-card" data-type="sprite"><div class="type-card-head"><span class="type-badge">SPRITE</span><span class="type-name">Sprite</span><span class="type-pct">50–90 km</span></div><div class="type-desc">Medusa rossa gigante dopo un CG+. Dura &lt;100 ms. Prima fotografia nel 1989.</div></div>
+              <div class="type-card" data-type="elves"><div class="type-card-head"><span class="type-badge">ELVES</span><span class="type-name">Elves</span><span class="type-pct">~400 km</span></div><div class="type-desc">Anello piatto che si espande alla velocità della luce nella ionosfera. Diametro fino a 400 km.</div></div>
+              <div class="type-card" data-type="blue-jet"><div class="type-card-head"><span class="type-badge">JET</span><span class="type-name">Blue Jet</span><span class="type-pct">40–50 km</span></div><div class="type-desc">Cono blu espulso dalla cima della nuvola verso l'alto. Colore = eccitazione N₂ molecolare.</div></div>
+            </div>
+          </div>
+          <div class="panel-right">
+            <canvas id="tle-canvas" style="width:100%;height:75vh;border:1px solid var(--border);"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S5: NUMERI ═══════════════ -->
+<section id="s-numeri" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel" style="display:block;padding:0;">
+        <span class="slide-eyebrow" style="position:absolute;top:1.5rem;left:5.5rem;z-index:10;">slide 05 · numeri e record</span>
+        <div class="records-grid">
+          <div class="record-cell"><div class="record-num">8 MLN</div><div class="record-label">fulmini al giorno nel mondo</div><div class="record-sub">50–100 scariche ogni secondo, in ogni istante</div></div>
+          <div class="record-cell"><div class="record-num">768 KM</div><div class="record-label">mega-flash Texas–Mississippi</div><div class="record-sub">Record WMO distanza orizzontale, 2020</div></div>
+          <div class="record-cell"><div class="record-num">17,1 SEC</div><div class="record-label">record durata singolo fulmine</div><div class="record-sub">Uruguay–Argentina, 2019</div></div>
+          <div class="record-cell"><div class="record-num">297</div><div class="record-label">notti/anno — Lago Maracaibo</div><div class="record-sub">28 scariche al minuto · 9 ore consecutive · Guinness WR</div></div>
+          <div class="record-cell"><div class="record-num">×1.000</div><div class="record-label">più potenti i fulmini di Giove</div><div class="record-sub">Saturno: rilevati da Cassini · Urano: scoperta recente</div></div>
+          <div class="record-cell"><div class="record-num">100.000 KM/S</div><div class="record-label">velocità return stroke</div><div class="record-sub">c/3 — giro della Terra in meno di mezzo secondo</div></div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">la fisica del tuono</span>
+            <h2 class="slide-title">Dal plasma <em>all'onda</em></h2>
+            <div class="slide-body">
+              <p>Il tuono è la diretta conseguenza termodinamica del fulmine. Il canale a <strong>30.000°C</strong> e <strong>10–100 atm</strong> si espande supersonicamente (Mach &gt; 1 entro 1–2 m), generando un'onda d'urto che decade in onda acustica. Udibile fino a <strong>20–25 km</strong>.</p>
+            </div>
+            <div class="thunder-calc" style="margin-top:1.5rem;">
+              <div style="width:100%;">
+                <label for="thunder-slider">SECONDI TRA LAMPO E TUONO</label>
+                <input type="range" id="thunder-slider" min="1" max="30" value="9">
+              </div>
+              <div class="thunder-output"><span id="thunder-out">3.0</span> <span>KM</span></div>
+              <div style="font-size:.65rem;color:var(--muted);text-align:center;">Formula: km = secondi ÷ 3 &nbsp;·&nbsp; se diminuisce, il temporale si avvicina</div>
+            </div>
+            <div style="margin-top:1.5rem;border-left:2px solid rgba(240,192,64,.3);padding-left:1rem;">
+              <p style="font-size:.75rem;color:rgba(240,192,64,.7);line-height:1.5;"><strong>MITO SFATATO:</strong> Il fulmine non segue il punto più alto — segue il percorso di <strong>minima resistenza elettrica</strong>. Lo stepped leader è "cieco" fino agli ultimi 30–50 m. L'Empire State Building viene colpito <strong>23 volte l'anno in media</strong>.</p>
+            </div>
+          </div>
+          <div class="panel-right" style="flex-direction:column;gap:1rem;align-items:flex-start;padding-top:3rem;">
+            <span class="slide-eyebrow">FIGURA DI LICHTENBERG — clicca per generare</span>
+            <canvas id="lichtenberg-canvas" style="width:100%;max-width:480px;height:50vh;border:1px solid var(--border);cursor:crosshair;"></canvas>
+            <div class="lich-controls">
+              <button class="lich-btn" id="lich-reset">RESET</button>
+              <button class="lich-btn" id="lich-save">SALVA PNG</button>
+            </div>
+            <p style="font-size:.7rem;color:var(--muted);line-height:1.4;max-width:400px;">Sui sopravvissuti ai fulmini compaiono figure identiche sulla pelle — rottura dei capillari lungo la traiettoria della corrente superficiale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S6: FRANKLIN ═══════════════ -->
+<section id="s-franklin" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 06 · franklin e storia</span>
+            <h2 class="slide-title">L'elettricità era <em>uno spettacolo</em></h2>
+            <div class="slide-body">
+              <p>A metà del XVIII secolo, l'elettricità era poco più di un curioso gioco da salotto. Le <strong>bottiglie di Leida</strong> accumulavano cariche e i filosofi naturali divertivano l'aristocrazia con scintille. Franklin, autodidatta delle colonie americane, fu il primo a intuire che le scintille di laboratorio e i fulmini celesti erano lo stesso fenomeno su scala diversa. La Royal Society di Londra lo prese per pazzo.</p>
+            </div>
+          </div>
+          <div class="panel-right">
+            <div class="tl-list">
+              <div class="tl-item"><span class="tl-year">1746</span><span class="tl-text">Pieter van Musschenbroek inventa la <strong>bottiglia di Leida</strong> — primo condensatore della storia.</span></div>
+              <div class="tl-item"><span class="tl-year">1750</span><span class="tl-text">Franklin scrive alla Royal Society proponendo di "catturare l'elettricità celeste". La lettera viene letta come una curiosità.</span></div>
+              <div class="tl-item"><span class="tl-year">1752</span><span class="tl-text">Esperimento dell'aquilone a Filadelfia (giugno). Franklin e il figlio William.</span></div>
+              <div class="tl-item"><span class="tl-year">1753</span><span class="tl-text">Georg Wilhelm Richmann, San Pietroburgo: <strong>primo martire</strong> della scienza elettrica. Ucciso il 6 agosto.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left" style="align-items:center;max-width:42%;">
+            <canvas id="kite-canvas" style="width:100%;max-width:280px;height:62vh;border:1px solid var(--border);"></canvas>
+            <div class="phase-ui" style="width:100%;max-width:280px;">
+              <div class="phase-strip">
+                <button class="phase-btn active" data-target="kite-canvas" data-phase="0">Nuvola carica</button>
+                <button class="phase-btn" data-target="kite-canvas" data-phase="1">Aquilone in volo</button>
+                <button class="phase-btn" data-target="kite-canvas" data-phase="2">Induzione</button>
+                <button class="phase-btn" data-target="kite-canvas" data-phase="3">Scintilla</button>
+                <button class="phase-btn" data-target="kite-canvas" data-phase="4">Bottiglia carica</button>
+              </div>
+              <p class="phase-desc" id="kite-desc" style="font-size:.72rem;">La nuvola temporalesca accumula cariche negative alla base.</p>
+              <div class="phase-controls">
+                <button class="phase-play-btn" id="kite-play">▶ PLAY</button>
+                <button class="phase-play-btn" id="kite-reset">⏮ RESET</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-right" style="flex-direction:column;align-items:flex-start;justify-content:center;">
+            <span class="slide-eyebrow">l'esperimento</span>
+            <h2 class="slide-title">Induzione, non <em>colpo diretto</em></h2>
+            <div class="slide-body">
+              <p>Franklin non aspettava un fulmine diretto — sarebbe morto istantaneamente. Sfruttava l'<strong>induzione elettrostatica</strong>: la nuvola carica induceva cariche libere lungo la canapa bagnata (conduttore per via dei sali minerali disciolti nell'acqua piovana). Avvicinando il dito (isolato dalla seta) alla chiave di ferro, generava una <strong>scintilla controllata</strong>. La bottiglia di Leida raccoglieva la carica celeste: prova definitiva.</p>
+            </div>
+            <div class="warn-pill">
+              <span class="warn-pill-text">⚠ Il 6 agosto 1753 Georg Wilhelm Richmann tentò lo stesso esperimento a San Pietroburgo. Fu colpito e ucciso davanti al suo incisore — prima vittima accertata nella storia degli esperimenti elettrici.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">la conseguenza pratica</span>
+            <h2 class="slide-title">Da terrore divino a rischio <em>calcolabile</em></h2>
+            <div class="slide-body">
+              <p><strong>A. Effetto Punta:</strong> Le cariche si concentrano sulle punte metalliche. Il campo elettrico intensissimo ionizza costantemente l'aria circostante, disperdendo silenziosamente le cariche della nuvola — riducendo localmente ΔV.</p>
+              <p><strong>B. Canalizzazione Sicura:</strong> Se il fulmine scatta comunque, il conduttore metallico (rame ≥50 mm²) offre il percorso a minima resistenza verso terra senza danni strutturali.</p>
+              <p style="margin-top:1rem;font-size:.78rem;color:rgba(240,192,64,.7);">Franklin rifiutò il brevetto: «È per il bene dell'umanità.»</p>
+            </div>
+          </div>
+          <div class="panel-right">
+            <div class="tl-list">
+              <div class="tl-item"><span class="tl-year">1753</span><span class="tl-text">Richmann muore. Il parafulmine diventa ingegneria seria.</span></div>
+              <div class="tl-item"><span class="tl-year">1800s</span><span class="tl-text">Il parafulmine si diffonde in tutto il mondo. Franklin rifiuta il brevetto: «Per il bene dell'umanità».</span></div>
+              <div class="tl-item"><span class="tl-year">1891</span><span class="tl-text"><strong>Nikola Tesla</strong> sviluppa la Bobina Tesla. Scariche artificiali spettacolari. Sogna la trasmissione wireless di energia gratuita per tutti.</span></div>
+              <div class="tl-item"><span class="tl-year">1960s</span><span class="tl-text">Razzi con filo metallico per provocare fulmini controllati in laboratorio.</span></div>
+              <div class="tl-item"><span class="tl-year">2000s+</span><span class="tl-text"><strong>LINET</strong> (Europa), <strong>SIRF/ISPRA</strong> (Italia): triangolazione time-of-arrival, precisione metrica.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ S7: NEL MONDO ═══════════════ -->
+<section id="s-mondo" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-track">
+      <div class="vc-panel map-panel">
+        <div id="map"></div>
+        <div class="map-counter">
+          <span style="font-size:.5rem;letter-spacing:.3em;color:rgba(240,192,64,.4);display:block;margin-bottom:.2rem;">SLIDE 07 · NEL MONDO</span>
+          <span id="bolt-count">0</span> FULMINI VISUALIZZATI
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-center">
+          <span class="slide-eyebrow">prima della fisica</span>
+          <h2 class="slide-title">Il fulmine come <em>potere assoluto</em></h2>
+          <p class="slide-body" style="text-align:center;max-width:580px;margin-bottom:2rem;">Per millenni il fulmine era la voce degli dei — incomprensibile, imprevedibile, mortale. I luoghi colpiti erano sacri: i greci li chiamavano <em>enelysion</em>.</p>
+          <div class="deity-grid">
+            <div class="deity-card"><div class="deity-icon">⚡</div><div class="deity-name">Zeus</div><span class="deity-culture">Grecia antica</span><div class="deity-desc">Re degli dei. Il fulmine era la sua arma assoluta, simbolo di potere e giustizia divina. I luoghi colpiti erano considerati sacri.</div></div>
+            <div class="deity-card"><div class="deity-icon">🔨</div><div class="deity-name">Thor</div><span class="deity-culture">Mitologia norrena</span><div class="deity-desc">Dio del tuono. Il suo martello Mjolnir creava i fulmini durante i viaggi tra i nove regni. Protettore degli uomini.</div></div>
+            <div class="deity-card"><div class="deity-icon">⚡</div><div class="deity-name">Giove</div><span class="deity-culture">Roma antica</span><div class="deity-desc">Equivalente romano di Zeus. I pontefici interpretavano direzione e tipo del fulmine come augurio o condanna divina.</div></div>
+            <div class="deity-card"><div class="deity-icon">✨</div><div class="deity-name">Indra</div><span class="deity-culture">Induismo</span><div class="deity-desc">Dio della guerra e dei temporali. Armato del vajra — il fulmine cosmico — sconfisse il demone Vritra liberando le acque del mondo.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="vc-panel">
+        <div class="panel-split">
+          <div class="panel-left">
+            <span class="slide-eyebrow">slide 07 · protezione</span>
+            <h2 class="slide-title" style="margin-bottom:1rem;">Cosa fare <em>e non fare</em></h2>
+            <div class="safety-grid">
+              <div class="safety-scen danger" data-scenario="tree"><span class="safety-icon">🌲</span><span class="safety-label">Sotto un albero</span><div class="safety-advice">Mai ripararsi sotto alberi isolati — sono bersagli preferiti. Allontanarsi almeno 50 m.</div></div>
+              <div class="safety-scen safe" data-scenario="car"><span class="safety-icon">🚗</span><span class="safety-label">In auto</span><div class="safety-advice">La carrozzeria metallica funge da gabbia di Faraday. Rimani dentro, non toccare la scocca.</div></div>
+              <div class="safety-scen safe" data-scenario="building"><span class="safety-icon">🏠</span><span class="safety-label">In edificio</span><div class="safety-advice">Sicuro. Stacca gli elettrodomestici, evita docce e rubinetti (le tubature conducono).</div></div>
+              <div class="safety-scen danger" data-scenario="lake"><span class="safety-icon">🏊</span><span class="safety-label">In acqua</span><div class="safety-advice">Esci immediatamente. La corrente si espande in superficie per centinaia di metri.</div></div>
+              <div class="safety-scen danger" data-scenario="hill"><span class="safety-icon">⛰️</span><span class="safety-label">In cima</span><div class="safety-advice">Scendi subito. Accovacciati sui talloni, piedi uniti, mani sulle orecchie. Non sdraiarti.</div></div>
+              <div class="safety-scen medium" data-scenario="field"><span class="safety-icon">🌾</span><span class="safety-label">Campo aperto</span><div class="safety-advice">Posizione "a rana" sui talloni (piedi uniti). Non sdraiarti — il "passo di contatto" è letale.</div></div>
+            </div>
+          </div>
+          <div class="panel-right" style="flex-direction:column;align-items:flex-start;justify-content:center;">
+            <span class="slide-eyebrow">rilevamento moderno</span>
+            <h2 class="slide-title">La rete <em>invisibile</em></h2>
+            <div class="slide-body">
+              <p>Ogni fulmine emette un impulso EM sferico che viaggia a c. Tre o più stazioni lo ricevono con differenze di tempo di frazioni di microsecondo: la <strong>triangolazione time-of-arrival</strong> localizza la scarica con precisione di <strong>pochi metri</strong>.</p>
+            </div>
+            <div class="detect-list">
+              <div class="detect-item"><span class="detect-lbl">LINET</span>Europa: 135+ sensori, copertura continentale</div>
+              <div class="detect-item"><span class="detect-lbl">SIRF</span>Italia (ISPRA): 1,5 milioni CG/anno, mappe stagionali</div>
+              <div class="detect-item"><span class="detect-lbl">ENTLN</span>Globale: 900+ sensori worldwide</div>
+              <div class="detect-item"><span class="detect-lbl">ISUAL</span>Satellite: rileva TGF, Sprite e Elves dallo spazio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vc-dots"><div class="vc-dot active"></div><div class="vc-dot"></div><div class="vc-dot"></div></div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let cx=0,cy=0,rx=0,ry=0,currentIdx=0;
+const triggered=new Set(),vcMap=new Map();
+const slides=[...document.querySelectorAll('.slide')];
+const cursorEl=document.getElementById('cursor');
+const ringEl=document.getElementById('cursor-ring');
+const progressBar=document.getElementById('progress-bar');
+const navDots=[...document.querySelectorAll('.ndot')];
+const counterEl=document.getElementById('slide-counter');
+
+/* ══════════════════════════════════════════════
+   CURSOR RAF
+══════════════════════════════════════════════ */
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;});
+(function cursorLoop(){
+  rx+=(cx-rx)*.12; ry+=(cy-ry)*.12;
+  cursorEl.style.left=cx+'px'; cursorEl.style.top=cy+'px';
+  ringEl.style.left=rx+'px'; ringEl.style.top=ry+'px';
+  requestAnimationFrame(cursorLoop);
+})();
+
+/* ══════════════════════════════════════════════
+   UI UPDATE
+══════════════════════════════════════════════ */
+function updateUI(i){
+  progressBar.style.height=(i/(slides.length-1)*100)+'%';
+  navDots.forEach((d,j)=>d.classList.toggle('active',j===i));
+  counterEl.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+}
+
+/* ══════════════════════════════════════════════
+   SLIDE OBSERVER
+══════════════════════════════════════════════ */
+const slideObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting&&e.intersectionRatio>=0.5){
+      const i=slides.indexOf(e.target);
+      if(i!==-1&&i!==currentIdx){currentIdx=i;updateUI(i);onSlideEnter(i);}
+    }
+  });
+},{threshold:0.5});
+slides.forEach(s=>slideObserver.observe(s));
+
+/* ══════════════════════════════════════════════
+   VERTICAL CAROUSEL
+   CRITICAL: wheel listener passive:false to call preventDefault
+   CRITICAL: scroll-snap-type on html ONLY, body overflow:visible
+══════════════════════════════════════════════ */
+function initVerticalCarousel(slideEl){
+  const vcWrap=slideEl.querySelector('.vc-wrap');
+  if(!vcWrap)return null;
+  const track=vcWrap.querySelector('.vc-track');
+  const panels=[...vcWrap.querySelectorAll(':scope > .vc-track > .vc-panel')];
+  const dots=[...vcWrap.querySelectorAll(':scope > .vc-dots > .vc-dot')];
+  if(!track||panels.length<2)return null;
+  const total=panels.length;
+  let idx=0,busy=false;
+
+  function go(n){
+    if(n<0||n>=total||busy)return;
+    busy=true; idx=n;
+    track.style.transform=`translateY(calc(${n} * -100vh))`;
+    dots.forEach((d,i)=>d.classList.toggle('active',i===n));
+    setTimeout(()=>{busy=false;},700);
+  }
+
+  dots.forEach((d,i)=>d.addEventListener('click',()=>go(i)));
+
+  /* wheel: intercept only when NOT at boundary */
+  slideEl.addEventListener('wheel',e=>{
+    const down=e.deltaY>0;
+    if(down&&idx<total-1){e.preventDefault();e.stopPropagation();if(!busy)go(idx+1);}
+    else if(!down&&idx>0){e.preventDefault();e.stopPropagation();if(!busy)go(idx-1);}
+    /* at boundary: fall through to scroll-snap */
+  },{passive:false});
+
+  let ty=0;
+  slideEl.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;},{passive:true});
+  slideEl.addEventListener('touchend',e=>{
+    const dy=e.changedTouches[0].clientY-ty;
+    if(dy<-50&&idx<total-1)go(idx+1);
+    else if(dy>50&&idx>0)go(idx-1);
+  });
+
+  return{atTop:()=>idx===0,atBottom:()=>idx===total-1,next:()=>go(idx+1),prev:()=>go(idx-1),reset:()=>go(0)};
+}
+
+slides.forEach(sl=>{const vc=initVerticalCarousel(sl);if(vc)vcMap.set(sl,vc);});
+
+/* ══════════════════════════════════════════════
+   KEYBOARD
+══════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  const vc=vcMap.get(slides[currentIdx]);
+  if(e.key==='ArrowDown'||e.key==='PageDown'){
+    e.preventDefault();
+    if(vc&&!vc.atBottom())vc.next();
+    else slides[Math.min(currentIdx+1,slides.length-1)].scrollIntoView({behavior:'smooth'});
+  }else if(e.key==='ArrowUp'||e.key==='PageUp'){
+    e.preventDefault();
+    if(vc&&!vc.atTop())vc.prev();
+    else slides[Math.max(currentIdx-1,0)].scrollIntoView({behavior:'smooth'});
+  }else if(e.key==='f'||e.key==='F'){
+    document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+  }
+});
+
+/* ══════════════════════════════════════════════
+   SLIDE ENTER DISPATCHER
+══════════════════════════════════════════════ */
+function onSlideEnter(i){
+  const vc=vcMap.get(slides[i]);
+  if(vc)vc.reset();
+  if(triggered.has(i))return;
+  triggered.add(i);
+  const dispatch=[
+    initHeroCanvas,
+    initPlasmaCanvas,
+    ()=>{initTriboCanvas();initLeaderCanvas();},
+    ()=>{initThermoCanvas();initZPinchCanvas();},
+    ()=>{initTypeCanvas();initTLECanvas();},
+    ()=>{initThunderCalc();initLichtenberg();},
+    initKiteCanvas,
+    ()=>{initMap();initSafety();},
+  ];
+  if(dispatch[i])dispatch[i]();
+}
+
+/* ══════════════════════════════════════════════
+   PHASE CONTROLLER — shared helper
+   Usage: makePhaseController({ canvasId, descId, playBtnId,
+          resetBtnId, phases, onDraw })
+   phases: [{desc:'...'}]
+   onDraw: (ctx, W, H, phase, t) => void
+══════════════════════════════════════════════ */
+function makePhaseController({canvasId,descId,playBtnId,resetBtnId,phases,onDraw}){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return null;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  const descEl=document.getElementById(descId);
+  const btns=[...document.querySelectorAll(`.phase-btn[data-target="${canvasId}"]`)];
+  const playBtn=document.getElementById(playBtnId);
+  const resetBtn=document.getElementById(resetBtnId);
+  let current=0,t=0,playing=false;
+
+  function setPhase(n){
+    current=Math.max(0,Math.min(n,phases.length-1));
+    t=0;
+    btns.forEach((b,i)=>b.classList.toggle('active',i===current));
+    if(descEl)descEl.textContent=phases[current].desc;
+  }
+
+  btns.forEach((b,i)=>b.addEventListener('click',()=>{
+    playing=false;
+    if(playBtn)playBtn.textContent='▶ PLAY';
+    setPhase(i);
+  }));
+
+  if(playBtn)playBtn.addEventListener('click',()=>{
+    playing=!playing;
+    playBtn.textContent=playing?'⏸ PAUSA':'▶ PLAY';
+  });
+
+  if(resetBtn)resetBtn.addEventListener('click',()=>{
+    playing=false;
+    if(playBtn)playBtn.textContent='▶ PLAY';
+    setPhase(0);
+  });
+
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    onDraw(ctx,canvas.width,canvas.height,current,t);
+    t++;
+    if(playing&&t>180){t=0;setPhase((current+1)%phases.length);}
+    requestAnimationFrame(loop);
+  }
+
+  setPhase(0);
+  loop();
+  return{setPhase,getPhase:()=>current,getT:()=>t};
+}
+
+/* ══════════════════════════════════════════════
+   CANVAS FUNCTIONS
+══════════════════════════════════════════════ */
+function initHeroCanvas(){
+  const canvas=document.getElementById('hero-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+
+  let segs=[],showing=false,bTimer=0,dTimer=0;
+
+  function genPath(x,y,targetY,depth,arr){
+    if(depth<=0||y>=targetY)return;
+    const step=(targetY-y)/(depth*2);
+    const nx=x+(Math.random()-.5)*60;
+    const ny=y+step*(1+Math.random()*.5);
+    arr.push({x1:x,y1:y,x2:nx,y2:ny,w:depth*.5+.5});
+    genPath(nx,ny,targetY,depth-1,arr);
+    if(Math.random()<.35&&depth>2){
+      const bx=nx+(Math.random()-.5)*50;
+      const by=ny+step*Math.random();
+      arr.push({x1:nx,y1:ny,x2:bx,y2:by,w:depth*.25});
+      genPath(bx,by,targetY,depth-2,arr);
+    }
+  }
+
+  function trigger(){
+    segs=[];
+    genPath(canvas.width*(.15+Math.random()*.7),0,canvas.height*.78,8,segs);
+    showing=true;dTimer=0;
+  }
+
+  (function frame(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(showing){
+      const alpha=dTimer<3?1:Math.max(0,1-(dTimer-3)/8);
+      segs.forEach(s=>{
+        ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);
+        ctx.strokeStyle=s.w>1.5?`rgba(255,255,255,${alpha})`:`rgba(240,192,64,${alpha*.7})`;
+        ctx.lineWidth=s.w;
+        ctx.shadowColor=s.w>1.5?'#fff':'#3a8fff';
+        ctx.shadowBlur=s.w>1?15:8;
+        ctx.stroke();ctx.shadowBlur=0;
+      });
+      dTimer++;if(dTimer>12){showing=false;bTimer=0;}
+    }else{
+      bTimer++;if(bTimer>120+Math.random()*120)trigger();
+    }
+    requestAnimationFrame(frame);
+  })();
+}
+
+function initPlasmaCanvas(){
+  const phases=[
+    {desc:'Molecole di N₂ e O₂ in moto termico casuale — aria normale, ottimo isolante.'},
+    {desc:'Il campo elettrico esterno cresce: le molecole si orientano lungo le linee di campo (dipoli indotti).'},
+    {desc:'Il campo supera 3×10⁶ V/m: gli elettroni vengono strappati dai nuclei — ionizzazione a valanga.'},
+    {desc:'Plasma conduttore: ioni+ e e⁻ liberi in moto. Canale luminoso 2–3 cm. Resistività bassissima.'},
+  ];
+
+  const molPositions=Array.from({length:20},(_,i)=>{
+    const rng=((i*2654435761)>>>0)/4294967296;
+    const rng2=((i*1664525+1013904223)>>>0)/4294967296;
+    return{bx:rng,by:rng2};
+  });
+
+  makePhaseController({
+    canvasId:'plasma-canvas',
+    descId:'plasma-desc',
+    playBtnId:'plasma-play',
+    resetBtnId:'plasma-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      ctx.fillStyle='#070d1f';ctx.fillRect(0,0,W,H);
+
+      if(phase===0){
+        molPositions.forEach((m,i)=>{
+          const x=W*.08+m.bx*W*.84+Math.sin(t*.05+i*1.3)*4;
+          const y=H*.06+m.by*H*.88+Math.cos(t*.04+i*.9)*4;
+          ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+          ctx.fillStyle='rgba(180,210,255,.35)';ctx.fill();
+          ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);
+          ctx.fillStyle='rgba(210,230,255,.7)';ctx.fill();
+          ctx.fillStyle='rgba(180,200,255,.3)';ctx.font='8px monospace';
+          ctx.fillText(i%3===0?'O₂':'N₂',x+7,y-3);
+        });
+        ctx.fillStyle='rgba(180,200,255,.2)';ctx.font='10px sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText('ARIA — dielettrico',W/2,H-10);
+        ctx.textAlign='left';
+      }
+
+      if(phase===1){
+        const fa=Math.min(1,t/25);
+        for(let xi=0;xi<5;xi++){
+          const fx=W*(.1+xi*.2);
+          ctx.strokeStyle=`rgba(240,192,64,${fa*.25})`;ctx.lineWidth=1;
+          ctx.setLineDash([5,5]);
+          ctx.beginPath();ctx.moveTo(fx,H*.04);ctx.lineTo(fx,H*.92);ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=`rgba(240,192,64,${fa*.35})`;
+          ctx.beginPath();ctx.moveTo(fx,H*.92);ctx.lineTo(fx-4,H*.84);ctx.lineTo(fx+4,H*.84);ctx.fill();
+        }
+        ctx.fillStyle=`rgba(240,192,64,${fa*.5})`;ctx.font='9px sans-serif';
+        ctx.textAlign='right';ctx.fillText('E ↓',W*.98,H/2);ctx.textAlign='left';
+
+        const jitter=Math.max(0,1-t/30);
+        molPositions.forEach((m,i)=>{
+          const x=W*.08+m.bx*W*.84+Math.sin(t*.015+i*1.3)*jitter*3;
+          const y=H*.06+m.by*H*.88+Math.cos(t*.012+i*.9)*jitter*3;
+          ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+          ctx.fillStyle='rgba(180,210,255,.35)';ctx.fill();
+          ctx.fillStyle='rgba(240,192,64,.55)';ctx.font='8px monospace';ctx.fillText('+',x-2,y-5);
+          ctx.fillStyle='rgba(58,143,255,.55)';ctx.fillText('−',x-2,y+10);
+        });
+      }
+
+      if(phase===2){
+        const ionized=Math.min(molPositions.length,Math.floor(t/5));
+        molPositions.forEach((m,i)=>{
+          const bx=W*.08+m.bx*W*.84;
+          const by=H*.06+m.by*H*.88;
+          if(i<ionized){
+            const tlocal=Math.min(t-i*5,60);
+            const ionY=by-tlocal*.4;
+            ctx.beginPath();ctx.arc(bx-4,ionY,5,0,Math.PI*2);
+            ctx.fillStyle='rgba(240,192,64,.9)';ctx.fill();
+            ctx.fillStyle='rgba(240,192,64,.7)';ctx.font='9px monospace';ctx.fillText('+',bx-6,ionY+3);
+            const elX=bx+4+tlocal*.5;
+            const elY=by+tlocal*.7;
+            ctx.beginPath();ctx.arc(elX%W,elY%H,2.5,0,Math.PI*2);
+            ctx.fillStyle='rgba(58,143,255,.9)';ctx.fill();
+          }else{
+            const flashT=t-i*5;
+            if(flashT>=0&&flashT<8){
+              const fa=1-flashT/8;
+              ctx.beginPath();ctx.arc(bx,by,6+fa*12,0,Math.PI*2);
+              ctx.fillStyle=`rgba(255,255,255,${fa*.7})`;ctx.fill();
+            }
+            ctx.beginPath();ctx.arc(bx,by,6,0,Math.PI*2);
+            ctx.fillStyle='rgba(180,210,255,.35)';ctx.fill();
+          }
+        });
+        const done=ionized/molPositions.length;
+        ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText(`IONIZZAZIONE: ${Math.round(done*100)}%`,W/2,H-10);ctx.textAlign='left';
+      }
+
+      if(phase===3){
+        molPositions.forEach((m,i)=>{
+          const px=(W*.08+m.bx*W*.84+Math.sin(t*.08+i*.7)*W*.06)%(W*.95);
+          const pyBase=H*.06+m.by*H*.88;
+          const py=((pyBase+(t*(i%2===0?-.4:.4)))%H+H)%H;
+          ctx.beginPath();ctx.arc(px,py,i%2===0?4:2.5,0,Math.PI*2);
+          ctx.fillStyle=i%2===0?'rgba(240,192,64,.45)':'rgba(58,143,255,.65)';ctx.fill();
+        });
+
+        const cw=3+Math.sin(t*.12)*1.2;
+        const ccx=W/2;
+        const g=ctx.createLinearGradient(ccx-cw*8,0,ccx+cw*8,0);
+        g.addColorStop(0,'rgba(58,143,255,0)');
+        g.addColorStop(.25,'rgba(120,180,255,.6)');
+        g.addColorStop(.5,'rgba(255,255,255,.92)');
+        g.addColorStop(.75,'rgba(120,180,255,.6)');
+        g.addColorStop(1,'rgba(58,143,255,0)');
+        ctx.fillStyle=g;ctx.fillRect(ccx-cw*8,0,cw*16,H);
+
+        ctx.save();ctx.shadowColor='#3a8fff';ctx.shadowBlur=22;
+        ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(ccx-cw,0,cw*2,H);ctx.restore();
+
+        ctx.strokeStyle='rgba(240,192,64,.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.moveTo(ccx-cw,H*.88);ctx.lineTo(ccx+cw,H*.88);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(240,192,64,.6)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('← 2–3 cm →',ccx,H*.95);
+        ctx.fillText('PLASMA CONDUTTORE · T ≈ 30.000 K',ccx,H*.07);
+        ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initTriboCanvas(){
+  const phases=[
+    {desc:'Il cumulonembo contiene cristalli di ghiaccio e graupel — particelle neutre, nessuna separazione di carica.'},
+    {desc:'Correnti violente fanno scontrare cristalli (leggeri) e graupel (pesante). L\'attrito (effetto triboelettrico) trasferisce elettroni.'},
+    {desc:'Cristalli di ghiaccio cedono e⁻: si caricano + e salgono (alto). Graupel acquista e⁻: si carica − e scende (basso). Il condensatore naturale si forma.'},
+    {desc:'La base della nuvola (−) respinge gli e⁻ del suolo: il terreno si carica + per induzione elettrostatica. ΔV sale verso 3×10⁶ V/m.'},
+  ];
+
+  const iceParticles=Array.from({length:16},(_,i)=>({
+    bx:.1+((i*173)%1000)/1000*.8,
+    by:.1+((i*271)%1000)/1000*.8,
+    vx:(((i*37)%100)/100-.5)*.008,
+    vy:(((i*53)%100)/100-.5)*.006,
+  }));
+  const graupelParticles=Array.from({length:16},(_,i)=>({
+    bx:.1+((i*317)%1000)/1000*.8,
+    by:.1+((i*401)%1000)/1000*.8,
+    vx:(((i*61)%100)/100-.5)*.008,
+    vy:(((i*79)%100)/100-.5)*.006,
+  }));
+
+  makePhaseController({
+    canvasId:'tribo-canvas',
+    descId:'tribo-desc',
+    playBtnId:'tribo-play',
+    resetBtnId:'tribo-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      const sg=ctx.createLinearGradient(0,0,0,H);
+      sg.addColorStop(0,'#070d1f');sg.addColorStop(.78,'#0a1025');sg.addColorStop(1,'#3a2810');
+      ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+
+      const cloudTop=H*.06,cloudBot=H*.72,cloudMid=(cloudTop+cloudBot)/2;
+      const groundY=H*.84;
+
+      ctx.strokeStyle='rgba(58,143,255,.2)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.ellipse(W/2,cloudMid,W*.42,cloudBot/2-cloudTop/2,0,0,Math.PI*2);ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle='rgba(60,42,12,.55)';ctx.fillRect(0,groundY,W,H-groundY);
+
+      function drawIce(x,y,label){
+        ctx.fillStyle='rgba(180,220,255,.55)';
+        ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x+5,y+3);ctx.lineTo(x-5,y+3);ctx.closePath();ctx.fill();
+        if(label){ctx.fillStyle='rgba(240,192,64,.75)';ctx.font='9px monospace';ctx.fillText('+',x+5,y-3);}
+      }
+      function drawGraupel(x,y,label){
+        ctx.fillStyle='rgba(180,200,220,.4)';
+        ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
+        if(label){ctx.fillStyle='rgba(58,143,255,.8)';ctx.font='9px monospace';ctx.fillText('−',x+5,y-3);}
+      }
+
+      if(phase===0){
+        iceParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84+Math.sin(t*.04+i)*5;
+          const y=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          drawIce(x,y,false);
+        });
+        graupelParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84+Math.cos(t*.03+i)*4;
+          const y=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          drawGraupel(x,y,false);
+        });
+      }
+
+      if(phase===1){
+        const collisions=Math.min(8,Math.floor(t/8));
+        for(let c=0;c<collisions;c++){
+          const ccx=W*.15+c*W*.1;
+          const ccy=cloudTop+30+c*((cloudBot-cloudTop-60)/8);
+          const fa=Math.max(0,1-(t-c*8)/6);
+          ctx.beginPath();ctx.arc(ccx,ccy,4+fa*8,0,Math.PI*2);
+          ctx.fillStyle=`rgba(255,255,255,${fa*.6})`;ctx.fill();
+        }
+        iceParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const y=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          drawIce(x,y,false);
+        });
+        graupelParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const y=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          drawGraupel(x,y,false);
+        });
+        ctx.fillStyle='rgba(240,192,64,.45)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('EFFETTO TRIBOELETTRICO',W/2,H*.03);ctx.textAlign='left';
+      }
+
+      if(phase===2){
+        const sep=Math.min(1,t/50);
+        iceParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const baseY=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          const targetY=cloudTop+10+p.by*(cloudMid-cloudTop-50)*sep;
+          const y=baseY+(targetY-baseY)*sep;
+          drawIce(x,y,sep>.4);
+        });
+        graupelParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const baseY=cloudTop+10+(p.by*(cloudBot-cloudTop-20));
+          const targetY=cloudMid+10+p.by*(cloudBot-cloudMid-20)*sep;
+          const y=baseY+(targetY-baseY)*sep;
+          drawGraupel(x,y,sep>.4);
+        });
+        if(sep>.5){
+          ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+          ctx.fillText('ZONA + (cristalli di ghiaccio)',W/2,cloudTop+H*.03);
+          ctx.fillStyle='rgba(58,143,255,.4)';
+          ctx.fillText('ZONA − (graupel)',W/2,cloudBot-4);
+          ctx.textAlign='left';
+        }
+      }
+
+      if(phase===3){
+        iceParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const y=cloudTop+10+p.by*(cloudMid-cloudTop-50);
+          drawIce(x,y,true);
+        });
+        graupelParticles.forEach((p,i)=>{
+          const x=W*.08+p.bx*W*.84;
+          const y=cloudMid+10+p.by*(cloudBot-cloudMid-20);
+          drawGraupel(x,y,true);
+        });
+
+        const tension=Math.min(1,t/80);
+        const bX=W*.88,bY=H*.12,bH=H*.68;
+        ctx.fillStyle='rgba(10,14,26,.7)';ctx.fillRect(bX,bY,8,bH);
+        const g=ctx.createLinearGradient(0,bY+bH*(1-tension),0,bY+bH);
+        g.addColorStop(0,'rgba(58,143,255,.9)');g.addColorStop(1,'rgba(240,192,64,.9)');
+        ctx.fillStyle=g;ctx.fillRect(bX,bY+bH*(1-tension),8,bH*tension);
+        ctx.fillStyle='rgba(240,192,64,.5)';ctx.font='8px sans-serif';
+        ctx.fillText('ΔV',bX-2,bY-5);
+        ctx.fillText(`${Math.round(tension*100)}%`,bX-5,bY+bH+12);
+
+        const gAlpha=Math.min(1,t/40);
+        ctx.fillStyle=`rgba(240,192,64,${gAlpha*.5})`;ctx.font='9px monospace';
+        for(let xi=0;xi<9;xi++)ctx.fillText('+',W*.06+xi*W*.1,groundY+12);
+        ctx.fillStyle=`rgba(240,192,64,${gAlpha*.4})`;ctx.font='8px sans-serif';ctx.textAlign='center';
+        ctx.fillText('SUOLO + (induzione elettrostatica)',W/2,groundY+H*.06);ctx.textAlign='left';
+
+        ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('ZONA +',W/2,cloudTop+H*.03);
+        ctx.fillStyle='rgba(58,143,255,.4)';ctx.fillText('ZONA −',W/2,cloudBot-4);
+        ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initLeaderCanvas(){
+  const phases=[
+    {desc:'Dalla base della nuvola parte il precursore — quasi invisibile, avanza a scatti di 50 m cercando il percorso di minore resistenza. Traiettoria frattale.'},
+    {desc:'A poche centinaia di metri dal suolo, l\'intenso campo elettrico ionizza l\'aria vicino ai punti prominenti. Salgono verso l\'alto filamenti di plasma blu: gli upward streamers.'},
+    {desc:'A 30–50 m dal suolo, stepped leader e upward streamer si incontrano. Il circuito si chiude in un millisecondo: nasce un "cavo virtuale" di plasma.'},
+    {desc:'Con il circuito chiuso, la resistenza crolla. Un\'immensa ondata di carica risale dal suolo a 100.000 km/s (c/3). Questo è il lampo che vediamo — risale dal basso, non scende.'},
+  ];
+
+  function seededRng(seed){let s=seed;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+  const rng=seededRng(42);
+  const steps=Array.from({length:14},()=>({dx:(rng()-.5)*70,stepH:1/14}));
+  const branches=[
+    {fromStep:3,dx:(rng()-.5)*60,len:3},
+    {fromStep:7,dx:(rng()-.5)*55,len:3},
+    {fromStep:10,dx:(rng()-.5)*50,len:2},
+  ];
+
+  makePhaseController({
+    canvasId:'leader-canvas',
+    descId:'leader-desc',
+    playBtnId:'leader-play',
+    resetBtnId:'leader-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      const sg=ctx.createLinearGradient(0,0,0,H);
+      sg.addColorStop(0,'#060c1e');sg.addColorStop(.82,'#0a1020');sg.addColorStop(1,'#3a2810');
+      ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+
+      ctx.fillStyle='rgba(60,42,12,.6)';ctx.fillRect(0,H*.86,W,H*.14);
+
+      ctx.fillStyle='rgba(20,35,80,.75)';
+      ctx.beginPath();ctx.ellipse(W/2,H*.07,W*.38,H*.05,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(W*.33,H*.08,W*.22,H*.04,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(W*.67,H*.08,W*.22,H*.04,0,0,Math.PI*2);ctx.fill();
+
+      const ox=W/2;
+      function drawLeader(alpha,dashed){
+        ctx.save();
+        if(dashed)ctx.setLineDash([6,6]);
+        ctx.strokeStyle=`rgba(240,192,64,${alpha})`;ctx.lineWidth=1.5;
+        ctx.shadowColor='rgba(240,192,64,.4)';ctx.shadowBlur=6;
+        let px=ox,py=H*.12;
+        ctx.beginPath();ctx.moveTo(px,py);
+        steps.forEach((s)=>{px+=s.dx*(W/700);py+=s.stepH*(H*.74);ctx.lineTo(px,py);});
+        ctx.stroke();
+        branches.forEach(b=>{
+          let bpx=ox,bpy=H*.12;
+          steps.forEach((s,i)=>{
+            if(i<b.fromStep){bpx+=s.dx*(W/700);bpy+=s.stepH*(H*.74);}
+          });
+          ctx.beginPath();ctx.moveTo(bpx,bpy);
+          for(let bi=0;bi<b.len;bi++){bpx+=b.dx*(W/700)*.5;bpy+=steps[0].stepH*(H*.74);}
+          ctx.stroke();
+        });
+        ctx.restore();
+        ctx.setLineDash([]);
+        let ex=ox,ey=H*.12;
+        steps.forEach(s=>{ex+=s.dx*(W/700);ey+=s.stepH*(H*.74);});
+        return{endX:ex,endY:ey};
+      }
+
+      if(phase===0){
+        const visSteps=Math.min(steps.length,Math.floor(t/10)+1);
+        ctx.save();ctx.setLineDash([6,6]);
+        ctx.strokeStyle='rgba(240,192,64,.65)';ctx.lineWidth=1.5;
+        ctx.shadowColor='rgba(240,192,64,.3)';ctx.shadowBlur=5;
+        let px=ox,py=H*.12;
+        ctx.beginPath();ctx.moveTo(px,py);
+        for(let i=0;i<visSteps;i++){px+=steps[i].dx*(W/700);py+=steps[i].stepH*(H*.74);ctx.lineTo(px,py);}
+        ctx.stroke();ctx.restore();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(240,192,64,.35)';ctx.font='9px sans-serif';
+        ctx.fillText(`STEP ${Math.min(visSteps,steps.length)} / ${steps.length}`,W*.04,H*.04);
+      }
+
+      if(phase===1){
+        drawLeader(.5,true);
+        const srng=seededRng(99);
+        const streamerXs=[W*.3,W*.52,W*.68];
+        const pct=Math.min(1,t/70);
+        streamerXs.forEach((sx,i)=>{
+          const maxH=H*.32;
+          const pulse=.6+.4*Math.sin(t*.15+i);
+          ctx.strokeStyle=`rgba(58,143,255,${pulse*.8})`;ctx.lineWidth=1.5;
+          ctx.shadowColor='#3a8fff';ctx.shadowBlur=8;
+          ctx.beginPath();ctx.moveTo(sx,H*.86);
+          ctx.lineTo(sx+(srng()-.5)*20,H*.86-maxH*pct);ctx.stroke();
+          ctx.shadowBlur=0;
+        });
+        ctx.fillStyle='rgba(58,143,255,.35)';ctx.font='9px sans-serif';
+        ctx.textAlign='center';ctx.fillText('UPWARD STREAMERS',W/2,H*.9);ctx.textAlign='left';
+      }
+
+      if(phase===2){
+        const {endX,endY}=drawLeader(.6,true);
+        const fa=.5+.5*Math.sin(t*.3);
+        ctx.strokeStyle=`rgba(255,255,255,${fa})`;ctx.lineWidth=3;
+        ctx.shadowColor='#fff';ctx.shadowBlur=30;
+        let px=ox,py=H*.12;
+        ctx.beginPath();ctx.moveTo(px,py);
+        steps.forEach(s=>{px+=s.dx*(W/700);py+=s.stepH*(H*.74);ctx.lineTo(px,py);});
+        ctx.stroke();ctx.shadowBlur=0;
+        ctx.beginPath();ctx.arc(endX,endY,8+(1-fa)*12,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(255,255,255,${fa*.6})`;ctx.lineWidth=1.5;ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('CIRCUITO CHIUSO',W/2,endY+20);ctx.textAlign='left';
+      }
+
+      if(phase===3){
+        const pct=Math.min(1,t/8);
+        const strokeAlpha=Math.max(0,1-(t-8)/20);
+        if(strokeAlpha>0){
+          const pts=[];let lx=ox,ly=H*.86;pts.push({x:lx,y:ly});
+          steps.slice().reverse().forEach(s=>{lx-=s.dx*(W/700)*.4;ly-=s.stepH*(H*.74);pts.push({x:lx,y:ly});});
+          const maxI=Math.floor(pts.length*pct);
+          ctx.strokeStyle=`rgba(255,255,255,${strokeAlpha})`;ctx.lineWidth=3+strokeAlpha;
+          ctx.shadowColor=`rgba(240,192,64,${strokeAlpha})`;ctx.shadowBlur=25;
+          ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+          for(let i=1;i<=maxI;i++)ctx.lineTo(pts[i].x,pts[i].y);
+          ctx.stroke();ctx.shadowBlur=0;
+        }
+        ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('↑ RETURN STROKE · c/3 · questo è il lampo che vediamo',W/2,H*.92);ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initThermoCanvas(){
+  const phases=[
+    {desc:'Canale plasma a riposo: diametro 2–3 mm, temperatura ambiente (~300 K), pressione 1 atm.'},
+    {desc:'Il return stroke avvia la corrente: frecce di flusso lungo il canale. Effetto Joule in aumento.'},
+    {desc:'In meno di 1 microsecondo la temperatura schizza a 30.000 K — 5 volte la fotosfera solare. Canale si espande a 2–3 cm.'},
+    {desc:'La pressione interna raggiunge 10–100 atm. Il canale non può contenere questa pressione: si gonfia radialmente.'},
+    {desc:'Espansione supersonica (Mach > 1 entro 1–2 m): onda d\'urto idrodinamica. Poi decay a Mach < 1: onda acustica lineare = tuono.'},
+  ];
+
+  makePhaseController({
+    canvasId:'thermo-canvas',
+    descId:'thermo-desc',
+    playBtnId:'thermo-play',
+    resetBtnId:'thermo-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      ctx.fillStyle='#07091a';ctx.fillRect(0,0,W,H);
+
+      const ccx=W/2;
+      const channelWidths=[2,2,8,14,14];
+      const baseW=channelWidths[Math.min(phase,4)];
+      const cw=phase===2?Math.min(8,1+t*.12):phase===3?Math.min(14,8+t*.1):baseW;
+
+      function tempColor(ph,tt){
+        if(ph===0)return{r:58,g:100,b:200};
+        if(ph===1){const f=Math.min(1,tt/60);return{r:58+f*140,g:100+f*50,b:200-f*50};}
+        return{r:255,g:240,b:240};
+      }
+      const tc=tempColor(phase,t);
+
+      if(phase<4){
+        const g=ctx.createLinearGradient(ccx-cw*4,0,ccx+cw*4,0);
+        g.addColorStop(0,`rgba(${tc.r},${tc.g},${tc.b},0)`);
+        g.addColorStop(.4,`rgba(${tc.r},${tc.g},${tc.b},.6)`);
+        g.addColorStop(.5,`rgba(${tc.r},${tc.g},${tc.b},.95)`);
+        g.addColorStop(.6,`rgba(${tc.r},${tc.g},${tc.b},.6)`);
+        g.addColorStop(1,`rgba(${tc.r},${tc.g},${tc.b},0)`);
+        ctx.fillStyle=g;ctx.fillRect(ccx-cw*4,H*.05,cw*8,H*.9);
+        ctx.save();ctx.shadowColor=`rgba(${tc.r},${tc.g},${tc.b},.5)`;ctx.shadowBlur=15;
+        ctx.fillStyle=`rgba(${tc.r},${tc.g},${tc.b},.4)`;ctx.fillRect(ccx-cw,H*.05,cw*2,H*.9);ctx.restore();
+      }
+
+      if(phase===1){
+        const arrowAlpha=Math.min(1,t/20);
+        for(let ay=H*.1;ay<H*.85;ay+=H*.12){
+          const offset=(t*2)%(H*.12);
+          const aY=(ay+offset)%(H*.85);
+          ctx.strokeStyle=`rgba(240,192,64,${arrowAlpha*.8})`;ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.moveTo(ccx,aY-8);ctx.lineTo(ccx,aY+8);ctx.stroke();
+          ctx.fillStyle=`rgba(240,192,64,${arrowAlpha*.8})`;
+          ctx.beginPath();ctx.moveTo(ccx,aY+8);ctx.lineTo(ccx-4,aY+1);ctx.lineTo(ccx+4,aY+1);ctx.fill();
+        }
+        ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('I = 30.000 A →',ccx+cw*5+5,H*.5);ctx.textAlign='left';
+      }
+
+      const thermX=W*.82,thermY=H*.1,thermH=H*.75;
+      ctx.fillStyle='rgba(15,20,40,.7)';ctx.fillRect(thermX,thermY,10,thermH);
+      const temps=[300,1000,10000,30000,30000];
+      const maxT=30000;
+      const currentTemp=temps[Math.min(phase,4)]*Math.min(1,t/60+.05);
+      const fillH=thermH*(Math.min(currentTemp,maxT)/maxT);
+      const tg=ctx.createLinearGradient(0,thermY+thermH-fillH,0,thermY+thermH);
+      tg.addColorStop(0,'rgba(58,143,255,.9)');tg.addColorStop(.5,'rgba(240,192,64,.9)');tg.addColorStop(1,'rgba(255,200,200,.9)');
+      ctx.fillStyle=tg;ctx.fillRect(thermX,thermY+thermH-fillH,10,fillH);
+      const kLabel=Math.round(Math.min(currentTemp,maxT));
+      ctx.fillStyle='rgba(240,192,64,.6)';ctx.font='8px sans-serif';
+      ctx.fillText(`${kLabel.toLocaleString()} K`,thermX-15,thermY-6);
+
+      const presX=W*.06,presY=H*.1,presH=H*.75;
+      ctx.fillStyle='rgba(15,20,40,.7)';ctx.fillRect(presX,presY,10,presH);
+      const pressions=[1,1,5,100,100];
+      const maxP=100;
+      const currentP=Math.min(pressions[Math.min(phase,4)]*Math.min(1,t/60+.05),maxP);
+      const pfillH=presH*(currentP/maxP);
+      ctx.fillStyle='rgba(58,143,255,.6)';ctx.fillRect(presX,presY+presH-pfillH,10,pfillH);
+      ctx.fillStyle='rgba(58,143,255,.5)';ctx.font='8px sans-serif';
+      ctx.fillText(`${Math.round(currentP)} atm`,presX-8,presY-6);
+
+      if(phase===4){
+        for(let w=0;w<Math.min(t,8);w++){
+          const wt=(t-w*15);
+          if(wt<0)continue;
+          const r=wt*3;
+          const alpha=Math.max(0,1-r/(W*.4));
+          const isSonic=r<W*.08;
+          ctx.strokeStyle=isSonic?`rgba(255,255,200,${alpha*.6})`:`rgba(100,150,255,${alpha*.4})`;
+          ctx.lineWidth=isSonic?2:1;
+          ctx.beginPath();ctx.arc(ccx,H/2,r,0,Math.PI*2);ctx.stroke();
+        }
+        ctx.fillStyle='rgba(255,255,200,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('MACH > 1 — onda d\'urto',ccx,H*.15);
+        ctx.fillStyle='rgba(100,150,255,.4)';
+        ctx.fillText('MACH < 1 — onda acustica = TUONO',ccx,H*.88);
+        ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initZPinchCanvas(){
+  const phases=[
+    {desc:'Corrente di 200.000 A fluisce verticalmente lungo il canale di plasma.'},
+    {desc:'La corrente genera un campo magnetico B circolare attorno al canale (Legge di Ampère: B = μ₀I/2πr).'},
+    {desc:'Il campo B esercita la forza di Lorentz sulle particelle cariche in moto: F = qv×B — diretta verso l\'interno del canale.'},
+    {desc:'Z-Pinch (strizione magnetica): il plasma viene compresso radialmente, poi rimbalza in espansione. Oscillazione smorzata.'},
+  ];
+
+  makePhaseController({
+    canvasId:'zpinch-canvas',
+    descId:'zpinch-desc',
+    playBtnId:'zpinch-play',
+    resetBtnId:'zpinch-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      ctx.fillStyle='#07091a';ctx.fillRect(0,0,W,H);
+
+      const ccx=W/2;
+      let channelW=6;
+
+      if(phase===3){
+        const osc=Math.sin(t*.15)*Math.exp(-t*.02);
+        channelW=6*(1+osc*.7);
+      }
+
+      const g=ctx.createLinearGradient(ccx-channelW*4,0,ccx+channelW*4,0);
+      g.addColorStop(0,'rgba(240,192,64,0)');
+      g.addColorStop(.4,'rgba(240,192,64,.5)');
+      g.addColorStop(.5,'rgba(255,255,255,.9)');
+      g.addColorStop(.6,'rgba(240,192,64,.5)');
+      g.addColorStop(1,'rgba(240,192,64,0)');
+      ctx.fillStyle=g;ctx.fillRect(ccx-channelW*4,H*.06,channelW*8,H*.88);
+      ctx.save();ctx.shadowColor='rgba(240,192,64,.4)';ctx.shadowBlur=12;
+      ctx.fillStyle='rgba(240,192,64,.35)';ctx.fillRect(ccx-channelW,H*.06,channelW*2,H*.88);ctx.restore();
+
+      if(phase===0){
+        for(let ay=H*.08;ay<H*.85;ay+=H*.1){
+          const aY=(ay+(t*2.5))%(H*.85)+H*.06;
+          ctx.fillStyle='rgba(240,192,64,.8)';
+          ctx.beginPath();ctx.moveTo(ccx,aY);ctx.lineTo(ccx-4,aY-8);ctx.lineTo(ccx+4,aY-8);ctx.fill();
+          ctx.strokeStyle='rgba(240,192,64,.5)';ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.moveTo(ccx,aY-8);ctx.lineTo(ccx,aY-18);ctx.stroke();
+        }
+        ctx.fillStyle='rgba(240,192,64,.5)';ctx.font='10px sans-serif';ctx.textAlign='center';
+        ctx.fillText('I = 200.000 A ↓',ccx,H*.02);ctx.textAlign='left';
+      }
+
+      if(phase===1){
+        const maxR=Math.min(W*.35,t*2);
+        for(let r=20;r<maxR;r+=28){
+          const alpha=Math.max(0,1-r/(W*.35));
+          ctx.strokeStyle=`rgba(100,100,255,${alpha*.6})`;ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.ellipse(ccx,H/2,r,r*.25,0,0,Math.PI*2);ctx.stroke();
+          if(r>40){
+            const aAlpha=alpha*.8;
+            ctx.strokeStyle=`rgba(100,100,255,${aAlpha})`;
+            ctx.beginPath();ctx.moveTo(ccx+r,H/2);ctx.lineTo(ccx+r-6,H/2-6);ctx.stroke();
+            ctx.beginPath();ctx.moveTo(ccx-r,H/2);ctx.lineTo(ccx-r+6,H/2+6);ctx.stroke();
+          }
+        }
+        ctx.fillStyle='rgba(100,100,255,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('Campo B (Legge di Ampère)',ccx,H*.04);ctx.textAlign='left';
+      }
+
+      if(phase===2){
+        for(let r=30;r<W*.3;r+=35){
+          ctx.strokeStyle='rgba(100,100,255,.2)';ctx.lineWidth=1;
+          ctx.beginPath();ctx.ellipse(ccx,H/2,r,r*.25,0,0,Math.PI*2);ctx.stroke();
+        }
+        const arrowAlpha=Math.min(1,t/30);
+        const positions=[H*.2,H*.35,H*.5,H*.65,H*.8];
+        positions.forEach(ay=>{
+          [W*.15,W*.25,W*.75,W*.85].forEach(ax=>{
+            const dir=ax<ccx?1:-1;
+            ctx.strokeStyle=`rgba(255,80,80,${arrowAlpha*.8})`;ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax+dir*20,ay);ctx.stroke();
+            ctx.fillStyle=`rgba(255,80,80,${arrowAlpha*.8})`;
+            ctx.beginPath();ctx.moveTo(ax+dir*20,ay);ctx.lineTo(ax+dir*12,ay-4);ctx.lineTo(ax+dir*12,ay+4);ctx.fill();
+          });
+        });
+        ctx.fillStyle='rgba(255,80,80,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('F = qv×B (verso l\'interno)',ccx,H*.04);ctx.textAlign='left';
+      }
+
+      if(phase===3){
+        const osc=Math.sin(t*.15)*Math.exp(-t*.02);
+        ctx.fillStyle='rgba(255,200,80,.5)';ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText(`Z-PINCH — compressione: ${osc>0?'+':'-'}${(Math.abs(osc)*100).toFixed(0)}%`,ccx,H*.04);
+        ctx.fillText('oscillazione smorzata',ccx,H*.96);
+        ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initTypeCanvas(){
+  const canvas=document.getElementById('type-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  window.addEventListener('resize',()=>{canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;});
+
+  const cards=[...document.querySelectorAll('#type-cards .type-card')];
+  let currentType='cg-neg',t=0;
+  cards.forEach(c=>c.addEventListener('click',()=>{
+    cards.forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected');
+    currentType=c.dataset.type;t=0;
+  }));
+
+  function seededRng(seed){let s=seed;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+  const rng=seededRng(77);
+  const leaderSteps=Array.from({length:12},()=>({dx:(rng()-.5)*50,dh:1/12}));
+
+  function drawSky(){
+    const sg=ctx.createLinearGradient(0,0,0,canvas.height);
+    sg.addColorStop(0,'#060c1e');sg.addColorStop(.84,'#0a1020');sg.addColorStop(1,'#3a2810');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='rgba(60,42,12,.55)';ctx.fillRect(0,canvas.height*.86,canvas.width,canvas.height*.14);
+  }
+  function drawCloud(cx,cy,rx,ry){
+    ctx.fillStyle='rgba(20,35,80,.8)';
+    ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx-rx*.4,cy+ry*.2,rx*.55,ry*.8,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+rx*.4,cy+ry*.2,rx*.55,ry*.8,0,0,Math.PI*2);ctx.fill();
+  }
+
+  const W=()=>canvas.width,H=()=>canvas.height;
+
+  function drawCGNeg(tt){
+    drawSky();
+    drawCloud(W()/2,H()*.08,W()*.38,H()*.05);
+    const phase=tt<80?0:1;
+    if(phase===0){
+      const sts=Math.min(leaderSteps.length,Math.floor(tt/6)+1);
+      ctx.setLineDash([6,6]);ctx.strokeStyle='rgba(240,192,64,.65)';ctx.lineWidth=1.5;
+      let px=W()/2,py=H()*.13;ctx.beginPath();ctx.moveTo(px,py);
+      for(let i=0;i<sts;i++){px+=leaderSteps[i].dx*(W()/700);py+=leaderSteps[i].dh*(H()*.73);ctx.lineTo(px,py);}
+      ctx.stroke();ctx.setLineDash([]);
+    }else{
+      const pct=Math.min(1,(tt-80)/8);
+      const alpha=Math.max(0,1-(tt-88)/20);
+      ctx.strokeStyle=`rgba(255,255,255,${alpha})`;ctx.lineWidth=3;
+      ctx.shadowColor='#fff';ctx.shadowBlur=20;
+      let px=W()/2,py=H()*.86;ctx.beginPath();ctx.moveTo(px,py);
+      const target=(1-pct)*H()*.86+pct*H()*.13;
+      ctx.lineTo(px+(Math.random()-.5)*10,target);ctx.stroke();ctx.shadowBlur=0;
+    }
+    ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('CG⁻ — partenza dalla base nube',W()/2,H()*.97);ctx.textAlign='left';
+  }
+
+  function drawCGPos(tt){
+    drawSky();
+    drawCloud(W()/2,H()*.07,W()*.38,H()*.05);
+    ctx.fillStyle='rgba(25,40,100,.7)';
+    ctx.fillRect(W()*.15,H()*.02,W()*.7,H()*.04);
+    const phase=tt<100?0:1;
+    if(phase===0){
+      const sts=Math.min(leaderSteps.length,Math.floor(tt/8)+1);
+      ctx.setLineDash([6,6]);ctx.strokeStyle='rgba(200,220,255,.7)';ctx.lineWidth=2;
+      let px=W()*.85,py=H()*.04;ctx.beginPath();ctx.moveTo(px,py);
+      for(let i=0;i<sts;i++){px-=Math.abs(leaderSteps[i].dx)*(W()/700);py+=leaderSteps[i].dh*(H()*.82);ctx.lineTo(px,py);}
+      ctx.stroke();ctx.setLineDash([]);
+    }else{
+      const alpha=Math.max(0,1-(tt-100)/25);
+      ctx.strokeStyle=`rgba(255,255,255,${alpha})`;ctx.lineWidth=5;
+      ctx.shadowColor='#fff';ctx.shadowBlur=35;
+      ctx.beginPath();ctx.moveTo(W()*.35,H()*.86);ctx.lineTo(W()*.85,H()*.04);ctx.stroke();ctx.shadowBlur=0;
+    }
+    ctx.fillStyle='rgba(200,220,255,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('CG⁺ — partenza dall\'incudine · 10× più potente',W()/2,H()*.97);ctx.textAlign='left';
+  }
+
+  function drawIC(tt){
+    drawSky();
+    ctx.fillStyle='rgba(20,35,80,.75)';
+    ctx.beginPath();ctx.ellipse(W()/2,H()*.45,W()*.45,H()*.38,0,0,Math.PI*2);ctx.fill();
+    const flashAlpha=.3+.35*Math.sin(tt*.12);
+    ctx.fillStyle=`rgba(255,255,180,${flashAlpha})`;
+    ctx.beginPath();ctx.ellipse(W()/2,H()*.45,W()*.42,H()*.35,0,0,Math.PI*2);ctx.fill();
+    const phase2=tt%120;
+    if(phase2<60){
+      const pct=phase2/60;
+      ctx.strokeStyle=`rgba(240,230,100,${.4+pct*.4})`;ctx.lineWidth=2;
+      ctx.shadowColor='rgba(240,230,100,.3)';ctx.shadowBlur=10;
+      ctx.beginPath();ctx.moveTo(W()*.2,H()*.38+Math.sin(tt*.1)*H()*.05);ctx.lineTo(W()*.2+pct*W()*.6,H()*.48+Math.cos(tt*.1)*H()*.05);ctx.stroke();ctx.shadowBlur=0;
+    }
+    ctx.fillStyle='rgba(240,230,100,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('IC — scarica interna · il tipo più frequente',W()/2,H()*.97);ctx.textAlign='left';
+  }
+
+  function drawCC(tt){
+    drawSky();
+    drawCloud(W()*.22,H()*.15,W()*.18,H()*.06);
+    drawCloud(W()*.78,H()*.15,W()*.18,H()*.06);
+    const pct=Math.min(1,(tt%160)/80);
+    const alpha=(tt%160<80)?pct:Math.max(0,1-(pct*2-1)*2);
+    ctx.strokeStyle=`rgba(240,192,64,${alpha*.7})`;ctx.lineWidth=1.5;
+    ctx.setLineDash([5,5]);
+    ctx.beginPath();
+    let px=W()*.22,py=H()*.15;ctx.moveTo(px,py);
+    for(let xi=0;xi<8;xi++){
+      const tx=W()*.22+(W()*.56)*(xi/7)*pct;
+      const ty=H()*.15+Math.sin(xi*1.5)*H()*.06;
+      ctx.lineTo(tx,ty);
+    }
+    ctx.lineTo(W()*.78*pct+W()*.22*(1-pct),H()*.15);
+    ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('CC — Anvil Crawler · centinaia di km',W()/2,H()*.97);ctx.textAlign='left';
+  }
+
+  (function frame(){
+    switch(currentType){
+      case 'cg-neg':drawCGNeg(t);break;
+      case 'cg-pos':drawCGPos(t);break;
+      case 'ic':drawIC(t);break;
+      case 'cc':drawCC(t);break;
+    }
+    t=(t+1)%200;
+    requestAnimationFrame(frame);
+  })();
+}
+
+function initTLECanvas(){
+  const canvas=document.getElementById('tle-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  window.addEventListener('resize',()=>{canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;});
+
+  const cards=[...document.querySelectorAll('#tle-cards .type-card')];
+  let currentType='ball',t=0;
+  cards.forEach(c=>c.addEventListener('click',()=>{
+    cards.forEach(x=>x.classList.remove('selected'));
+    c.classList.add('selected');
+    currentType=c.dataset.type;t=0;
+  }));
+
+  const W=()=>canvas.width,H=()=>canvas.height;
+  const altMax=420;
+  function altToY(km){return H()*.95-km/altMax*H()*.9;}
+
+  function drawAltScale(){
+    ctx.fillStyle='#06091a';ctx.fillRect(0,0,W(),H());
+    const layers=[
+      {km:0,label:'SUOLO',bg:true},
+      {km:12,label:'TROPOSFERA',color:'rgba(58,143,255,.3)'},
+      {km:50,label:'STRATOSFERA',color:'rgba(100,150,200,.2)'},
+      {km:90,label:'MESOSFERA',color:'rgba(150,100,200,.2)'},
+      {km:400,label:'IONOSFERA',color:'rgba(80,80,200,.15)'},
+    ];
+    layers.forEach(l=>{
+      const y=altToY(l.km);
+      if(l.bg){ctx.fillStyle='rgba(60,42,12,.4)';ctx.fillRect(0,y,W(),H()-y);}
+      else{
+        ctx.strokeStyle=l.color;ctx.lineWidth=1;ctx.setLineDash([4,8]);
+        ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W(),y);ctx.stroke();ctx.setLineDash([]);
+      }
+      ctx.fillStyle='rgba(180,200,230,.25)';ctx.font='8px sans-serif';
+      ctx.fillText(`${l.km} km — ${l.label}`,4,y-3);
+    });
+    const cloudY=altToY(12);
+    ctx.fillStyle='rgba(20,35,80,.75)';
+    ctx.beginPath();ctx.ellipse(W()/2,cloudY,W()*.3,H()*.025,0,0,Math.PI*2);ctx.fill();
+  }
+
+  function drawBall(tt){
+    drawAltScale();
+    const bx=W()/2+Math.sin(tt*.022)*W()*.2;
+    const by=altToY(0.5)+Math.cos(tt*.018)*H()*.04;
+    const r=14+Math.sin(tt*.08)*2;
+    const grd=ctx.createRadialGradient(bx,by,0,bx,by,r*3);
+    grd.addColorStop(0,'rgba(255,180,50,.8)');
+    grd.addColorStop(.4,'rgba(255,120,20,.4)');
+    grd.addColorStop(1,'rgba(255,80,0,0)');
+    ctx.fillStyle=grd;ctx.beginPath();ctx.arc(bx,by,r*3,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(bx,by,r,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,200,80,.9)';ctx.fill();
+    ctx.beginPath();ctx.arc(bx,by,r*.4,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,220,.95)';ctx.fill();
+    ctx.fillStyle='rgba(255,150,50,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('BALL LIGHTNING · plasma di silicio?',W()/2,altToY(0)-8);ctx.textAlign='left';
+  }
+
+  function drawSprite(tt){
+    drawAltScale();
+    if(tt<20){
+      ctx.fillStyle=`rgba(255,255,200,${(1-tt/20)*.5})`;
+      ctx.beginPath();ctx.ellipse(W()/2,altToY(12),W()*.28,H()*.022,0,0,Math.PI*2);ctx.fill();
+    }
+    if(tt>15){
+      const appear=Math.min(1,(tt-15)/20);
+      const spriteY=altToY(70);
+      ctx.fillStyle=`rgba(200,50,50,${appear*.5})`;
+      ctx.beginPath();ctx.ellipse(W()/2,spriteY,W()*.2,H()*.06*appear,0,0,Math.PI*2);ctx.fill();
+      const pulse=.6+.4*Math.sin(tt*.15);
+      ctx.strokeStyle=`rgba(200,50,50,${appear*pulse*.7})`;ctx.lineWidth=1.5;
+      for(let ti=-4;ti<=4;ti++){
+        if(ti===0)continue;
+        const tx=W()/2+ti*W()*.045;
+        ctx.beginPath();ctx.moveTo(tx,spriteY+H()*.06*appear);
+        ctx.lineTo(tx+ti*5,spriteY+H()*.14*appear);ctx.stroke();
+      }
+      ctx.fillStyle='rgba(200,50,50,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+      ctx.fillText('SPRITE · medusa rossa · 50–90 km',W()/2,altToY(90)-4);ctx.textAlign='left';
+    }
+  }
+
+  function drawElves(tt){
+    drawAltScale();
+    const cycle=tt%100;
+    if(cycle<60){
+      const pct=cycle/60;
+      const y=altToY(400);
+      const r=pct*W()*.48;
+      const alpha=1-pct;
+      ctx.strokeStyle=`rgba(150,150,255,${alpha*.6})`;ctx.lineWidth=2;
+      ctx.save();ctx.shadowColor='rgba(150,150,255,.3)';ctx.shadowBlur=8;
+      ctx.beginPath();ctx.ellipse(W()/2,y,r,r*.08,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+    ctx.fillStyle='rgba(150,150,255,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('ELVES · anello alla velocità della luce · ~400 km',W()/2,altToY(410)-4);ctx.textAlign='left';
+  }
+
+  function drawBlueJet(tt){
+    drawAltScale();
+    const cycle=tt%80;
+    const pct=cycle<40?cycle/40:Math.max(0,1-(cycle-40)/20);
+    const baseY=altToY(12);
+    const topY=altToY(50);
+    const h=(baseY-topY)*pct;
+    if(h>2){
+      const grd=ctx.createLinearGradient(W()/2,baseY,W()/2,baseY-h);
+      grd.addColorStop(0,'rgba(30,100,255,.7)');
+      grd.addColorStop(.6,'rgba(50,150,255,.5)');
+      grd.addColorStop(1,'rgba(100,200,255,0)');
+      ctx.fillStyle=grd;
+      ctx.beginPath();
+      ctx.moveTo(W()/2,baseY);
+      ctx.lineTo(W()/2-W()*.06,baseY);
+      ctx.lineTo(W()/2-W()*.04*(1-pct*.6),baseY-h);
+      ctx.lineTo(W()/2+W()*.04*(1-pct*.6),baseY-h);
+      ctx.lineTo(W()/2+W()*.06,baseY);
+      ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(80,150,255,.4)';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText('BLUE JET · cono blu · N₂ eccitato · 40–50 km',W()/2,altToY(55)-4);ctx.textAlign='left';
+  }
+
+  (function frame(){
+    switch(currentType){
+      case 'ball':drawBall(t);break;
+      case 'sprite':drawSprite(t);break;
+      case 'elves':drawElves(t);break;
+      case 'blue-jet':drawBlueJet(t);break;
+    }
+    t=(t+1)%200;
+    requestAnimationFrame(frame);
+  })();
+}
+
+function initThunderCalc(){
+  const slider=document.getElementById('thunder-slider');
+  const output=document.getElementById('thunder-out');
+  if(!slider||!output)return;
+  function update(){output.textContent=(slider.value/3).toFixed(1);}
+  slider.addEventListener('input',update);
+  update();
+}
+
+function initLichtenberg(){
+  const canvas=document.getElementById('lichtenberg-canvas');
+  const resetBtn=document.getElementById('lich-reset');
+  const saveBtn=document.getElementById('lich-save');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+
+  let drawing=false;
+
+  function seededRng(seed){let s=seed;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+
+  function generateDLA(sx,sy){
+    const queue=[];
+    const visited=new Set();
+    const key=(x,y)=>`${Math.round(x/3)}_${Math.round(y/3)}`;
+    const rng=seededRng(Date.now()%100000);
+    for(let b=0;b<3;b++){
+      const angle=rng()*Math.PI*2;
+      queue.push({x:sx,y:sy,angle,depth:8,w:2.5});
+    }
+
+    function processQueue(){
+      if(queue.length===0){drawing=false;return;}
+      const batch=Math.min(6,queue.length);
+      for(let bi=0;bi<batch;bi++){
+        const item=queue.shift();
+        if(!item||item.depth<=0)continue;
+        const k=key(item.x,item.y);
+        if(visited.has(k))continue;
+        visited.add(k);
+        const spread=(Math.PI/3)*rng()+item.angle-Math.PI/6;
+        const len=8+rng()*12;
+        const nx=item.x+Math.cos(spread)*len;
+        const ny=item.y+Math.sin(spread)*len;
+        if(nx<4||nx>canvas.width-4||ny<4||ny>canvas.height-4)continue;
+        ctx.beginPath();ctx.moveTo(item.x,item.y);ctx.lineTo(nx,ny);
+        ctx.strokeStyle=`rgba(240,192,64,${.5+item.w*.15})`;
+        ctx.lineWidth=item.w;
+        ctx.shadowColor='rgba(240,192,64,.4)';ctx.shadowBlur=item.w*3;
+        ctx.stroke();ctx.shadowBlur=0;
+        if(item.depth>1){
+          queue.push({x:nx,y:ny,angle:spread,depth:item.depth-1,w:item.w*.75});
+          if(rng()<.55&&item.depth>2)
+            queue.push({x:nx,y:ny,angle:spread+(rng()-.5)*Math.PI*.8,depth:item.depth-2,w:item.w*.5});
+        }
+      }
+      requestAnimationFrame(processQueue);
+    }
+    drawing=true;
+    processQueue();
+  }
+
+  canvas.addEventListener('click',e=>{
+    if(drawing)return;
+    const r=canvas.getBoundingClientRect();
+    const sx=(e.clientX-r.left)*(canvas.width/r.width);
+    const sy=(e.clientY-r.top)*(canvas.height/r.height);
+    generateDLA(sx,sy);
+  });
+
+  if(resetBtn)resetBtn.addEventListener('click',()=>{
+    drawing=false;ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='rgba(122,128,153,.3)';ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('clicca per generare',canvas.width/2,canvas.height/2);ctx.textAlign='left';
+  });
+
+  if(saveBtn)saveBtn.addEventListener('click',()=>{
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='lichtenberg.png';a.click();
+  });
+
+  ctx.fillStyle='rgba(122,128,153,.3)';ctx.font='11px sans-serif';ctx.textAlign='center';
+  ctx.fillText('clicca per generare',canvas.width/2,canvas.height/2);ctx.textAlign='left';
+}
+
+function initKiteCanvas(){
+  const phases=[
+    {desc:'La nuvola temporalesca accumula cariche negative alla base. Campo elettrico latente tra nuvola e suolo.'},
+    {desc:'L\'aquilone di seta vola nell\'aria ionizzata. Il filo metallico in cima "cattura" le cariche elettriche.'},
+    {desc:'Le cariche scendono lungo la canapa bagnata (conduttore per via dei sali minerali). La chiave di ferro si carica.'},
+    {desc:'Franklin avvicina il dito alla chiave (isolato dalla seta asciutta): differenza di potenziale → scintilla controllata.'},
+    {desc:'La bottiglia di Leida si carica con l\'elettricità celeste. PROVA: elettricità di laboratorio = elettricità celeste.'},
+  ];
+
+  makePhaseController({
+    canvasId:'kite-canvas',
+    descId:'kite-desc',
+    playBtnId:'kite-play',
+    resetBtnId:'kite-reset',
+    phases,
+    onDraw(ctx,W,H,phase,t){
+      const sg=ctx.createLinearGradient(0,0,0,H);
+      sg.addColorStop(0,'#060c20');sg.addColorStop(.6,'#0a1228');sg.addColorStop(1,'#3a2810');
+      ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+
+      ctx.fillStyle='rgba(50,35,10,.7)';ctx.fillRect(0,H*.88,W,H*.12);
+      ctx.fillStyle='rgba(60,40,15,.8)';
+      ctx.fillRect(W*.04,H*.72,W*.25,H*.03);
+      ctx.fillRect(W*.04,H*.75,W*.04,H*.14);
+      ctx.fillRect(W*.25,H*.75,W*.04,H*.14);
+
+      const cloudY=H*.12;
+      ctx.fillStyle='rgba(20,35,80,.8)';
+      ctx.beginPath();ctx.ellipse(W/2,cloudY,W*.38,H*.06,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(W*.3,cloudY+H*.02,W*.22,H*.04,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(W*.7,cloudY+H*.02,W*.22,H*.04,0,0,Math.PI*2);ctx.fill();
+
+      if(phase===0){
+        for(let xi=0;xi<7;xi++){
+          ctx.fillStyle='rgba(58,143,255,.65)';ctx.font='10px monospace';
+          ctx.fillText('−',W*.18+xi*W*.1,cloudY+H*.05);
+        }
+        const fa=Math.min(1,t/30);
+        for(let xi=0;xi<5;xi++){
+          const fx=W*.15+xi*W*.18;
+          ctx.strokeStyle=`rgba(240,192,64,${fa*.2})`;ctx.lineWidth=1;ctx.setLineDash([3,6]);
+          ctx.beginPath();ctx.moveTo(fx,cloudY+H*.06);ctx.lineTo(fx,H*.86);ctx.stroke();ctx.setLineDash([]);
+        }
+        ctx.fillStyle='rgba(240,192,64,.3)';ctx.font='8px sans-serif';ctx.textAlign='center';
+        ctx.fillText('CAMPO ELETTRICO',W/2,H*.45);ctx.textAlign='left';
+      }
+
+      const kiteX=W*.55,kiteY=phase>=1?H*.3:H*.95;
+      const kiteAlpha=phase>=1?Math.min(1,t/20):0;
+
+      if(kiteAlpha>0){
+        ctx.save();ctx.globalAlpha=kiteAlpha;
+        ctx.strokeStyle='rgba(240,192,64,.8)';ctx.lineWidth=1.5;
+        ctx.fillStyle='rgba(240,192,64,.08)';
+        ctx.beginPath();
+        ctx.moveTo(kiteX,kiteY-18);ctx.lineTo(kiteX+12,kiteY);
+        ctx.lineTo(kiteX,kiteY+22);ctx.lineTo(kiteX-12,kiteY);ctx.closePath();
+        ctx.fill();ctx.stroke();
+        ctx.strokeStyle='rgba(240,192,64,.9)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(kiteX,kiteY-18);ctx.lineTo(kiteX,kiteY-26);ctx.stroke();
+        ctx.restore();
+      }
+
+      const keyY=H*.67,keyX=W*.15;
+      if(phase>=1&&kiteAlpha>0){
+        ctx.save();ctx.globalAlpha=kiteAlpha;
+        const isDashed=phase<2;
+        if(isDashed)ctx.setLineDash([5,4]);
+        ctx.strokeStyle='rgba(240,192,64,.5)';ctx.lineWidth=1.2;
+        ctx.beginPath();ctx.moveTo(kiteX,kiteY+22);
+        ctx.quadraticCurveTo(W*.42,H*.52,keyX,keyY);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+        ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='8px sans-serif';
+        ctx.fillText('canapa bagnata',W*.32,H*.5);
+      }
+
+      if(phase===2){
+        const flowPos=(t*.8)%100/100;
+        const fx=kiteX+(keyX-kiteX)*flowPos;
+        const fy=kiteY+22+(keyY-(kiteY+22))*flowPos;
+        ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);
+        ctx.fillStyle='rgba(240,192,64,.8)';ctx.fill();
+        ctx.fillStyle='rgba(240,192,64,.4)';ctx.font='8px sans-serif';
+        ctx.fillText('cariche in discesa',W*.28,H*.58);
+      }
+
+      if(phase>=1){
+        ctx.strokeStyle='rgba(200,168,32,.8)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(keyX,keyY,5,0,Math.PI*2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(keyX,keyY+5);ctx.lineTo(keyX,keyY+12);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(keyX-4,keyY+10);ctx.lineTo(keyX+4,keyY+10);ctx.stroke();
+        ctx.fillStyle='rgba(200,168,32,.5)';ctx.font='8px sans-serif';
+        ctx.fillText('chiave',keyX+7,keyY);
+      }
+
+      if(phase>=1){
+        ctx.strokeStyle='rgba(58,143,255,.6)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(keyX,keyY+12);ctx.lineTo(keyX,keyY+22);ctx.stroke();
+        ctx.fillStyle='rgba(58,143,255,.4)';ctx.font='7px sans-serif';
+        ctx.fillText('seta (isolante)',keyX+7,keyY+18);
+      }
+
+      if(phase===3){
+        const pulse=.7+.3*Math.sin(t*.4);
+        ctx.strokeStyle='rgba(232,234,240,.4)';ctx.lineWidth=4;
+        ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(keyX+15,keyY-5);ctx.lineTo(keyX+8,keyY-2);ctx.stroke();
+        ctx.lineCap='butt';
+        ctx.strokeStyle=`rgba(255,240,100,${pulse})`;ctx.lineWidth=1.5;
+        ctx.shadowColor='#fff';ctx.shadowBlur=10;
+        ctx.beginPath();ctx.moveTo(keyX+8,keyY-2);ctx.lineTo(keyX+3,keyY+1);ctx.lineTo(keyX+6,keyY-1);ctx.lineTo(keyX+1,keyY);ctx.stroke();
+        ctx.shadowBlur=0;
+        ctx.fillStyle='rgba(255,240,100,.5)';ctx.font='8px sans-serif';
+        ctx.fillText('SCINTILLA!',keyX+18,keyY-4);
+      }
+
+      if(phase>=1){
+        const jarX=W*.12,jarY=H*.76;
+        const jarAlpha=phase>=4?Math.min(1,t/20):0.3;
+        ctx.save();ctx.globalAlpha=jarAlpha;
+        ctx.strokeStyle='rgba(122,128,153,.7)';ctx.lineWidth=1.5;
+        ctx.fillStyle='rgba(10,20,50,.6)';
+        ctx.beginPath();ctx.roundRect(jarX-10,jarY-18,20,25,2);ctx.fill();ctx.stroke();
+        ctx.fillStyle='rgba(58,143,255,.5)';
+        ctx.fillRect(jarX-10,jarY-18,20,5);
+        if(phase===4){
+          ctx.fillStyle=`rgba(240,192,64,${Math.min(1,t/15)*.4})`;
+          ctx.beginPath();ctx.roundRect(jarX-10,jarY-18,20,25,2);ctx.fill();
+          ctx.fillStyle='rgba(240,192,64,.5)';ctx.font='7px sans-serif';
+          ctx.fillText('CARICA!',jarX-12,jarY+12);
+        }
+        ctx.restore();
+        ctx.fillStyle='rgba(122,128,153,.4)';ctx.font='7px sans-serif';
+        ctx.textAlign='center';ctx.fillText('Leida',jarX,jarY+15);ctx.textAlign='left';
+      }
+
+      if(phase===4){
+        const fa=Math.min(1,t/30);
+        ctx.fillStyle=`rgba(240,192,64,${fa*.6})`;ctx.font='9px sans-serif';ctx.textAlign='center';
+        ctx.fillText('PROVA: elettricità celeste = elettricità di laboratorio',W/2,H*.06);
+        ctx.textAlign='left';
+      }
+    }
+  });
+}
+
+function initMap(){
+  const mapEl=document.getElementById('map');
+  if(!mapEl||mapEl._leaflet_id)return;
+
+  const map=L.map('map',{
+    center:[10,20],zoom:2,
+    zoomControl:false,
+    attributionControl:false,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    subdomains:'abcd',maxZoom:19,
+  }).addTo(map);
+
+  const hotspots=[
+    {ll:[9.75,-71.6],name:'Lago Maracaibo',info:'230–260 fulmini/km²/anno · 297 notti/anno · Guinness WR'},
+    {ll:[-2.5,27.5],name:'Congo/Kifuka',info:'205 fulmini/km²/anno · foresta equatoriale'},
+    {ll:[27.9,-82.5],name:'Florida/Tampa',info:'>1.2M fulmini/anno · convergenza brezze marine'},
+    {ll:[45.5,9.2],name:'Pianura Padana',info:'Hotspot autunnale · supercelle quando fronte freddo scavalca le Alpi'},
+  ];
+
+  const markerStyle={
+    radius:8,color:'#f0c040',weight:2,
+    fillColor:'rgba(240,192,64,.3)',fillOpacity:1,
+  };
+
+  hotspots.forEach(h=>{
+    L.circleMarker(h.ll,markerStyle)
+      .bindPopup(`<strong style="color:#f0c040;font-family:'Bebas Neue',sans-serif;">${h.name}</strong><br><span style="font-size:.85em;color:#ccc;">${h.info}</span>`)
+      .addTo(map);
+  });
+
+  const zones=[
+    {ll:[9.75,-71.6],freq:2000},
+    {ll:[-2.5,27.5], freq:3000},
+    {ll:[27.9,-82.5],freq:4000},
+    {ll:[4,25],       freq:5000},
+    {ll:[45.5,9.2],  freq:8000},
+  ];
+
+  let boltCount=0;
+  const boltCountEl=document.getElementById('bolt-count');
+
+  function spawnStrike(baseLat,baseLon){
+    const lat=baseLat+(Math.random()-.5)*1.6;
+    const lon=baseLon+(Math.random()-.5)*1.6;
+    const circle=L.circle([lat,lon],{
+      radius:10000,color:'#f0c040',weight:1.5,
+      fillColor:'rgba(240,192,64,.7)',fillOpacity:.7,
+    }).addTo(map);
+
+    let opacity=0.7;
+    const fadeInterval=setInterval(()=>{
+      opacity-=0.07;
+      if(opacity<=0){clearInterval(fadeInterval);map.removeLayer(circle);}
+      else{circle.setStyle({fillOpacity:opacity,opacity:opacity});}
+    },100);
+
+    boltCount++;
+    if(boltCountEl)boltCountEl.textContent=boltCount;
+  }
+
+  zones.forEach(z=>{
+    setInterval(()=>spawnStrike(z.ll[0],z.ll[1]),z.freq);
+  });
+
+  setTimeout(()=>map.invalidateSize(),100);
+}
+
+function initSafety(){
+  document.querySelectorAll('.safety-scen').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.safety-scen').forEach(s=>s.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   SCROLL HINT
+══════════════════════════════════════════════ */
+window.addEventListener('scroll',()=>document.getElementById('scroll-hint').classList.add('hidden'),{once:true});
+
+/* ══════════════════════════════════════════════
+   FULLSCREEN
+══════════════════════════════════════════════ */
+document.getElementById('fullscreen-btn').addEventListener('click',()=>{
+  document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+});
+
+/* ══════════════════════════════════════════════
+   NAV DOTS
+══════════════════════════════════════════════ */
+navDots.forEach((d,i)=>d.addEventListener('click',()=>slides[i].scrollIntoView({behavior:'smooth'})));
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+updateUI(0);
+onSlideEnter(0);
+</script>
+</body>
+</html>
