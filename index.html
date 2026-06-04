@@ -2146,7 +2146,7 @@
         if(canvas._init) return; canvas._init=true;
         const ctx=canvas.getContext('2d');
         let busy=false;
-        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; drawScene(); }
+        function resize(){ canvas.width=canvas.offsetWidth||400; canvas.height=canvas.offsetHeight||500; drawScene(); }
         function drawScene(){
           const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
           const bX=W*.47,bW=W*.11,bH=H*.33,rodTopY=H*.78-H*.33-H*.07;
