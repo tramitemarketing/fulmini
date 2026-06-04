@@ -959,7 +959,85 @@ canvas { display: block; }
     </div>
   </div>
 </section>
-<section id="s-tuono"     class="slide"><!-- Task 3 --></section>
+<section id="s-tuono" class="slide">
+  <div class="vc-wrap">
+    <div class="vc-dots">
+      <div class="vc-dot active"></div>
+      <div class="vc-dot"></div>
+      <div class="vc-dot"></div>
+    </div>
+    <div class="vc-track">
+
+      <!-- P1: Dal plasma all'onda -->
+      <div class="vc-panel panel-split">
+        <div class="left">
+          <span class="slide-eyebrow">slide 04 · il tuono</span>
+          <h2 class="slide-title">Un'esplosione <em>supersonica</em></h2>
+          <p class="slide-body">
+            Il tuono non è un evento separato: è la diretta conseguenza
+            termodinamica del fulmine. Il canale di plasma a 30.000°C
+            — quasi 5 volte la superficie del Sole — non può contenere
+            la pressione di 10–100 atm.<br><br>
+            Si espande radialmente a regime <strong>supersonico</strong>
+            (Mach&nbsp;&gt;&nbsp;1 nei primi metri): <strong>onda d'urto idrodinamica</strong>.
+            Man mano che si allontana perde energia, rallenta sotto Mach 1:
+            l'onda d'urto decade in normale <strong>onda acustica lineare</strong>.<br><br>
+            Udibile fino a 20–25 km; oltre, la rifrazione
+            acustica disperde le onde verso l'alto.
+          </p>
+        </div>
+        <div class="right">
+          <canvas id="thunder-canvas" width="340" height="260" style="max-width:100%;"></canvas>
+        </div>
+      </div>
+
+      <!-- P2: Calcolatore distanza -->
+      <div class="vc-panel panel-center">
+        <span class="slide-eyebrow">calcola la distanza</span>
+        <h2 class="slide-title">Lampo → Tuono → <em>distanza</em></h2>
+        <p class="slide-body" style="margin-bottom:1.5rem;">
+          La luce viaggia a 300.000 km/s: il lampo è istantaneo.
+          Il suono viaggia a 343 m/s: circa 1 km ogni 3 secondi.
+        </p>
+        <div class="thunder-slider-wrap">
+          <span class="slider-label">SECONDI TRA LAMPO E TUONO</span>
+          <input type="range" id="thunder-slider" min="1" max="30" value="10">
+          <span class="thunder-out" id="thunder-out">3.3 km</span>
+          <span class="thunder-formula">km = secondi ÷ 3</span>
+        </div>
+        <p class="slide-body" style="margin-top:1.5rem;max-width:45ch;text-align:center;">
+          9 secondi → 3 km. Se l'intervallo <em>diminuisce</em> tra un lampo e
+          l'altro, il temporale si sta avvicinando.
+        </p>
+      </div>
+
+      <!-- P3: Tabella dati fisici -->
+      <div class="vc-panel panel-center">
+        <span class="slide-eyebrow">dati fisici completi</span>
+        <h2 class="slide-title">La scheda <em>tecnica</em></h2>
+        <table class="data-table" style="max-width:620px;width:100%;margin-top:1.25rem;">
+          <thead><tr><th>Parametro</th><th>Valore</th></tr></thead>
+          <tbody>
+            <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
+            <tr><td>Corrente media</td><td>20.000–30.000 A</td></tr>
+            <tr><td>Tensione</td><td>100 milioni – 1 miliardo di Volt</td></tr>
+            <tr><td>Durata (con più scariche)</td><td>~0,2 secondi</td></tr>
+            <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
+            <tr><td>Energia utilizzabile</td><td>~1 kWh (il resto è calore)</td></tr>
+            <tr><td>Velocità return stroke</td><td>~100.000 km/s (c/3)</td></tr>
+            <tr><td>Diametro canale plasma</td><td>2–3 cm</td></tr>
+            <tr><td>Pressione picco</td><td>10–100 atm</td></tr>
+          </tbody>
+        </table>
+        <p class="slide-body" style="margin-top:1.25rem;max-width:50ch;text-align:center;">
+          Potrebbe far bollire 4 litri d'acqua. Ma la durata brevissima rende
+          impossibile raccogliere e usare quell'energia in pratica.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
 <section id="s-tipi"      class="slide"><!-- Task 3 --></section>
 <section id="s-record"    class="slide"><!-- Task 4 --></section>
 <section id="s-franklin"  class="slide"><!-- Task 4 --></section>
