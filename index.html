@@ -26,15 +26,18 @@
 }
 
 html {
-  scroll-snap-type: y mandatory;
   background: var(--bg);
   color: var(--white);
   font-family: 'Source Serif 4', serif;
   cursor: none;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  overflow: visible;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
 }
 
 /* ===== SLIDES ===== */
@@ -104,8 +107,8 @@ body {
   transition: transform .5s cubic-bezier(.4,0,.2,1);
 }
 .hc-slide {
-  min-width: 100%;
   flex-shrink: 0;
+  /* width set by JS initHorizontalCarousel */
 }
 .hc-tabs {
   display: flex;
@@ -1667,16 +1670,30 @@ function initVerticalCarousel(slideEl) {
 /* ===== HORIZONTAL CAROUSEL ===== */
 function initHorizontalCarousel(wrapEl) {
   const track = wrapEl.querySelector('.hc-track');
-  const slides = [...wrapEl.querySelectorAll('.hc-slide')];
+  const hcSlides = [...wrapEl.querySelectorAll('.hc-slide')];
   const tabs = [...wrapEl.querySelectorAll('.hc-tab')];
-  if (!track || slides.length < 2) return;
+  if (!track || hcSlides.length < 2) return;
   let idx = 0;
+
+  function measure() {
+    const w = wrapEl.getBoundingClientRect().width || wrapEl.offsetWidth || 300;
+    hcSlides.forEach(s => { s.style.width = w + 'px'; s.style.flexShrink = '0'; });
+    return w;
+  }
+
   function go(n) {
-    idx = Math.max(0, Math.min(n, slides.length - 1));
-    track.style.transform = `translateX(calc(${idx} * -100%))`;
+    idx = Math.max(0, Math.min(n, hcSlides.length - 1));
+    const w = measure();
+    track.style.transform = `translateX(${idx * -w}px)`;
     tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
   }
+
   tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
+  window.addEventListener('resize', () => go(idx));
+
+  // Init after layout
+  requestAnimationFrame(() => go(0));
+
   return { go, getIdx: () => idx };
 }
 
