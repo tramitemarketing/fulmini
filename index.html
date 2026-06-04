@@ -871,7 +871,115 @@
   </section>
   <section class="section" id="curiosita" data-section="8">
     <div class="section-header"><span class="section-num">08 — CURIOSITÀ &amp; RECORD</span></div>
-    <!-- CURIOSITA CONTENT -->
+    <div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Record WMO -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Curiosità &amp; Record — 1/3</span>
+          <h2 class="reveal reveal-d1">Record WMO ufficiali</h2>
+          <p class="reveal reveal-d2">Un fulmine nube-suolo standard è lungo in media circa 8 km. Ma i fulmini orizzontali all'interno dei sistemi nuvolosi (<em>megaflash</em>) raggiungono dimensioni spaventose. L'Organizzazione Meteorologica Mondiale ha registrato e certificato nel 2021 i due record assoluti:</p>
+          <div class="reveal reveal-d3" style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+            <div style="border-left:3px solid var(--gold);padding:.75rem 1rem;background:var(--surface);">
+              <div class="eyebrow">Record di lunghezza</div>
+              <div id="rec-len" style="font-family:var(--mono);font-size:2.5rem;font-weight:700;color:var(--gold);">0 km</div>
+              <p style="font-size:.85rem;margin:.25rem 0 0;">Un singolo fulmine lungo quanto la distanza tra Texas e Mississippi (USA), 29 aprile 2020.</p>
+            </div>
+            <div style="border-left:3px solid var(--blue);padding:.75rem 1rem;background:var(--surface);">
+              <div class="eyebrow">Record di durata</div>
+              <div id="rec-dur" style="font-family:var(--mono);font-size:2.5rem;font-weight:700;color:var(--blue);">0 s</div>
+              <p style="font-size:.85rem;margin:.25rem 0 0;">Un singolo fulmine rimasto acceso per 17,1 secondi su Uruguay e Argentina, 18 giugno 2020.</p>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;">lunghezza media</div>
+            <div style="font-size:2rem;color:var(--muted);">~8 km</div>
+            <div style="font-size:.65rem;letter-spacing:.2em;color:var(--muted);margin:.5rem 0;">vs record</div>
+            <div style="font-size:3rem;font-weight:700;color:var(--gold);">768 km</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Velocità e il tuono -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Curiosità &amp; Record — 2/3</span>
+          <h2 class="reveal reveal-d1">Velocità e il tuono</h2>
+          <p class="reveal reveal-d2">La fase di discesa del precursore è "lenta" (~200.000 km/h), ma il colpo di ritorno — il guizzo luminoso che sale dalla terra — viaggia a velocità relativistiche, fino a circa <strong>100.000 km/s</strong> (un terzo della velocità della luce): a quella velocità farebbe il giro della Terra in meno di mezzo secondo.</p>
+          <p class="reveal reveal-d3">Poiché la luce è istantanea per le distanze terrestri, il suono percorre circa 1 km ogni 3 secondi. <strong>Regola infallibile: conta i secondi tra il lampo e il tuono e dividi per 3</strong> — ottieni la distanza in km. Non si sente il tuono oltre i 20–25 km (rifrazione acustica).</p>
+          <div class="thunder-calc reveal reveal-d4">
+            <label for="thunder-slider">Secondi tra lampo e tuono</label>
+            <input type="range" min="1" max="60" value="15" id="thunder-slider">
+            <span class="thunder-val" id="thunder-val">15 s</span>
+            <div class="thunder-result">
+              <span class="thunder-km" id="thunder-km">5,0 km</span>
+              <span class="risk-badge risk-yellow" id="thunder-risk">ATTENZIONE</span>
+            </div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;">
+          <div class="reveal" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.15em;color:var(--muted);">RETURN STROKE</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--white);">100.000 km/s</div>
+            <div style="font-size:.75rem;color:var(--gold);">= ⅓ velocità della luce</div>
+          </div>
+          <div class="reveal reveal-d1" style="text-align:center;font-family:var(--mono);">
+            <div style="font-size:.65rem;letter-spacing:.15em;color:var(--muted);">SUONO</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--muted);">0,343 km/s</div>
+            <div style="font-size:.75rem;color:var(--muted);">1 km ogni 3 secondi</div>
+          </div>
+          <div class="reveal reveal-d2" style="font-family:var(--mono);font-size:.7rem;color:var(--blue);text-align:center;border:1px solid var(--border);padding:.75rem 1rem;">
+            velocità luce / velocità suono ≈ <strong style="color:var(--gold);">874.000×</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Altre curiosità -->
+    <div class="hc-slide">
+      <div class="slide-full" style="display:flex;flex-direction:column;justify-content:center;padding:3rem 5.5rem;">
+        <span class="eyebrow reveal">Curiosità &amp; Record — 3/3</span>
+        <h2 class="reveal reveal-d1" style="margin-bottom:1.5rem;">Altre curiosità</h2>
+        <div class="curiosity-grid reveal reveal-d2">
+          <div class="curiosity-card">
+            <div class="c-icon">🌿</div>
+            <h4>Figure di Lichtenberg</h4>
+            <p>Chi viene colpito da un fulmine e sopravvive può presentare sulla pelle segni rossastri a forma di felce o di ramo, dovuti alla rottura dei capillari per il passaggio della corrente sulla superficie del corpo.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🪐</div>
+            <h4>Fulmini su altri pianeti</h4>
+            <p>Tempeste di fulmini colossali — migliaia di volte più potenti delle nostre — avvengono regolarmente su Giove e Saturno, alimentate da tempeste di idrogeno ed elio. Rilevate dalle sonde Voyager, Cassini e Juno.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🌋</div>
+            <h4>Fulmini vulcanici</h4>
+            <p>Durante le eruzioni violente l'attrito tra cenere, polvere e roccia espulsa dal cratere genera una separazione di cariche tale da provocare fulmini spettacolari all'interno del pennacchio di fumo, senza bisogno di nuvole di pioggia.</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="c-icon">🏙</div>
+            <h4>Il mito del "non colpisce due volte"</h4>
+            <p>Completamente falso. L'Empire State Building a New York viene colpito in media <strong>23 volte all'anno</strong>. I punti elevati e conduttivi vengono colpiti ripetutamente perché favoriscono la formazione degli upward streamers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="sicurezza" data-section="9">
     <div class="section-header"><span class="section-num">09 — SICUREZZA</span></div>
@@ -2087,6 +2195,60 @@
 })();
 // === MONDO MAP END ===
     // === CURIOSITA INIT ===
+(function initCuriositaSection(){
+  const sec = document.getElementById('curiosita');
+
+  function animCount(el,target,suffix,duration,toFixed){
+    if(!el) return;
+    const start=Date.now();
+    function step(){
+      const p=Math.min(1,(Date.now()-start)/duration);
+      const ease=1-Math.pow(1-p,3);
+      const val=target*ease;
+      el.textContent=(toFixed?val.toFixed(1):Math.round(val))+suffix;
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function initRecordCounters(){
+    const obs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        obs.disconnect();
+        animCount(document.getElementById('rec-len'),768,' km',2000,false);
+        animCount(document.getElementById('rec-dur'),17.1,' s',2000,true);
+      }
+    },{threshold:.3});
+    const slide1=sec.querySelectorAll('.hc-slide')[0];
+    if(slide1) obs.observe(slide1);
+  }
+
+  function initThunderCalc(){
+    const slider=document.getElementById('thunder-slider');
+    const valEl=document.getElementById('thunder-val');
+    const kmEl=document.getElementById('thunder-km');
+    const riskEl=document.getElementById('thunder-risk');
+    if(!slider) return;
+    function update(){
+      const s=parseInt(slider.value,10);
+      const km=(s/3).toFixed(1).replace('.',',');
+      valEl.textContent=s+' s';
+      kmEl.textContent=km+' km';
+      riskEl.className='risk-badge';
+      if(s<=10){ riskEl.classList.add('risk-red'); riskEl.textContent='PERICOLO IMMEDIATO'; }
+      else if(s<=30){ riskEl.classList.add('risk-yellow'); riskEl.textContent='ATTENZIONE'; }
+      else{ riskEl.classList.add('risk-green'); riskEl.textContent='MONITORARE'; }
+    }
+    slider.addEventListener('input',update); update();
+  }
+
+  sec.addEventListener('section-enter',function onEnter(){
+    initCarousel(sec);
+    initRecordCounters();
+    initThunderCalc();
+  },{once:true});
+})();
+// === CURIOSITA INIT END ===
     // === SICUREZZA INIT ===
     // === REVEAL INIT ===
     // === BOOTSTRAP ===
