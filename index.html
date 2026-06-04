@@ -573,7 +573,136 @@
   </section>
   <section class="section" id="fisica" data-section="3">
     <div class="section-header"><span class="section-num">03 — FISICA ESTREMA</span></div>
-    <!-- FISICA CONTENT -->
+<div class="hc-wrap">
+  <div class="hc-track">
+
+    <!-- SLIDE 1: Temperatura -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Fisica Estrema — 1/4</span>
+          <h2 class="reveal reveal-d1">30.000°C</h2>
+          <p class="reveal reveal-d2">Il canale plasma di un fulmine raggiunge temperature di <strong>30.000 K</strong> — circa <em>cinque volte</em> la superficie del Sole (5.500°C) e cinque volte il nucleo della Terra (6.000°C).</p>
+          <p class="reveal reveal-d3">L'espansione supersonica del gas surriscaldato crea un'onda d'urto cilindrica: questo è il <strong>tuono</strong>. Il crepitio vicino è l'onda d'urto supersonica; il rombo lontano è la rifrazione e riflessione nelle nubi.</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:2rem;justify-content:center;">
+          <div>
+            <span class="eyebrow">Temperatura canale plasma</span>
+            <div class="stat-value" id="temp-counter" data-target="30000" style="font-family:var(--mono);font-size:3.5rem;color:var(--gold);">0</div>
+            <div class="stat-unit">°C — 5× superficie solare</div>
+          </div>
+          <div>
+            <span class="eyebrow">Velocità return stroke</span>
+            <div class="stat-value" id="speed-counter" data-target="100000" style="font-family:var(--mono);font-size:3.5rem;color:var(--blue);">0</div>
+            <div class="stat-unit">km/s — ⅓ velocità luce</div>
+          </div>
+          <div>
+            <span class="eyebrow">Corrente picco massima</span>
+            <div class="stat-value" id="amp-counter" data-target="300" style="font-family:var(--mono);font-size:3.5rem;color:var(--white);">0</div>
+            <div class="stat-unit">kA — record misurato</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: TGF -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Fisica Estrema — 2/4</span>
+          <h2 class="reveal reveal-d1">Terrestrial Gamma-ray Flashes</h2>
+          <p class="reveal reveal-d2">Nel 1994 il satellite BATSE/Compton scoprì che i temporali emettono <strong>raggi gamma</strong> verso lo spazio — antimateria inclusa. Gli elettroni accelerati dal campo elettrico del leader emettono fotoni gamma per bremsstrahlung.</p>
+          <p class="reveal reveal-d3">I TGF durano meno di <strong>1 ms</strong> e producono positroni (e⁺): l'unica produzione naturale di antimateria in atmosfera. Ogni anno si stima che i temporali terrestri generino ~500 TGF al giorno.</p>
+          <div class="phase-controls reveal reveal-d4">
+            <button class="phase-btn" data-tgf-phase="1">Elettroni e⁻</button>
+            <button class="phase-btn" data-tgf-phase="2">Gamma γ</button>
+            <button class="phase-btn" data-tgf-phase="3">Positroni e⁺</button>
+            <button class="play-btn" data-tgf-play>▶ Play sciame</button>
+          </div>
+        </div>
+        <div class="slide-right">
+          <canvas id="tgf-canvas" aria-label="Animazione Terrestrial Gamma-ray Flash"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Chimica -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Fisica Estrema — 3/4</span>
+          <h2 class="reveal reveal-d1">Il laboratorio atmosferico</h2>
+          <p class="reveal reveal-d2">Il plasma a 30.000 K è un reattore chimico naturale: rompe e ricombina N₂ e O₂ in modi impossibili a temperatura ambiente. Ogni fulmine è anche un <strong>evento geochimico</strong>.</p>
+          <ul style="list-style:none;margin-top:1rem;" class="reveal reveal-d3">
+            <li style="padding:.5rem 0;border-bottom:1px solid var(--border);">⚡ <strong>N₂ + O₂ → NO, NO₂</strong> — fertilizzante naturale, ~10⁸ kg/anno</li>
+            <li style="padding:.5rem 0;border-bottom:1px solid var(--border);">⚡ <strong>3O₂ → 2O₃</strong> — ozono locale (odore dopo il temporale)</li>
+            <li style="padding:.5rem 0;border-bottom:1px solid var(--border);">⚡ <strong>SiO₂ + calore → fulguriti</strong> — vetro naturale nel terreno</li>
+            <li style="padding:.5rem 0;">⚡ <strong>~10⁹ J</strong> per fulmine totale</li>
+          </ul>
+          <p class="reveal reveal-d4" style="margin-top:1rem;">Spettro di emissione ottica del canale plasma:</p>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div class="spectrum-wrap reveal">
+            <div class="spectrum-bar" id="spectrum-bar">
+              <div class="spectrum-line" style="left:5%" data-nm="337" data-el="N₂" data-note="Prima positiva">
+                <div class="spectrum-tooltip">N₂ — 337 nm (UV)</div>
+              </div>
+              <div class="spectrum-line" style="left:12%" data-nm="391" data-el="N₂⁺" data-note="Primo negativo">
+                <div class="spectrum-tooltip">N₂⁺ — 391 nm</div>
+              </div>
+              <div class="spectrum-line" style="left:36%" data-nm="486" data-el="H (Hβ)" data-note="Balmer">
+                <div class="spectrum-tooltip">H (Hβ) — 486 nm</div>
+              </div>
+              <div class="spectrum-line" style="left:63%" data-nm="589" data-el="Na (D)" data-note="Doppietto sodio">
+                <div class="spectrum-tooltip">Na — 589 nm</div>
+              </div>
+              <div class="spectrum-line" style="left:89%" data-nm="656" data-el="H (Hα)" data-note="Balmer rosso">
+                <div class="spectrum-tooltip">H (Hα) — 656 nm</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-family:var(--mono);font-size:.6rem;color:var(--muted);">
+              <span>380 nm (UV)</span><span>700 nm (IR)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Elettromagnetismo -->
+    <div class="hc-slide">
+      <div class="slide-split">
+        <div class="slide-left">
+          <span class="eyebrow reveal">Fisica Estrema — 4/4</span>
+          <h2 class="reveal reveal-d1">Il Z-pinch atmosferico</h2>
+          <p class="reveal reveal-d2">La corrente del fulmine genera un campo magnetico di ~<strong>200 Tesla</strong> intorno al canale. Secondo l'effetto Bennett, la forza di Lorentz J×B comprime (pinch) il plasma verso l'asse: è lo stesso principio usato nei reattori a fusione.</p>
+          <p class="reveal reveal-d3">I transitori ELF (Sferics) si propagano nella cavità Terra-ionosfera a velocità di ~c/3, circumnavigando il globo in frazioni di secondo. Blitzortung.org le utilizza per localizzare i fulmini a livello mondiale.</p>
+          <div style="background:var(--surface);border:1px solid var(--border);padding:1rem;margin-top:1.5rem;font-family:var(--mono);font-size:.85rem;" class="reveal reveal-d4">
+            <div style="color:var(--gold);margin-bottom:.5rem;">∇ × B = μ₀J</div>
+            <div style="color:var(--blue);">F = J × B (radiale inward)</div>
+            <div style="color:var(--muted);margin-top:.5rem;font-size:.7rem;">Equazione di Maxwell + forza di Lorentz</div>
+          </div>
+        </div>
+        <div class="slide-right" style="padding:2rem;display:flex;flex-direction:column;gap:1.5rem;justify-content:center;font-family:var(--mono);">
+          <div class="reveal"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;">Campo magnetico nel canale</span>
+            <div style="font-size:2.5rem;color:var(--gold);font-weight:700;">~200 T</div></div>
+          <div class="reveal reveal-d1"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;">Velocità sferic nella cavità</span>
+            <div style="font-size:2.5rem;color:var(--blue);font-weight:700;">~c/3</div></div>
+          <div class="reveal reveal-d2"><span style="color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;">Stazioni Blitzortung globali</span>
+            <div style="font-size:2.5rem;color:var(--white);font-weight:700;">2.000+</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="hc-arrows">
+    <button class="hc-arrow hc-arrow-prev">←</button>
+    <button class="hc-arrow hc-arrow-next">→</button>
+  </div>
+  <div class="hc-dots">
+    <div class="hc-dot active"></div><div class="hc-dot"></div>
+    <div class="hc-dot"></div><div class="hc-dot"></div>
+  </div>
+</div>
   </section>
   <section class="section" id="dati" data-section="4">
     <div class="section-header"><span class="section-num">04 — I NUMERI</span></div>
@@ -1273,6 +1402,128 @@
     })();
     // === SCARICA CANVAS END ===
     // === FISICA CANVAS ===
+    (function initFisicaSection(){
+      const sec = document.getElementById('fisica');
+
+      function animateCounter(el, target, duration) {
+        let start=null, startVal=0;
+        function step(ts){
+          if(!start) start=ts;
+          const p=Math.min((ts-start)/duration,1);
+          const ease=1-Math.pow(1-p,3);
+          el.textContent=Math.round(startVal+ease*(target-startVal)).toLocaleString('it');
+          if(p<1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      function initTGFCanvas(canvas){
+        if(canvas._init) return; canvas._init=true;
+        const ctx=canvas.getContext('2d');
+        let visLayers=0;
+        function resize(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; draw(visLayers); }
+        function altY(km){ return canvas.height-(km/100)*canvas.height; }
+        function draw(layers){
+          visLayers=layers;
+          const W=canvas.width,H=canvas.height;
+          ctx.clearRect(0,0,W,H);
+          const bg=ctx.createLinearGradient(0,H,0,0);
+          bg.addColorStop(0,'#0a0a0f'); bg.addColorStop(1,'#020305');
+          ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+          const lyrs=[['SUOLO',0],['TROPOSFERA',12],['STRATOSFERA',50],['MESOSFERA',85]];
+          lyrs.forEach(([n,km])=>{
+            const y=altY(km);
+            ctx.save(); ctx.font='8px JetBrains Mono'; ctx.fillStyle='rgba(102,102,128,.4)'; ctx.fillText(n,4,y-3);
+            ctx.strokeStyle='rgba(102,102,128,.12)'; ctx.lineWidth=.5; ctx.setLineDash([3,5]);
+            ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+          });
+          const cloudY=altY(12);
+          ctx.save(); ctx.fillStyle='#151525';
+          ctx.beginPath(); ctx.arc(W*.38,cloudY,W*.1,0,Math.PI*2); ctx.arc(W*.5,cloudY-18,W*.12,0,Math.PI*2); ctx.arc(W*.62,cloudY-5,W*.1,0,Math.PI*2); ctx.fill(); ctx.restore();
+          const t=Date.now()*.002;
+          if(layers>=1){
+            for(let i=0;i<18;i++){
+              const px=W*.35+Math.sin(i*1.7+t+i)*W*.12;
+              const py=altY(12+((i*7.3+t*30)%88));
+              ctx.save(); ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2);
+              ctx.fillStyle='#4a9eff'; ctx.shadowColor='#4a9eff'; ctx.shadowBlur=8; ctx.fill(); ctx.restore();
+            }
+          }
+          if(layers>=2){
+            for(let i=0;i<10;i++){
+              const px=W*.4+Math.sin(i*2.1)*W*.1;
+              const prog=((i*11.3+t*50)%100);
+              const y1=altY(12+prog*.86),y2=y1-14;
+              ctx.save(); ctx.strokeStyle='#ffd700'; ctx.lineWidth=1; ctx.globalAlpha=.7;
+              ctx.shadowColor='#ffd700'; ctx.shadowBlur=6;
+              ctx.beginPath(); ctx.moveTo(px,y1); ctx.lineTo(px,y2); ctx.stroke(); ctx.restore();
+            }
+          }
+          if(layers>=3){
+            for(let i=0;i<8;i++){
+              const px=W*.45+Math.cos(i*1.4+t)*W*.08;
+              const py=altY(18+((i*9.1+t*38)%80));
+              ctx.save(); ctx.beginPath(); ctx.arc(px,py,2,0,Math.PI*2);
+              ctx.fillStyle='#ff4444'; ctx.shadowColor='#ff4444'; ctx.shadowBlur=8; ctx.fill();
+              ctx.font='7px JetBrains Mono'; ctx.fillStyle='#ff4444'; ctx.fillText('e⁺',px+3,py); ctx.restore();
+            }
+          }
+          if(layers>0) requestAnimationFrame(()=>{ if(canvas._init&&visLayers>0) draw(visLayers); });
+        }
+        resize();
+        const slide=canvas.closest('.hc-slide');
+        slide?.querySelectorAll('[data-tgf-phase]').forEach(btn=>{
+          btn.addEventListener('click',()=>{
+            const p=parseInt(btn.dataset.tgfPhase); draw(p);
+            slide.querySelectorAll('[data-tgf-phase]').forEach(b=>b.classList.toggle('active',b===btn));
+          });
+        });
+        const playBtn=slide?.querySelector('[data-tgf-play]');
+        if(playBtn){
+          playBtn.addEventListener('click',()=>{
+            if(playBtn.classList.contains('playing')) return;
+            playBtn.classList.add('playing'); playBtn.textContent='⏳';
+            draw(0); slide.querySelectorAll('[data-tgf-phase]').forEach(b=>b.classList.remove('active'));
+            let p=0;
+            const iv=setInterval(()=>{
+              p++;
+              if(p>3){ clearInterval(iv); playBtn.classList.remove('playing'); playBtn.textContent='▶ Play sciame'; }
+              else{
+                draw(p);
+                slide.querySelectorAll('[data-tgf-phase]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.tgfPhase)===p));
+              }
+            },1000);
+          });
+        }
+        window.addEventListener('resize',resize);
+      }
+
+      function initSpectrumBar(){
+        document.querySelectorAll('.spectrum-line').forEach((line,i)=>{
+          setTimeout(()=>{
+            line.style.opacity='1';
+            line.style.filter='brightness(1.5)';
+            setTimeout(()=>line.style.filter='',400);
+          },i*200);
+        });
+      }
+
+      sec.addEventListener('section-enter',function onEnter(){
+        const counters=[
+          {id:'temp-counter',target:30000},
+          {id:'speed-counter',target:100000},
+          {id:'amp-counter',target:300}
+        ];
+        counters.forEach(({id,target})=>{
+          const el=document.getElementById(id);
+          if(el) animateCounter(el,target,1800);
+        });
+        initTGFCanvas(document.getElementById('tgf-canvas'));
+        initSpectrumBar();
+        initCarousel(sec);
+      },{once:true});
+    })();
+    // === FISICA CANVAS END ===
     // === DATI INIT ===
     // === TIPI CANVAS ===
     // === FRANKLIN CANVAS ===
