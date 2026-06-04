@@ -1781,6 +1781,7 @@
         const ctx=canvas.getContext('2d');
         const W=canvas.width,H=canvas.height;
         function gen(){
+          if(document.hidden) return;
           ctx.clearRect(0,0,W,H);
           const cloudY=positive?H*.85:H*.15;
           ctx.save(); ctx.fillStyle='#1a1a2e';
@@ -1967,12 +1968,14 @@
           if(showing.sprite||(showing.elve&&elveAlpha>0)) requestAnimationFrame(draw);
         }
         function showSprite(){ showing={sprite:true}; draw(); }
+        let elveExpanding=false;
         function showElve(){
-          showing={elve:true}; elveR=5; elveAlpha=1;
+          if(elveExpanding) return;
+          showing={elve:true}; elveR=5; elveAlpha=1; elveExpanding=true;
           function expand(){
             elveR+=14; elveAlpha-=.045; draw();
             if(elveAlpha>0&&elveR<canvas.width) requestAnimationFrame(expand);
-            else{ elveAlpha=0; elveR=0; drawBase(); }
+            else{ elveAlpha=0; elveR=0; elveExpanding=false; drawBase(); }
           }
           expand();
         }
