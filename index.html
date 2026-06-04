@@ -205,6 +205,70 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // === SCROLL ENGINE ===
+    const TOTAL_SECTIONS = 10;
+    const state = {
+      currentSection: 0,
+      slideCurrent: new Array(TOTAL_SECTIONS).fill(0),
+      slideTotal: [1, 3, 4, 5, 3, 3, 4, 5, 3, 3]
+    };
+
+    function updateProgress(si) {
+      state.currentSection = si;
+      const pct = (si / (TOTAL_SECTIONS - 1)) * 100;
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i === si));
+      const sc = state.slideCurrent[si];
+      const st = state.slideTotal[si];
+      document.getElementById('slide-counter').textContent = `${sc+1} / ${st}`;
+    }
+
+    function scrollToSection(si) {
+      const sections = document.querySelectorAll('.section');
+      if (sections[si]) sections[si].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function bindScrollToLinks() {
+      document.querySelectorAll('[data-scroll-to]').forEach(el => {
+        el.addEventListener('click', e => {
+          e.preventDefault();
+          const sec = document.getElementById(el.dataset.scrollTo);
+          if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    }
+
+    (function buildNavDots() {
+      const container = document.getElementById('nav-dots');
+      for (let i = 0; i < TOTAL_SECTIONS; i++) {
+        const d = document.createElement('div');
+        d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        d.addEventListener('click', () => scrollToSection(i));
+        container.appendChild(d);
+      }
+    })();
+
+    const sectionObs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          const si = parseInt(entry.target.dataset.section);
+          updateProgress(si);
+          entry.target.dispatchEvent(new CustomEvent('section-enter', { bubbles: false }));
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.section').forEach(s => sectionObs.observe(s));
+
+    document.addEventListener('keydown', e => {
+      const si = state.currentSection;
+      if (e.key === 'ArrowDown') { scrollToSection(Math.min(si+1, TOTAL_SECTIONS-1)); e.preventDefault(); }
+      else if (e.key === 'ArrowUp') { scrollToSection(Math.max(si-1, 0)); e.preventDefault(); }
+      else if (e.key === 'ArrowRight') { carouselNext(si); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { carouselPrev(si); e.preventDefault(); }
+      else if (e.key === 'f' || e.key === 'F') {
+        document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      }
+    });
+    // === SCROLL ENGINE END ===
     // === CAROUSEL ENGINE ===
     // === HERO INIT ===
     // === FORMAZIONE CANVAS ===
