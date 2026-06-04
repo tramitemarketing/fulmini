@@ -1609,7 +1609,7 @@
       showJet(); slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.toggle('active',b.dataset.tle==='jet'));
     });
     slide?.querySelector('[data-tle="play"]')?.addEventListener('click',async function(){
-      this.classList.add('playing'); this.textContent='⏳';
+      this.disabled=true; this.classList.add('playing'); this.textContent='⏳';
       slide.querySelectorAll('[data-tle]').forEach(b=>b.classList.remove('active'));
       showSprite(); slide.querySelector('[data-tle="sprite"]')?.classList.add('active');
       await new Promise(r=>setTimeout(r,1800));
@@ -1617,7 +1617,7 @@
       await new Promise(r=>setTimeout(r,2000));
       showJet(); slide.querySelector('[data-tle="jet"]')?.classList.add('active');
       await new Promise(r=>setTimeout(r,1500));
-      this.classList.remove('playing'); this.textContent='▶ Play tutto';
+      this.classList.remove('playing'); this.textContent='▶ Play tutto'; this.disabled=false;
     });
     window.addEventListener('resize',resize);
   }
