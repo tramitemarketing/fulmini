@@ -1,2455 +1,371 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fulmini — La Scienza del Lampo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>
-/* ===== RESET & BASE ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fulmine — Fisica dei Fulmini</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0a0a0f;--surface:#0f0f18;--surface2:#14141f;
+      --gold:#c9a84c;--blue:#4a9eff;--white:#e8e6e0;
+      --muted:#666680;--border:rgba(201,168,76,.15);
+      --red:#ff4444;--green:#44cc88;--plasma:#7b2fff;
+      --mono:'JetBrains Mono','Courier New',monospace;
+    }
+    html{scroll-snap-type:y mandatory;overflow-y:scroll;overflow-x:hidden;}
+    body{overflow:visible;background:var(--bg);color:var(--white);
+      font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:clamp(1rem,1.4vw,1.2rem);line-height:1.75;}
+    h1{font-weight:300;font-size:clamp(5rem,12vw,11rem);line-height:.9;letter-spacing:-.02em;}
+    h2{font-weight:300;font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.05;letter-spacing:-.01em;}
+    h3{font-weight:400;font-size:clamp(1.4rem,2.5vw,2rem);line-height:1.2;margin-bottom:1rem;}
+    p{margin-bottom:1rem;opacity:.85;}p:last-child{margin-bottom:0;}
+    strong{color:var(--gold);font-weight:600;}em{color:var(--blue);font-style:italic;}
+    .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;
+      color:var(--gold);margin-bottom:1rem;display:block;}
+    .label{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--muted);}
 
-:root {
-  --bg: #05070f;
-  --surface: #0a0e1a;
-  --surface2: #0f1525;
-  --gold: #f0c040;
-  --blue: #3a8fff;
-  --white: #e8eaf0;
-  --muted: #7a8099;
-  --border: rgba(240,192,64,.15);
-  --red: #ff4040;
-  --green: #50c878;
-  /* layout tokens: horizontal padding accounts for arrow width (38px + .875rem ≈ 3.3rem) */
-  --px: clamp(3.5rem, 5.5vw, 5rem);
-  --py: clamp(1.5rem, 3vh, 2.5rem);
-}
+    /* SECTIONS */
+    .section{height:100vh;scroll-snap-align:start;scroll-snap-stop:always;
+      overflow:hidden;position:relative;background:var(--bg);}
 
-html {
-  scroll-snap-type: y mandatory;
-  background: var(--bg);
-  color: var(--white);
-  font-family: 'Source Serif 4', serif;
-  cursor: none;
-}
+    /* HORIZONTAL CAROUSEL */
+    .hc-wrap{position:relative;width:100%;height:100%;overflow:hidden;}
+    .hc-track{display:flex;height:100%;will-change:transform;
+      transition:transform .5s cubic-bezier(.25,.1,.25,1);}
+    .hc-slide{min-width:100vw;width:100vw;height:100%;overflow:hidden;
+      display:flex;align-items:stretch;position:relative;}
 
-body {
-  overflow-x: hidden;
-}
+    /* SLIDE LAYOUTS */
+    .slide-split{display:flex;width:100%;height:100%;}
+    .slide-left{flex:0 0 50%;max-width:50%;padding:4rem 2rem 4rem 5.5rem;
+      display:flex;flex-direction:column;justify-content:center;z-index:1;}
+    .slide-right{flex:0 0 50%;max-width:50%;display:flex;align-items:center;
+      justify-content:center;overflow:hidden;position:relative;}
+    .slide-center{display:flex;flex-direction:column;align-items:center;
+      justify-content:center;width:100%;padding:3rem 5.5rem;text-align:center;}
+    .slide-full{width:100%;height:100%;position:relative;}
 
-/* ===== SLIDES ===== */
-.slide {
-  height: 100vh;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    /* CAROUSEL NAV */
+    .hc-arrows{position:absolute;bottom:2rem;right:2rem;display:flex;gap:.5rem;z-index:100;}
+    .hc-arrow{font-family:var(--mono);background:rgba(201,168,76,.08);
+      border:1px solid var(--border);color:var(--gold);width:2.5rem;height:2.5rem;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      font-size:1rem;transition:background .2s,border-color .2s;user-select:none;}
+    .hc-arrow:hover{background:rgba(201,168,76,.2);border-color:var(--gold);}
+    .hc-arrow:disabled{opacity:.3;cursor:default;}
+    .hc-dots{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);
+      display:flex;gap:.5rem;z-index:100;}
+    .hc-dot{width:.4rem;height:.4rem;border-radius:50%;background:var(--muted);
+      transition:background .3s,transform .3s;cursor:pointer;}
+    .hc-dot.active{background:var(--gold);transform:scale(1.4);}
 
-/* ===== SECTION CAROUSEL (SC) ===== */
-.sc-carousel { position: relative; width: 100%; height: 100%; overflow: hidden; }
-.sc-track {
-  display: flex; width: 100%; height: 100%;
-  transition: transform .55s cubic-bezier(.4,0,.2,1); will-change: transform;
-}
-.sc-slide {
-  min-width: 100vw; height: 100%; flex-shrink: 0; overflow: hidden;
-  position: relative; display: flex; align-items: center; justify-content: center;
-}
-.sc-arrow {
-  position: absolute; top: 50%; transform: translateY(-50%); z-index: 50;
-  width: 38px; height: 38px;
-  background: rgba(5,7,15,.9); border: 1px solid var(--border);
-  color: var(--muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .3s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-}
-.sc-arrow:hover { border-color: var(--gold); color: var(--gold); }
-.sc-arrow[disabled] { opacity: .1; pointer-events: none; }
-.sc-arrow svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.sc-prev { left: .875rem; }
-.sc-next { right: .875rem; }
-.sc-nav {
-  position: absolute; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
-  z-index: 50; display: flex; align-items: center; gap: 1rem;
-}
-.sc-dots { display: flex; gap: .45rem; align-items: center; }
-.sc-dot { width: 5px; height: 5px; background: rgba(240,192,64,.18); border-radius: 50%; cursor: pointer; transition: all .35s; }
-.sc-dot.active { background: var(--gold); transform: scale(1.8); }
-.sc-counter { font-family: 'Bebas Neue', sans-serif; font-size: .5rem; letter-spacing: .25em; color: rgba(122,128,153,.4); }
+    /* FIXED UI */
+    #progress-bar{position:fixed;top:0;left:0;height:2px;background:var(--gold);
+      transition:width .4s ease;z-index:1000;box-shadow:0 0 8px var(--gold);}
+    #nav-dots{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);
+      display:flex;flex-direction:column;gap:.6rem;z-index:1000;}
+    .nav-dot{width:.35rem;height:.35rem;border-radius:50%;background:var(--muted);
+      transition:background .3s,transform .3s;cursor:pointer;}
+    .nav-dot.active{background:var(--gold);transform:scale(1.6);}
+    #slide-counter{position:fixed;bottom:2rem;right:2rem;font-family:var(--mono);
+      font-size:.65rem;color:var(--muted);letter-spacing:.1em;z-index:1000;}
+    #fullscreen-btn{position:fixed;bottom:2rem;left:2rem;font-family:var(--mono);
+      font-size:.75rem;color:var(--muted);background:none;border:1px solid var(--border);
+      padding:.4rem .6rem;cursor:pointer;z-index:1000;transition:color .2s,border-color .2s;}
+    #fullscreen-btn:hover{color:var(--gold);border-color:var(--gold);}
+    #scroll-hint{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+      font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;
+      z-index:1000;animation:bounce 2s ease infinite;transition:opacity .5s;}
+    #scroll-hint.hidden{opacity:0;pointer-events:none;}
+    @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}
+      50%{transform:translateX(-50%) translateY(-6px);}}
 
-/* ===== HORIZONTAL CAROUSEL (HC) ===== */
-.hc-wrap { position: relative; width: 100%; overflow: hidden; }
-.hc-track { display: flex; transition: transform .5s cubic-bezier(.4,0,.2,1); }
-.hc-slide { flex-shrink: 0; }
-.hc-tabs { display: flex; gap: .35rem; margin-bottom: .75rem; flex-wrap: wrap; }
-.hc-tab {
-  padding: .28rem .65rem; border: 1px solid rgba(240,192,64,.2);
-  font-family: 'Bebas Neue', sans-serif; font-size: .52rem; letter-spacing: .15em;
-  cursor: pointer; color: var(--muted); background: transparent; transition: all .3s;
-}
-.hc-tab.active { border-color: var(--gold); color: var(--gold); background: rgba(240,192,64,.05); }
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.visible{opacity:1;transform:none;}
+    .reveal-d1{transition-delay:.1s;}.reveal-d2{transition-delay:.2s;}
+    .reveal-d3{transition-delay:.3s;}.reveal-d4{transition-delay:.4s;}
 
-/* ===== LAYOUT PANELS ===== */
-.panel-split {
-  display: flex; align-items: center;
-  gap: clamp(2rem, 3.5vw, 4rem);
-  width: 100%; height: 100%;
-  padding: var(--py) var(--px);
-}
-.panel-split .left {
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column; justify-content: center;
-  overflow: hidden;
-}
-.panel-split .right {
-  flex: 1; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-.panel-center {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  width: 100%; height: 100%;
-  padding: var(--py) var(--px);
-  overflow-y: auto;
-}
+    /* PHASE CONTROLS */
+    .phase-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem;}
+    .phase-btn{font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;
+      padding:.4rem .8rem;border:1px solid var(--border);background:transparent;
+      color:var(--muted);cursor:pointer;transition:all .2s;}
+    .phase-btn:hover{border-color:var(--gold);color:var(--gold);}
+    .phase-btn.active{border-color:var(--gold);color:var(--bg);background:var(--gold);}
+    .play-btn{font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;
+      padding:.4rem 1rem;border:1px solid var(--blue);background:transparent;
+      color:var(--blue);cursor:pointer;transition:all .2s;}
+    .play-btn:hover{background:rgba(74,158,255,.15);}
+    .play-btn.playing{opacity:.5;cursor:not-allowed;}
 
-/* ===== TYPOGRAPHY ===== */
-.slide-eyebrow {
-  display: block; font-family: 'Bebas Neue', sans-serif; font-size: .57rem;
-  letter-spacing: .25em; color: rgba(240,192,64,.5);
-  margin-bottom: .6rem; text-transform: uppercase;
-}
-.slide-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(1.8rem, 3.8vw, 3.5rem);
-  line-height: 1; color: var(--white); margin-bottom: .875rem;
-}
-.slide-title em { color: var(--gold); font-style: normal; }
-.slide-body {
-  font-size: clamp(.78rem, 1.05vw, .88rem);
-  line-height: 1.75; color: rgba(232,234,240,.75);
-}
-.slide-body strong { color: var(--white); }
+    /* CARDS */
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:1.5rem;width:100%;padding:2rem 5.5rem;}
+    .card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;
+      transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
+    .card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(201,168,76,.12);
+      border-color:rgba(201,168,76,.4);}
+    .card .card-icon{font-size:2rem;margin-bottom:.75rem;display:block;}
+    .card h4{font-size:1.2rem;font-weight:600;color:var(--gold);margin-bottom:.5rem;}
+    .card p{font-size:.9rem;}
 
-/* ===== HERO ===== */
-.hero-eyebrow {
-  display: block;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .65rem;
-  letter-spacing: .4em;
-  color: rgba(240,192,64,.5);
-  margin-bottom: 1.5rem;
-  text-transform: uppercase;
-}
-.hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(5rem, 18vw, 14rem);
-  line-height: .85;
-  color: var(--white);
-  letter-spacing: -.02em;
-}
-.hero-title em { color: var(--gold); font-style: normal; }
-.hero-line {
-  width: 80px;
-  height: 1px;
-  background: var(--gold);
-  margin: 1.5rem auto;
-  opacity: .4;
-}
-.hero-sub {
-  font-size: .85rem;
-  letter-spacing: .15em;
-  color: var(--muted);
-  font-family: 'Bebas Neue', sans-serif;
-  text-transform: uppercase;
-}
+    /* FLIP CARDS */
+    .flip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+      width:100%;padding:1rem 5.5rem;max-width:1200px;margin:0 auto;}
+    .myth-card{perspective:1000px;cursor:pointer;height:160px;}
+    .myth-card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+      transition:transform .6s cubic-bezier(.4,0,.2,1);}
+    .myth-card.flipped .myth-card-inner{transform:rotateY(180deg);}
+    .myth-front,.myth-back{position:absolute;inset:0;backface-visibility:hidden;
+      padding:1rem;display:flex;flex-direction:column;justify-content:center;}
+    .myth-front{background:var(--surface);border:1px solid var(--border);}
+    .myth-back{background:var(--surface2);border:1px solid rgba(68,204,136,.3);
+      transform:rotateY(180deg);}
+    .myth-front .myth-label{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;
+      color:var(--red);text-transform:uppercase;margin-bottom:.5rem;}
+    .myth-back .myth-label{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;
+      color:var(--green);text-transform:uppercase;margin-bottom:.5rem;}
+    .myth-card h4{font-size:.95rem;font-weight:400;color:var(--white);line-height:1.3;}
+    .myth-card p{font-size:.8rem;line-height:1.4;margin:0;}
 
-/* ===== COMPONENTS ===== */
-.stat-box {
-  border: 1px solid var(--border); padding: .875rem 1.125rem;
-  text-align: center; background: var(--surface);
-}
-.stat-box .stat-icon { font-size: 1.25rem; margin-bottom: .35rem; display: block; }
-.stat-box .stat-label {
-  font-family: 'Bebas Neue', sans-serif; font-size: .5rem;
-  letter-spacing: .2em; color: var(--muted); display: block; margin-bottom: .2rem;
-}
-.stat-box .stat-value {
-  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--gold); line-height: 1;
-}
+    /* DATA TABLE */
+    .data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.75rem;}
+    .data-table th{text-align:left;padding:.6rem 1rem;border-bottom:1px solid var(--border);
+      color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-weight:700;}
+    .data-table td{padding:.6rem 1rem;border-bottom:1px solid rgba(201,168,76,.06);
+      color:var(--white);opacity:.85;}
+    .data-table tr:hover td{background:rgba(201,168,76,.04);}
 
-.data-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
-.data-table th {
-  font-family: 'Bebas Neue', sans-serif; font-size: .52rem; letter-spacing: .2em;
-  color: var(--gold); text-align: left; padding: .4rem .6rem; border-bottom: 1px solid var(--border);
-}
-.data-table td {
-  padding: .4rem .6rem; border-bottom: 1px solid rgba(240,192,64,.05);
-  color: rgba(232,234,240,.8);
-}
-.data-table tr:last-child td { border-bottom: none; }
-.data-table td:first-child { color: var(--muted); }
+    /* NUMBERS STRIP */
+    .numbers-strip{display:flex;flex-wrap:wrap;width:100%;}
+    .stat-item{flex:1 1 200px;padding:2rem 1.5rem;border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);}
+    .stat-item:last-child{border-right:none;}
+    .stat-value{font-family:var(--mono);font-size:clamp(1.8rem,3vw,2.8rem);
+      font-weight:700;color:var(--gold);display:block;line-height:1;margin-bottom:.4rem;}
+    .stat-unit{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;}
+    .stat-desc{font-size:.85rem;color:var(--muted);margin-top:.25rem;}
 
-.tl-item { display: flex; gap: .875rem; margin-bottom: .7rem; }
-.tl-year {
-  font-family: 'Bebas Neue', sans-serif; font-size: .85rem; color: var(--gold);
-  min-width: 3rem; padding-top: .1rem; flex-shrink: 0;
-}
-.tl-text { font-size: .78rem; color: rgba(232,234,240,.7); line-height: 1.6; }
+    /* WARNING BOX */
+    .warning-box{border-left:3px solid var(--red);background:rgba(255,68,68,.06);
+      padding:1rem 1.5rem;margin-top:1.5rem;}
+    .warning-box .warning-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--red);margin-bottom:.5rem;}
+    .warning-box p{font-size:.9rem;margin:0;}
 
-.record-cell {
-  border: 1px solid var(--border); padding: 1.125rem 1rem;
-  background: var(--surface); text-align: center;
-}
-.record-cell .rec-value {
-  font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.4rem, 2.2vw, 2.2rem);
-  color: var(--gold); line-height: 1; display: block; margin-bottom: .2rem;
-}
-.record-cell .rec-label {
-  font-family: 'Bebas Neue', sans-serif; font-size: .52rem;
-  letter-spacing: .12em; color: var(--white); display: block; margin-bottom: .3rem;
-}
-.record-cell .rec-sub { font-size: .65rem; color: var(--muted); line-height: 1.4; }
+    /* THUNDER CALCULATOR */
+    .thunder-calc{background:var(--surface);border:1px solid var(--border);
+      padding:2rem;max-width:500px;margin:1.5rem 0;}
+    .thunder-calc label{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;
+      color:var(--muted);text-transform:uppercase;display:block;margin-bottom:.75rem;}
+    .thunder-calc input[type="range"]{width:100%;-webkit-appearance:none;height:2px;
+      background:var(--border);outline:none;margin-bottom:.5rem;}
+    .thunder-calc input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;
+      width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;}
+    .thunder-val{font-family:var(--mono);font-size:.7rem;color:var(--gold);
+      text-align:right;display:block;margin-bottom:1rem;}
+    .thunder-result{display:flex;align-items:center;gap:1rem;margin-top:1rem;}
+    .thunder-km{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--white);}
+    .risk-badge{font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;
+      text-transform:uppercase;padding:.3rem .8rem;}
+    .risk-red{background:rgba(255,68,68,.15);color:var(--red);border:1px solid var(--red);}
+    .risk-yellow{background:rgba(255,200,0,.1);color:#ffc800;border:1px solid #ffc800;}
+    .risk-green{background:rgba(68,204,136,.1);color:var(--green);border:1px solid var(--green);}
 
-.records-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; background: var(--border); width: 100%;
-}
+    /* RISK METER */
+    .risk-meter{background:var(--surface);border:1px solid var(--border);
+      padding:2rem;max-width:500px;margin:1.5rem 0;}
+    .risk-question{display:flex;align-items:center;gap:1rem;padding:.6rem 0;
+      border-bottom:1px solid rgba(201,168,76,.08);cursor:pointer;font-size:.95rem;}
+    .risk-question:last-of-type{border-bottom:none;}
+    .risk-question input[type="checkbox"]{width:1rem;height:1rem;accent-color:var(--gold);cursor:pointer;}
+    #risk-result{margin-top:1.5rem;font-family:var(--mono);font-size:.8rem;}
 
-.deity-card {
-  border: 1px solid var(--border); padding: .875rem 1rem; background: var(--surface);
-}
-.deity-card .deity-icon { font-size: 1.4rem; margin-bottom: .35rem; display: block; }
-.deity-card .deity-name {
-  font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: var(--gold);
-  display: block; margin-bottom: .2rem;
-}
-.deity-card .deity-culture {
-  font-size: .52rem; letter-spacing: .15em; color: var(--muted);
-  font-family: 'Bebas Neue', sans-serif; display: block; margin-bottom: .35rem;
-}
-.deity-card p { font-size: .73rem; color: rgba(232,234,240,.7); line-height: 1.5; }
+    /* SPECTRUM BAR */
+    .spectrum-wrap{width:100%;max-width:600px;margin:1.5rem 0;}
+    .spectrum-bar{position:relative;height:40px;
+      background:linear-gradient(to right,#4b0082 0%,#0000ff 15%,#00ffff 35%,
+        #00ff00 50%,#ffff00 65%,#ff6600 80%,#ff0000 100%);border-radius:2px;}
+    .spectrum-line{position:absolute;top:-8px;bottom:-8px;width:2px;cursor:pointer;
+      transition:opacity .4s;}
+    .spectrum-line::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;
+      background:white;opacity:.9;box-shadow:0 0 6px white;}
+    .spectrum-tooltip{position:absolute;bottom:calc(100% + 12px);left:50%;
+      transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);
+      padding:.4rem .6rem;font-family:var(--mono);font-size:.6rem;white-space:nowrap;
+      pointer-events:none;opacity:0;transition:opacity .2s;}
+    .spectrum-line:hover .spectrum-tooltip{opacity:1;}
 
-.safety-item {
-  display: flex; align-items: center; gap: .6rem; padding: .55rem .875rem;
-  border: 1px solid var(--border); cursor: pointer; transition: background .2s;
-  background: var(--surface);
-}
-.safety-item:hover { background: var(--surface2); }
-.safety-item .s-icon { font-size: .95rem; flex-shrink: 0; }
-.safety-item .s-label { font-family: 'Bebas Neue', sans-serif; font-size: .58rem; letter-spacing: .12em; flex: 1; }
-.safety-item .s-badge {
-  font-family: 'Bebas Neue', sans-serif; font-size: .48rem; letter-spacing: .1em; padding: .18rem .38rem;
-}
-.safety-item.danger .s-badge { color: var(--red); border: 1px solid var(--red); }
-.safety-item.safe .s-badge { color: var(--green); border: 1px solid var(--green); }
-.safety-item.medium .s-badge { color: var(--gold); border: 1px solid var(--gold); }
-.safety-tip {
-  margin-top: .75rem; padding: .6rem .875rem; border-left: 2px solid var(--gold);
-  background: var(--surface); font-size: .75rem; color: rgba(232,234,240,.8); min-height: 2.5rem;
-}
+    /* TIMELINE */
+    .timeline{display:flex;flex-direction:column;width:100%;max-width:600px;position:relative;}
+    .timeline::before{content:'';position:absolute;left:4.5rem;top:0;bottom:0;
+      width:1px;background:var(--border);}
+    .timeline-item{display:flex;gap:1.5rem;padding:1rem 0;cursor:pointer;position:relative;}
+    .timeline-year{font-family:var(--mono);font-size:.7rem;color:var(--gold);
+      width:3.5rem;flex-shrink:0;text-align:right;padding-top:.1rem;}
+    .timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);
+      flex-shrink:0;margin-top:.3rem;position:relative;z-index:1;}
+    .timeline-content{flex:1;}
+    .timeline-content h4{font-size:1rem;color:var(--white);margin-bottom:0;}
+    .timeline-detail{font-size:.85rem;color:var(--muted);max-height:0;
+      overflow:hidden;transition:max-height .3s ease;}
+    .timeline-item.open .timeline-detail{max-height:100px;}
 
-.myth-item {
-  border: 1px solid var(--border); padding: .875rem 1.125rem; background: var(--surface);
-  font-size: .78rem; line-height: 1.65; color: rgba(232,234,240,.75);
-}
+    /* DO/DON'T */
+    .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:2rem;
+      width:100%;max-width:800px;}
+    .do-col .col-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--green);margin-bottom:.5rem;}
+    .dont-col .col-title{font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--red);margin-bottom:.5rem;}
+    .do-item,.dont-item{font-size:.9rem;padding:.5rem .75rem;border-left:2px solid;}
+    .do-item{border-color:var(--green);margin-bottom:.4rem;}
+    .dont-item{border-color:var(--red);margin-bottom:.4rem;}
 
-.warn-pill {
-  margin-top: .875rem; padding: .6rem .875rem;
-  border: 1px solid rgba(255,64,64,.3); background: rgba(255,64,64,.05);
-  font-size: .75rem; color: rgba(232,234,240,.7); line-height: 1.6;
-}
-.warn-pill strong { color: var(--red); }
+    /* CANVAS */
+    canvas{display:block;width:100%;height:100%;}
 
-.info-box {
-  padding: .7rem .875rem; border: 1px solid rgba(58,143,255,.3);
-  background: rgba(58,143,255,.05); font-size: .76rem;
-  color: rgba(232,234,240,.75); line-height: 1.6; margin-top: .75rem;
-}
-.info-box strong { color: var(--blue); }
+    /* LEAFLET OVERRIDES */
+    .leaflet-container{background:#0a0a0f;}
+    .leaflet-popup-content-wrapper{background:var(--surface2);border:1px solid var(--border);
+      border-radius:0;color:var(--white);}
+    .leaflet-popup-tip{background:var(--surface2);}
 
-.plasma-states { display: flex; gap: .625rem; margin: .875rem 0; justify-content: center; }
-.plasma-states .state {
-  font-family: 'Bebas Neue', sans-serif; font-size: .65rem; letter-spacing: .15em;
-  color: var(--muted); padding: .3rem .65rem; border: 1px solid rgba(122,128,153,.2);
-}
-.plasma-states .state.active { color: var(--blue); border-color: var(--blue); background: rgba(58,143,255,.08); }
+    /* HERO */
+    .hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+    .hero-bolt{position:absolute;opacity:0;}
+    .hero-bolt:nth-child(1){top:10%;left:65%;animation:flashbolt 4s .5s infinite;}
+    .hero-bolt:nth-child(2){top:5%;left:78%;animation:flashbolt 4s 2s infinite;}
+    .hero-bolt:nth-child(3){top:18%;left:55%;animation:flashbolt 4s 3.2s infinite;}
+    @keyframes flashbolt{
+      0%,85%,100%{opacity:0;}
+      87%{opacity:1;filter:drop-shadow(0 0 12px var(--blue));}
+      89%{opacity:.3;}91%{opacity:1;filter:drop-shadow(0 0 20px var(--blue));}95%{opacity:0;}}
+    .hero-content{display:flex;width:100%;height:100%;position:relative;z-index:1;}
+    .hero-left{flex:0 0 55%;padding:0 2rem 0 5.5rem;display:flex;
+      flex-direction:column;justify-content:center;}
+    .hero-right{flex:0 0 45%;padding:4rem 3rem 4rem 2rem;display:flex;
+      flex-direction:column;justify-content:center;}
+    .hero-title{font-weight:300;font-size:clamp(6rem,14vw,13rem);line-height:.85;
+      letter-spacing:-.03em;margin-bottom:1.5rem;}
+    .hero-subtitle{font-size:clamp(1.1rem,1.8vw,1.4rem);font-weight:300;font-style:italic;
+      color:var(--muted);max-width:420px;margin-bottom:2rem;line-height:1.6;}
+    .hero-nav-guide{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;
+      color:var(--muted);line-height:2;margin-bottom:2rem;}
+    .hero-cta{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--gold);background:none;
+      border:1px solid var(--border);padding:.75rem 1.5rem;display:inline-flex;
+      align-items:center;gap:.5rem;cursor:pointer;transition:background .2s,border-color .2s;}
+    .hero-cta:hover{background:rgba(201,168,76,.08);border-color:var(--gold);}
+    .toc{list-style:none;}
+    .toc-item{display:flex;align-items:center;gap:1rem;padding:.6rem 0;
+      border-bottom:1px solid rgba(201,168,76,.08);cursor:pointer;transition:color .2s;}
+    .toc-item:last-child{border-bottom:none;}
+    .toc-item:hover .toc-title{color:var(--gold);}
+    .toc-num{font-family:var(--mono);font-size:.6rem;color:var(--muted);
+      width:1.5rem;flex-shrink:0;}
+    .toc-title{font-size:1rem;font-weight:300;color:var(--white);
+      letter-spacing:.02em;transition:color .2s;}
 
-.phase-badge {
-  display: inline-block; font-family: 'Bebas Neue', sans-serif; font-size: .5rem;
-  letter-spacing: .15em; color: var(--gold); border: 1px solid var(--border);
-  padding: .18rem .45rem; margin-bottom: .45rem;
-}
+    /* SECTION HEADER */
+    .section-header{position:absolute;top:2rem;left:5.5rem;z-index:10;pointer-events:none;}
+    .section-num{font-family:var(--mono);font-size:.6rem;color:var(--muted);
+      letter-spacing:.12em;}
 
-.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.detect-list { list-style: none; margin-top: .6rem; }
-.detect-list li {
-  display: flex; gap: .75rem; padding: .32rem 0;
-  border-bottom: 1px solid rgba(240,192,64,.05); font-size: .76rem;
-}
-.detect-list li span:first-child {
-  font-family: 'Bebas Neue', sans-serif; color: var(--gold);
-  min-width: 3.5rem; font-size: .7rem; letter-spacing: .1em; flex-shrink: 0;
-}
-.detect-list li span:last-child { color: rgba(232,234,240,.6); }
+    /* BLITZORTUNG IFRAME */
+    .blitz-wrap{width:100%;height:100%;position:relative;}
+    .blitz-wrap iframe{width:100%;height:100%;border:none;}
 
-/* ===== MAP ===== */
-#map { width: 100%; height: 100%; z-index: 1; }
-.map-panel { display: block !important; padding: 0 !important; }
-.map-counter {
-  position: absolute;
-  top: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 400;
-  background: rgba(5,7,15,.85);
-  border: 1px solid var(--border);
-  padding: .5rem 1.25rem;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .75rem;
-  letter-spacing: .2em;
-  color: var(--gold);
-  text-transform: uppercase;
-}
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      .slide-left{padding:3rem 1.5rem 3rem 2rem;flex:0 0 100%;max-width:100%;}
+      .slide-right{display:none;}
+      .hero-left{padding:0 1.5rem 0 2rem;flex:0 0 100%;}
+      .hero-right{display:none;}
+      .card-grid{padding:1.5rem;}
+      .flip-grid{grid-template-columns:1fr 1fr;padding:1rem 1.5rem;}
+      .section-header{left:2rem;}
+      .do-dont{grid-template-columns:1fr;gap:1rem;}
+    }
 
-/* ===== FIXED UI ===== */
-#cursor {
-  width: 8px; height: 8px;
-  background: var(--gold);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%,-50%);
-}
-#cursor-ring {
-  width: 28px; height: 28px;
-  border: 1px solid rgba(240,192,64,.4);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%,-50%);
-  transition: width .2s, height .2s;
-}
-#progress-bar {
-  position: fixed;
-  left: 0; top: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--gold), rgba(240,192,64,.2));
-  z-index: 1000;
-  transition: height .4s;
-  height: 0%;
-}
-#nav-dots {
-  position: fixed;
-  right: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-  z-index: 1000;
-}
-.ndot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: rgba(122,128,153,.4);
-  cursor: pointer;
-  transition: all .3s;
-}
-.ndot.active { background: var(--gold); transform: scale(1.6); }
-#slide-counter {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .7rem;
-  letter-spacing: .2em;
-  color: var(--muted);
-  z-index: 1000;
-}
-#fullscreen-btn {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .6rem;
-  letter-spacing: .15em;
-  padding: .35rem .7rem;
-  cursor: pointer;
-  z-index: 1000;
-  transition: all .3s;
-}
-#fullscreen-btn:hover { border-color: var(--gold); color: var(--gold); }
-#scroll-hint {
-  position: fixed;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: .6rem;
-  letter-spacing: .25em;
-  color: var(--muted);
-  z-index: 1000;
-  transition: opacity .5s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .4rem;
-}
-#scroll-hint .sh-arrow {
-  width: 1px; height: 20px;
-  background: linear-gradient(to bottom, transparent, var(--muted));
-}
-
-/* ===== SLIDER ===== */
-.thunder-slider-wrap { width: 100%; max-width: 380px; margin: 1.125rem auto; }
-input[type=range] { -webkit-appearance: none; width: 100%; height: 2px; background: var(--border); outline: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); cursor: pointer; }
-.slider-label { font-family: 'Bebas Neue', sans-serif; font-size: .52rem; letter-spacing: .2em; color: var(--muted); text-align: center; display: block; margin-bottom: .45rem; }
-.thunder-out { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--gold); text-align: center; line-height: 1; display: block; margin: .5rem 0; }
-.thunder-formula { font-family: 'Bebas Neue', sans-serif; font-size: .55rem; letter-spacing: .2em; color: var(--muted); text-align: center; margin-top: .4rem; }
-
-/* ===== CANVAS ===== */
-canvas { display: block; max-width: 100%; }
-.canvas-btn { display: block; margin: .6rem auto 0; background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: .52rem; letter-spacing: .2em; padding: .32rem .75rem; cursor: pointer; transition: all .3s; }
-.canvas-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-/* ===== ATM DIAGRAM ===== */
-.atmo-diagram { display: flex; flex-direction: column; width: 100%; max-width: 560px; }
-.atmo-layer { display: flex; align-items: center; gap: .75rem; padding: .5rem .6rem; border-bottom: 1px solid rgba(240,192,64,.06); }
-.atmo-layer .alt { font-family: 'Bebas Neue', sans-serif; font-size: .58rem; color: var(--muted); min-width: 4rem; text-align: right; }
-.atmo-layer .name { font-family: 'Bebas Neue', sans-serif; font-size: .58rem; letter-spacing: .1em; color: var(--white); min-width: 5.5rem; }
-.atmo-layer .tle-name { font-size: .68rem; font-family: 'Bebas Neue', sans-serif; letter-spacing: .08em; flex: 1; }
-.atmo-layer.tle-elves .tle-name { color: #a0e0ff; }
-.atmo-layer.tle-sprite .tle-name { color: #ff6080; }
-.atmo-layer.tle-jet .tle-name { color: #60a0ff; }
-.atmo-layer.tle-bolt .tle-name { color: var(--gold); }
-
-/* ===== ITALY MAP ===== */
-.italy-svg-wrap { display: flex; align-items: center; justify-content: center; height: 100%; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  :root { --px: 1.5rem; --py: 1.25rem; }
-  .panel-split { flex-direction: column; gap: 1.25rem; }
-  .panel-split .left, .panel-split .right { flex: none; width: 100%; min-height: 0; }
-  .two-cols { grid-template-columns: 1fr; gap: .875rem; }
-  .records-grid { grid-template-columns: repeat(2, 1fr); }
-  .sc-arrow { width: 32px; height: 32px; }
-  .sc-prev { left: .5rem; }
-  .sc-next { right: .5rem; }
-}
-@media (max-width: 480px) {
-  .slide-title { font-size: clamp(1.4rem, 7vw, 2rem); }
-  .records-grid { grid-template-columns: 1fr; }
-}
-</style>
+    /* REDUCED MOTION */
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;
+        transition-duration:.01ms!important;}
+      .reveal{opacity:1;transform:none;}
+    }
+  </style>
 </head>
 <body>
 
-<!-- FIXED UI -->
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-<div id="progress-bar"></div>
-<div id="nav-dots"></div>
-<div id="slide-counter">01 / 10</div>
-<button id="fullscreen-btn">⛶ FULLSCREEN</button>
-<div id="scroll-hint">
-  <span>SCORRI</span>
-  <div class="sh-arrow"></div>
-</div>
-
-<!-- SLIDES (contenuto aggiunto nei task successivi) -->
-<section id="s-hero" class="slide" style="overflow:hidden;">
-  <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;"></canvas>
-  <div style="position:relative;z-index:2;text-align:center;">
-    <span class="hero-eyebrow">la scienza del lampo</span>
-    <h1 class="hero-title">FUL<em>MI</em>NI</h1>
-    <div class="hero-line"></div>
-    <p class="hero-sub">Scariche elettriche atmosferiche — fisica, storia, misteri</p>
-  </div>
-</section>
-<section id="s-cosae" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Definizione + canvas -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 01 · cos'è un fulmine</span>
-          <h2 class="slide-title">Una scarica <em>gigantesca</em></h2>
-          <p class="slide-body">
-            Un fulmine è una scarica elettrica transitoria ad altissima intensità che
-            si verifica nell'atmosfera per riequilibrare un forte dislivello di potenziale
-            elettrico tra nuvole e suolo (o tra diverse nuvole).<br><br>
-            La scarica dura pochissimi millisecondi ma raggiunge temperature di circa
-            <strong>30.000 K</strong> — 5 volte più calda della superficie del sole —
-            e una corrente che può superare i <strong>30.000 ampere</strong>.
-          </p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.75rem;font-style:italic;">
-            Clicca il canvas per resettare l'animazione
-          </p>
-        </div>
-        <div class="right">
-          <canvas id="charge-canvas" width="340" height="300" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-      <!-- P2: Plasma -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">la sostanza del fulmine</span>
-        <h2 class="slide-title">Non fuoco. <em>Plasma.</em></h2>
-        <p class="slide-body">
-          Il fulmine non è fatto di fuoco, né è semplice "elettricità". La sua sostanza
-          fisica è il <strong>plasma</strong> — il quarto stato della materia.
-          Quando il campo elettrico supera la rigidità dielettrica dell'aria
-          (<strong>3×10⁶ V/m</strong>), gli elettroni vengono strappati dai nuclei
-          atomici di N₂ e O₂. Il gas isolante si trasforma in una miscela di ioni
-          positivi ed elettroni liberi: plasma conduttore a resistività bassissima,
-          super-riscaldato, intensamente luminoso.
-        </p>
-        <div class="plasma-states">
-          <div class="state">SOLIDO</div>
-          <div class="state">LIQUIDO</div>
-          <div class="state">GAS</div>
-          <div class="state active">PLASMA</div>
-        </div>
-        <div class="info-box">
-          Il canale plasma ha un diametro reale di appena <strong>2–3 centimetri</strong>.
-          L'apparente larghezza del lampo è causata dallo scattering di Mie e Rayleigh:
-          la luce del plasma rimbalza tra le gocce di pioggia illuminando km² di cielo.
-        </div>
-      </div>
-
-      <!-- P3: Numeri -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">parametri fisici</span>
-        <h2 class="slide-title">Numeri <em>estremi</em></h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;width:100%;max-width:640px;margin:1rem 0;">
-          <div class="stat-box">
-            <span class="stat-icon">⚡</span>
-            <span class="stat-label">Tensione</span>
-            <span class="stat-value">100M–1B<br><span style="font-size:1rem;">Volt</span></span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-icon">⚡</span>
-            <span class="stat-label">Corrente media</span>
-            <span class="stat-value">30.000<br><span style="font-size:1rem;">Ampere</span></span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-icon">⚡</span>
-            <span class="stat-label">Energia</span>
-            <span class="stat-value">1–5 Mld<br><span style="font-size:1rem;">Joule</span></span>
-          </div>
-        </div>
-        <p class="slide-body" style="max-width:52ch;text-align:center;">
-          Un impianto domestico regge 16 Ampere. Il fulmine medio porta 30.000 A:
-          quasi <strong>2.000 volte di più</strong>. Ciò che lo rende letale è la potenza
-          istantanea, non la quantità totale di energia.
-        </p>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-formazione" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Effetto triboelettrico + canvas -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 02 · formazione</span>
-          <h2 class="slide-title">Il condensatore <em>naturale</em></h2>
-          <p class="slide-body">
-            All'interno del cumulonembo, le correnti d'aria violente fanno scontrare
-            cristalli di ghiaccio e graupel (grandine tenera). L'attrito —
-            <strong>effetto triboelettrico</strong> — strappa elettroni:
-            i cristalli leggeri si caricano <strong>positivamente</strong> e salgono,
-            il graupel pesante si carica <strong>negativamente</strong> e scende.
-            La nuvola diventa un <strong>condensatore naturale</strong>.<br><br>
-            La terra sotto sviluppa una carica positiva per
-            <strong>induzione elettrostatica</strong>. Quando la differenza di
-            potenziale supera ~3×10⁶ V/m, l'aria si ionizza e scatta la scarica.
-          </p>
-        </div>
-        <div class="right">
-          <canvas id="formation-canvas" width="320" height="320" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-      <!-- P2: 4 fasi (HC) + leader canvas -->
-      <div class="sc-slide panel-split">
-        <div class="left" style="flex: 0 0 44%; min-width: 0;">
-          <span class="slide-eyebrow">meccanismo di scarica</span>
-          <div class="hc-wrap" id="leader-hc">
-            <div class="hc-tabs">
-              <button class="hc-tab active">A. STEPPED LEADER</button>
-              <button class="hc-tab">B. STREAMER</button>
-              <button class="hc-tab">C. CONNESSIONE</button>
-              <button class="hc-tab">D. RETURN STROKE</button>
-            </div>
-            <div class="hc-track">
-              <div class="hc-slide">
-                <span class="phase-badge">FASE A</span>
-                <p class="slide-body">
-                  Dal cumulonembo parte il <strong>precursore</strong>: un canale quasi
-                  invisibile che avanza a scatti da 50 m, a 150–200 km/s, cercando
-                  il percorso di minore resistenza. La sua traiettoria è frattale.
-                </p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">FASE B</span>
-                <p class="slide-body">
-                  A poche centinaia di metri dal suolo, il campo elettrico intensissimo
-                  ionizza l'aria vicino ai punti prominenti. Salgono verso l'alto
-                  filamenti di plasma blu: gli <strong>upward streamers</strong>.
-                </p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">FASE C</span>
-                <p class="slide-body">
-                  A 30–50 m dal suolo, stepped leader e upward streamer si incontrano.
-                  Il circuito si chiude: si crea un 'cavo virtuale' di plasma
-                  tra nuvola e terra.
-                </p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">FASE D</span>
-                <p class="slide-body">
-                  Con il circuito chiuso, la resistenza crolla. Un'immensa ondata di
-                  carica risale dal suolo a <strong>100.000 km/s</strong> (c/3).
-                  È questo il lampo che vediamo — risale dal basso, non scende.
-                </p>
-              </div>
-            </div>
-          </div>
-          <button class="canvas-btn" id="leader-play-btn">▶ PLAY</button>
-        </div>
-        <div class="right">
-          <canvas id="leader-canvas" width="300" height="400" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 02</span>
-    </div>
-  </div>
-</section>
-<section id="s-fisica" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Termodinamica -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 03 · fisica estrema</span>
-          <h2 class="slide-title">30.000 K in <em>un microsecondo</em></h2>
-          <p class="slide-body">
-            Durante il return stroke, l'effetto Joule scalda il canale da temperatura
-            ambiente a <strong>30.000 K</strong> in meno di 10⁻⁶ secondi.
-            Secondo P = ρRT, la pressione interna schizza a
-            <strong>10–100 atmosfere</strong>. Il canale esplode radialmente
-            a velocità supersonica (Mach&nbsp;&gt;&nbsp;1 nei primi 1–2 metri),
-            generando un'<strong>onda d'urto idrodinamica</strong> che
-            poi decade in onda acustica: il tuono.
-          </p>
-        </div>
-        <div class="right">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.625rem;">
-            <div class="stat-box"><span class="stat-label">Temperatura</span><span class="stat-value" style="font-size:1.2rem;">30.000 K</span></div>
-            <div class="stat-box"><span class="stat-label">Pressione picco</span><span class="stat-value" style="font-size:1.2rem;">10–100 atm</span></div>
-            <div class="stat-box"><span class="stat-label">Diametro canale</span><span class="stat-value" style="font-size:1.2rem;">2–3 cm</span></div>
-            <div class="stat-box"><span class="stat-label">Durata return stroke</span><span class="stat-value" style="font-size:1.2rem;">0,1 ms</span></div>
-            <div class="stat-box"><span class="stat-label">Espansione</span><span class="stat-value" style="font-size:1.2rem;">Mach&gt;1</span></div>
-            <div class="stat-box"><span class="stat-label">Confronto Sole</span><span class="stat-value" style="font-size:1.2rem;">5×</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- P2: EM + Z-Pinch -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">elettromagnetismo</span>
-        <h2 class="slide-title">Il fulmine come <em>laboratorio</em></h2>
-        <div class="two-cols" style="width:100%;max-width:760px;text-align:left;">
-          <div>
-            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--gold);margin-bottom:.5rem;">LEGGE DI AMPÈRE</h3>
-            <p class="slide-body">
-              Una corrente fino a 200.000 A genera un campo magnetico B circolare
-              e intensissimo attorno al canale. Ogni elettrone in movimento
-              è soggetto alla <strong>forza di Lorentz</strong>.
-            </p>
-          </div>
-          <div>
-            <h3 style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--gold);margin-bottom:.5rem;">EFFETTO Z-PINCH</h3>
-            <p class="slide-body">
-              Il campo magnetico spinge le particelle cariche <em>verso l'interno</em>
-              del canale: è lo <strong>Z-Pinch</strong> (strizione magnetica).
-              Il plasma viene compresso e densificato per pochi microsecondi,
-              in equilibrio dinamico tra compressione magnetica ed espansione termica.
-            </p>
-          </div>
-        </div>
-        <div class="info-box" style="max-width:760px;width:100%;text-align:left;margin-top:.75rem;">
-          La variazione rapidissima di corrente genera un potente <strong>impulso
-          elettromagnetico</strong> rilevabile a centinaia di chilometri.
-        </div>
-        <canvas id="em-canvas" width="500" height="180" style="max-width:100%;margin-top:1rem;"></canvas>
-        <button class="canvas-btn" id="em-play-btn">AVVIA IMPULSO</button>
-      </div>
-
-      <!-- P3: Chimica + Fisica Nucleare -->
-      <div class="sc-slide" style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,3.5vw,3.5rem);align-items:start;align-content:center;padding:var(--py) var(--px);overflow-y:auto;">
-        <div>
-          <span class="slide-eyebrow">chimica</span>
-          <h2 class="slide-title" style="font-size:clamp(1.6rem,2.8vw,2.6rem);">L'atmosfera <em>trasformata</em></h2>
-          <ul style="list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
-            <li class="slide-body">🌿 <strong>Ozono O₃</strong> — l'energia del fulmine dissocia N₂ e O₂; gli atomi liberi si ricombinano formando ozono. L'odore "fresco" dopo il temporale è ozono.</li>
-            <li class="slide-body">🌱 <strong>NOx</strong> — fissazione naturale dell'azoto atmosferico nel terreno: fertilizzante naturale per le piante.</li>
-            <li class="slide-body">💎 <strong>Fulgurite</strong> — quando colpisce sabbia, la corrente fonde il quarzo (SiO₂) a 30.000 K creando una roccia vetrosa tubolare che replica la forma sotterranea della scarica.</li>
-          </ul>
-        </div>
-        <div>
-          <span class="slide-eyebrow">fisica nucleare</span>
-          <h2 class="slide-title" style="font-size:clamp(1.6rem,2.8vw,2.6rem);">Acceleratore <em>naturale</em></h2>
-          <ul style="list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
-            <li class="slide-body">☢️ <strong>TGF (Terrestrial Gamma-ray Flashes)</strong> — i campi elettrici dei temporali accelerano elettroni a velocità relativistiche. Frenando contro i nuclei dell'aria, emettono raggi X e gamma rilevabili dai satelliti.</li>
-            <li class="slide-body">⚛️ <strong>Reazioni fotonucleari</strong> — i fotoni gamma colpiscono nuclei di ¹⁴N, strappando un neutrone e generando ¹³N instabile. Brevissima reazione nucleare spontanea in atmosfera.</li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-tuono" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Dal plasma all'onda -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 04 · il tuono</span>
-          <h2 class="slide-title">Un'esplosione <em>supersonica</em></h2>
-          <p class="slide-body">
-            Il tuono non è un evento separato: è la diretta conseguenza
-            termodinamica del fulmine. Il canale di plasma a 30.000°C
-            — quasi 5 volte la superficie del Sole — non può contenere
-            la pressione di 10–100 atm.<br><br>
-            Si espande radialmente a regime <strong>supersonico</strong>
-            (Mach&nbsp;&gt;&nbsp;1 nei primi metri): <strong>onda d'urto idrodinamica</strong>.
-            Man mano che si allontana perde energia, rallenta sotto Mach 1:
-            l'onda d'urto decade in normale <strong>onda acustica lineare</strong>.<br><br>
-            Udibile fino a 20–25 km; oltre, la rifrazione
-            acustica disperde le onde verso l'alto.
-          </p>
-        </div>
-        <div class="right">
-          <canvas id="thunder-canvas" width="340" height="260" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-      <!-- P2: Calcolatore distanza -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">calcola la distanza</span>
-        <h2 class="slide-title">Lampo → Tuono → <em>distanza</em></h2>
-        <p class="slide-body" style="margin-bottom:1.5rem;">
-          La luce viaggia a 300.000 km/s: il lampo è istantaneo.
-          Il suono viaggia a 343 m/s: circa 1 km ogni 3 secondi.
-        </p>
-        <div class="thunder-slider-wrap">
-          <span class="slider-label">SECONDI TRA LAMPO E TUONO</span>
-          <input type="range" id="thunder-slider" min="1" max="30" value="10">
-          <span class="thunder-out" id="thunder-out">3.3 km</span>
-          <span class="thunder-formula">km = secondi ÷ 3</span>
-        </div>
-        <p class="slide-body" style="margin-top:1rem;max-width:48ch;text-align:center;">
-          9 secondi → 3 km. Se l'intervallo <em>diminuisce</em> tra un lampo e
-          l'altro, il temporale si sta avvicinando.
-        </p>
-      </div>
-
-      <!-- P3: Tabella dati fisici -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">dati fisici completi</span>
-        <h2 class="slide-title">La scheda <em>tecnica</em></h2>
-        <table class="data-table" style="max-width:580px;width:100%;margin-top:1rem;">
-          <thead><tr><th>Parametro</th><th>Valore</th></tr></thead>
-          <tbody>
-            <tr><td>Temperatura canale</td><td>~30.000 K</td></tr>
-            <tr><td>Corrente media</td><td>20.000–30.000 A</td></tr>
-            <tr><td>Tensione</td><td>100 milioni – 1 miliardo di Volt</td></tr>
-            <tr><td>Durata (con più scariche)</td><td>~0,2 secondi</td></tr>
-            <tr><td>Energia per fulmine</td><td>1–5 miliardi di Joule</td></tr>
-            <tr><td>Energia utilizzabile</td><td>~1 kWh (il resto è calore)</td></tr>
-            <tr><td>Velocità return stroke</td><td>~100.000 km/s (c/3)</td></tr>
-            <tr><td>Diametro canale plasma</td><td>2–3 cm</td></tr>
-            <tr><td>Pressione picco</td><td>10–100 atm</td></tr>
-          </tbody>
-        </table>
-        <p class="slide-body" style="margin-top:.875rem;max-width:52ch;text-align:center;">
-          Potrebbe far bollire 4 litri d'acqua. Ma la durata brevissima rende
-          impossibile raccogliere e usare quell'energia in pratica.
-        </p>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-tipi" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Fulmini CG (HC) -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 05 · tipi di fulmini</span>
-          <h2 class="slide-title">Fulmini <em>comuni</em></h2>
-          <div class="hc-wrap" id="cg-hc">
-            <div class="hc-tabs">
-              <button class="hc-tab active">CG⁻</button>
-              <button class="hc-tab">CG⁺</button>
-              <button class="hc-tab">IC</button>
-              <button class="hc-tab">CC</button>
-            </div>
-            <div class="hc-track">
-              <div class="hc-slide">
-                <span class="phase-badge">NEGATIVO · ~90%</span>
-                <p class="slide-body">Dal base della nuvola verso terra. Corrente media 30.000 A. Le cariche negative si accumulano alla base del cumulonembo.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">POSITIVO · ~10%</span>
-                <p class="slide-body">Dall'incudine (sommità) verso terra. Fino a 300.000 A — 10× più potente. I tuoni più forti e sordi, udibili a decine di km. Statisticamente più pericolosi.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">INTRA-CLOUD · più frequente</span>
-                <p class="slide-body">Il tipo più frequente in natura. Avviene interamente dentro il cumulonembo tra base − e cima +. Un picco improvviso di IC segnala che il temporale si sta intensificando.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">CLOUD-TO-CLOUD</span>
-                <p class="slide-body">Scarica orizzontale tra due nuvole distinte con polarità opposta. Gli Anvil Crawlers percorrono centinaia di km con geometrie frattali nel cielo notturno.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="right">
-          <canvas id="type-canvas" width="300" height="380" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-      <!-- P2: Fenomeni rari TLE (HC) -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">fenomeni rari</span>
-          <h2 class="slide-title">Fulmini <em>misteriosi</em></h2>
-          <div class="hc-wrap" id="tle-hc">
-            <div class="hc-tabs">
-              <button class="hc-tab active">BALL</button>
-              <button class="hc-tab">SPRITE</button>
-              <button class="hc-tab">ELVES</button>
-              <button class="hc-tab">BLUE JET</button>
-            </div>
-            <div class="hc-track">
-              <div class="hc-slide">
-                <span class="phase-badge">BALL LIGHTNING · mistero della fisica</span>
-                <p class="slide-body">Sfera luminosa (arancione→bianca), dimensione arancia→pallone. Dura secondi, si muove lentamente, può passare attraverso vetri, si dissolve silenziosamente o esplode. La spiegazione fisica è ancora oggetto di dibattito scientifico.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">SPRITE · 50–90 km quota</span>
-                <p class="slide-body">Strutture luminose rosse a forma di medusa con tentacoli verso il basso. Compaiono dopo un CG positivo molto potente. Durano pochi millisecondi. Documentati in foto solo dal 1989.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">ELVES · ~400 km (ionosfera)</span>
-                <p class="slide-body">Emission of Light and VLF perturbations due to EMP Sources. Anelli luminosi piatti che si espandono alla velocità della luce. Diametro fino a 400 km. Causati dall'impulso EM del temporale sottostante.</p>
-              </div>
-              <div class="hc-slide">
-                <span class="phase-badge">BLUE JET · 40–50 km</span>
-                <p class="slide-body">Getti conici di luce blu espulsi dalla cima della nuvola verso l'alto. Il colore blu = eccitazione degli atomi di N₂ molecolare negli strati atmosferici più densi.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="right">
-          <canvas id="tle-canvas" width="300" height="380" style="max-width:100%;"></canvas>
-        </div>
-      </div>
-
-      <!-- P3: Diagramma quota atmosferica -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">dove avvengono</span>
-        <h2 class="slide-title">Dalla nuvola alla <em>ionosfera</em></h2>
-        <div class="atmo-diagram" style="margin-top:1rem;">
-          <div class="atmo-layer tle-elves">
-            <span class="alt">~400 km</span>
-            <span class="name">IONOSFERA</span>
-            <span class="tle-name">⚪ ELVES — anelli che si espandono alla velocità della luce</span>
-          </div>
-          <div class="atmo-layer tle-sprite">
-            <span class="alt">~90 km</span>
-            <span class="name">MESOSFERA</span>
-            <span class="tle-name">🔴 SPRITES — strutture rosse a medusa</span>
-          </div>
-          <div class="atmo-layer tle-jet">
-            <span class="alt">~50 km</span>
-            <span class="name">STRATOSFERA</span>
-            <span class="tle-name">🔵 BLUE JETS — coni di luce blu verso l'alto</span>
-          </div>
-          <div class="atmo-layer tle-bolt">
-            <span class="alt">~12 km</span>
-            <span class="name">CUMULONEMBO</span>
-            <span class="tle-name">⚡ FULMINI CG / IC / CC</span>
-          </div>
-          <div class="atmo-layer">
-            <span class="alt">0 km</span>
-            <span class="name">SUOLO</span>
-            <span class="tle-name" style="color:var(--muted);">—</span>
-          </div>
-        </div>
-        <p class="slide-body" style="margin-top:1rem;max-width:52ch;text-align:center;font-style:italic;">
-          "Fino agli anni '90 i piloti riportavano 'luci strane' sopra i temporali.
-          Nessuno li credeva. Oggi le chiamiamo TLE e le studiamo con i satelliti."
-        </p>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-record" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Records grid -->
-      <div class="sc-slide" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:var(--py) var(--px);overflow-y:auto;">
-        <span class="slide-eyebrow">slide 06 · numeri e record</span>
-        <h2 class="slide-title">I <em>numeri</em> del fulmine</h2>
-        <div class="records-grid" style="height:auto;margin-top:.5rem;">
-          <div class="record-cell"><span class="rec-value">8 MLN</span><span class="rec-label">fulmini al giorno nel mondo</span><span class="rec-sub">50–100 scariche ogni secondo</span></div>
-          <div class="record-cell"><span class="rec-value">768 KM</span><span class="rec-label">mega-flash Texas–Mississippi</span><span class="rec-sub">record distanza orizzontale, 2020</span></div>
-          <div class="record-cell"><span class="rec-value">17,1 SEC</span><span class="rec-label">record durata</span><span class="rec-sub">Uruguay–Argentina, 2019</span></div>
-          <div class="record-cell"><span class="rec-value">297 NOTTI</span><span class="rec-label">Lago Maracaibo — fulmini ogni anno</span><span class="rec-sub">28 scariche al minuto, 9 ore consecutive</span></div>
-          <div class="record-cell"><span class="rec-value">×1.000</span><span class="rec-label">più potenti i fulmini di Giove</span><span class="rec-sub">Saturno: rilevati da Cassini; Urano: scoperta recente</span></div>
-          <div class="record-cell"><span class="rec-value">100.000 KM/S</span><span class="rec-label">velocità return stroke</span><span class="rec-sub">c/3 — giro della Terra in &lt; 0,5 secondi</span></div>
-        </div>
-      </div>
-
-      <!-- P2: Curiosità rare -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">curiosità rare</span>
-        <h2 class="slide-title">Fulmini che <em>sorprendono</em></h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;max-width:860px;width:100%;margin-top:1rem;">
-          <div class="myth-item">
-            <strong style="color:var(--gold);font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-size:.85rem;display:block;margin-bottom:.4rem;">FIGURE DI LICHTENBERG</strong>
-            Quando una persona sopravvive a un fulmine, sulla pelle compaiono segni rossastri a forma di felce.
-            Causate dalla rottura dei capillari per il passaggio della corrente sulla superficie corporea. Ogni figura è unica come un'impronta.
-          </div>
-          <div class="myth-item">
-            <strong style="color:var(--gold);font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-size:.85rem;display:block;margin-bottom:.4rem;">FULMINI VULCANICI</strong>
-            Un fulmine non ha bisogno di nuvole di pioggia. Durante eruzioni violente, l'attrito tra particelle di cenere genera separazione di cariche così intensa da provocare fulmini spettacolari nel pennacchio di fumo.
-          </div>
-          <div class="myth-item">
-            <strong style="color:var(--gold);font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;font-size:.85rem;display:block;margin-bottom:.4rem;">FULMINI NELLO SPAZIO</strong>
-            I fulmini non sono un'esclusiva terrestre. Nell'atmosfera di <strong>Giove e Saturno</strong> avvengono tempeste elettriche migliaia di volte più potenti delle nostre, alimentate da idrogeno ed elio plasmatico.
-          </div>
-        </div>
-      </div>
-
-      <!-- P3: Debunking -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">miti da sfatare</span>
-          <h2 class="slide-title">Il fulmine colpisce sempre <em>il punto più alto?</em></h2>
-          <p class="slide-body">
-            <strong>No.</strong> Il fulmine segue esclusivamente il percorso
-            di <strong>minore resistenza elettrica</strong>, non l'altezza geometrica.<br><br>
-            Lo stepped leader che scende è "cieco" fino agli ultimi 30–50 m:
-            è guidato solo dall'umidità, dalla ionizzazione locale e dalla
-            conducibilità dell'aria — non dall'altezza degli oggetti sottostanti.<br><br>
-            L'altezza e le punte metalliche <em>aumentano la probabilità</em>
-            di innescare un upward streamer, ma non garantiscono nulla.
-          </p>
-        </div>
-        <div class="right" style="flex-direction:column;gap:1rem;align-items:flex-start;">
-          <div class="stat-box" style="width:100%;">
-            <span class="stat-icon">🏢</span>
-            <span class="stat-label">EMPIRE STATE BUILDING</span>
-            <span class="stat-value" style="font-size:1.5rem;">23×/anno</span>
-            <p style="font-size:.72rem;color:var(--muted);margin-top:.4rem;">Il mito del "non colpisce due volte nello stesso posto" è fisicamente assurdo.</p>
-          </div>
-          <div class="myth-item" style="width:100%;">
-            <em style="color:var(--muted);font-size:.78rem;">"Il canale del fulmine è largo"</em><br>
-            <strong style="color:var(--gold);font-size:.78rem;">→ Il canale è appena 2–3 cm</strong>
-          </div>
-          <div class="myth-item" style="width:100%;">
-            <em style="color:var(--muted);font-size:.78rem;">"Produce solo luce e calore"</em><br>
-            <strong style="color:var(--gold);font-size:.78rem;">→ TGF, NOx, fulguriti, reazioni nucleari</strong>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-franklin" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Contesto storico -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">slide 07 · franklin e storia</span>
-          <h2 class="slide-title">L'elettricità era <em>uno spettacolo</em></h2>
-          <p class="slide-body">
-            A metà del XVIII secolo, l'elettricità era poco più di un curioso
-            gioco da salotto. I filosofi naturali accumulavano cariche nelle
-            <strong>bottiglie di Leida</strong> e divertivano l'aristocrazia
-            con scintille. L'idea che il fulmine e l'elettricità fossero la
-            stessa cosa era considerata bizzarra, quasi blasfema.<br><br>
-            Franklin, autodidatta delle colonie americane, fu il primo a intuire
-            che le scintille di laboratorio e i fulmini celesti erano
-            lo stesso fenomeno su scala diversa.
-          </p>
-        </div>
-        <div class="right" style="flex-direction:column;align-items:flex-start;gap:.5rem;">
-          <div class="tl-item"><span class="tl-year">1746</span><span class="tl-text">Pieter van Musschenbroek inventa la bottiglia di Leida, primo condensatore della storia</span></div>
-          <div class="tl-item"><span class="tl-year">1750</span><span class="tl-text">Franklin scrive alla Royal Society proponendo di "catturare l'elettricità celeste". Viene preso per pazzo.</span></div>
-          <div class="tl-item"><span class="tl-year">1752</span><span class="tl-text">Esperimento dell'aquilone a Filadelfia (giugno)</span></div>
-          <div class="tl-item"><span class="tl-year">1753</span><span class="tl-text">Georg Wilhelm Richmann, San Pietroburgo: primo martire della scienza elettrica</span></div>
-          <div class="tl-item"><span class="tl-year">1800s</span><span class="tl-text">Il parafulmine si diffonde in tutto il mondo occidentale</span></div>
-          <div class="tl-item"><span class="tl-year">1891</span><span class="tl-text">Tesla e la Bobina: scariche artificiali spettacolari</span></div>
-        </div>
-      </div>
-
-      <!-- P2: Esperimento aquilone -->
-      <div class="sc-slide panel-split">
-        <div class="left" style="align-items:center;justify-content:center;display:flex;">
-          <svg viewBox="0 0 220 380" width="180" style="max-width:100%;">
-            <!-- Cloud -->
-            <ellipse cx="110" cy="30" rx="65" ry="25" fill="#1a2040" stroke="rgba(58,143,255,.4)" stroke-width="1.5"/>
-            <text x="110" y="35" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="10" fill="#3a8fff">NUVOLA TEMPORALESCA</text>
-            <!-- Kite string -->
-            <line x1="110" y1="55" x2="110" y2="130" stroke="rgba(240,192,64,.5)" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- Kite shape -->
-            <polygon points="110,65 90,100 110,130 130,100" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
-            <line x1="90" y1="100" x2="130" y2="100" stroke="rgba(240,192,64,.4)" stroke-width="1"/>
-            <line x1="110" y1="65" x2="110" y2="130" stroke="rgba(240,192,64,.4)" stroke-width="1"/>
-            <text x="155" y="100" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--muted)">AQUILONE DI SETA</text>
-            <!-- Hemp rope -->
-            <line x1="110" y1="130" x2="110" y2="220" stroke="rgba(122,128,153,.6)" stroke-width="2"/>
-            <text x="118" y="180" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--muted)">CANAPA</text>
-            <!-- Key -->
-            <circle cx="110" cy="225" r="6" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
-            <line x1="110" y1="231" x2="110" y2="245" stroke="var(--gold)" stroke-width="1.5"/>
-            <text x="120" y="228" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--gold)">CHIAVE</text>
-            <!-- Silk insulator -->
-            <line x1="110" y1="245" x2="110" y2="270" stroke="#e8eaf0" stroke-width="1.5"/>
-            <text x="118" y="258" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--white)">SETA (ISO.)</text>
-            <!-- Leyden jar -->
-            <rect x="94" y="270" width="32" height="40" rx="4" fill="none" stroke="rgba(58,143,255,.5)" stroke-width="1.5"/>
-            <text x="110" y="296" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="#3a8fff">BOTTIGLIA</text>
-            <text x="110" y="308" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="#3a8fff">DI LEIDA</text>
-            <!-- Ground line -->
-            <line x1="50" y1="325" x2="170" y2="325" stroke="rgba(122,128,153,.3)" stroke-width="1"/>
-          </svg>
-        </div>
-        <div class="right" style="flex-direction:column;align-items:flex-start;">
-          <span class="slide-eyebrow">l'esperimento</span>
-          <h2 class="slide-title">Induzione, non <em>colpo diretto</em></h2>
-          <p class="slide-body">
-            Franklin non aspettava un fulmine diretto — sarebbe morto.
-            Sfruttava l'<strong>induzione elettrostatica</strong>: la nuvola
-            carica induceva cariche libere lungo la canapa bagnata.<br><br>
-            Avvicinando il nocchiolo del dito alla chiave carica, generava
-            una <strong>scintilla controllata</strong>. La bottiglia di Leida
-            raccoglieva la carica celeste: prova definitiva che elettricità
-            di laboratorio e fulmini erano la stessa cosa.
-          </p>
-          <div class="warn-pill">
-            ⚠ Richmann tentò lo stesso esperimento a San Pietroburgo l'anno
-            successivo. Fu colpito e ucciso il <strong>6 agosto 1753</strong> —
-            prima vittima accertata nella storia degli esperimenti elettrici.
-          </div>
-        </div>
-      </div>
-
-      <!-- P3: Il parafulmine -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">la conseguenza pratica</span>
-          <h2 class="slide-title">Da terrore divino a rischio <em>calcolabile</em></h2>
-          <p class="slide-body">
-            Franklin comprese che un'asta metallica appuntita collegata a terra
-            avrebbe prodotto due effetti fisici protettivi:<br><br>
-            <strong>A. Effetto Punta (prevenzione):</strong> Le cariche si concentrano
-            sulle punte. Il campo elettrico intensissimo ionizza costantemente l'aria
-            circostante, disperdendo silenziosamente le cariche della nuvola e
-            riducendo localmente la differenza di potenziale.<br><br>
-            <strong>B. Canalizzazione sicura (protezione):</strong> Se il fulmine scatta
-            comunque, il conduttore metallico offre il percorso a minima resistenza.
-            La corrente scorre nel cavo, si disperde nel terreno, senza toccare pietra o legno.
-          </p>
-        </div>
-        <div class="right" style="flex-direction:column;align-items:flex-start;gap:.5rem;">
-          <div class="tl-item"><span class="tl-year">1753</span><span class="tl-text">Richmann muore. Il parafulmine diventa ingegneria seria.</span></div>
-          <div class="tl-item"><span class="tl-year">1800s</span><span class="tl-text">Franklin rifiuta il brevetto: "È per il bene dell'umanità."</span></div>
-          <div class="tl-item"><span class="tl-year">1891</span><span class="tl-text">Tesla crea la Bobina Tesla. Sogna la trasmissione wireless di energia elettrica gratuita per tutti.</span></div>
-          <div class="tl-item"><span class="tl-year">Oggi</span><span class="tl-text">Reti di rilevamento in tempo reale, razzi con filo metallico per "provocare" fulmini controllati in laboratorio.</span></div>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-mitologia" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Dei del fulmine -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">slide 08 · mitologia</span>
-        <h2 class="slide-title">Prima della <em>fisica</em></h2>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;max-width:680px;width:100%;margin-top:1rem;">
-          <div class="deity-card">
-            <span class="deity-icon">⚡</span>
-            <span class="deity-name">ZEUS</span>
-            <span class="deity-culture">GRECIA</span>
-            <p>Re degli dei. Il fulmine era la sua arma assoluta, simbolo di potere e giustizia divina. I luoghi colpiti dai fulmini erano sacri — i greci li chiamavano <em>enelysion</em>.</p>
-          </div>
-          <div class="deity-card">
-            <span class="deity-icon">🔨</span>
-            <span class="deity-name">THOR</span>
-            <span class="deity-culture">NORRENA</span>
-            <p>Dio del tuono. Il suo martello Mjolnir creava i fulmini durante i viaggi tra i regni. Protettore degli uomini contro il caos delle forze della natura.</p>
-          </div>
-          <div class="deity-card">
-            <span class="deity-icon">⚡</span>
-            <span class="deity-name">GIOVE</span>
-            <span class="deity-culture">ROMA</span>
-            <p>Equivalente romano di Zeus. I fulmini erano i suoi strali divini. I pontifex romani interpretavano la direzione e il tipo di fulmine come augurio o condanna.</p>
-          </div>
-          <div class="deity-card">
-            <span class="deity-icon">✨</span>
-            <span class="deity-name">INDRA</span>
-            <span class="deity-culture">INDUISMO</span>
-            <p>Dio della guerra e dei temporali. Armato del vajra — il fulmine cosmico — sconfisse il demone-serpente Vritra liberando le acque del mondo.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- P2: Dopo Franklin: scienza moderna -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">la storia della scienza</span>
-          <h2 class="slide-title">Da Franklin <em>ai satelliti</em></h2>
-          <div style="margin-top:.75rem;">
-            <div class="tl-item"><span class="tl-year">1753</span><span class="tl-text">Richmann muore. Il parafulmine diventa un oggetto serio di ingegneria.</span></div>
-            <div class="tl-item"><span class="tl-year">1891</span><span class="tl-text">Nikola Tesla sviluppa la Bobina Tesla. Sogna la trasmissione wireless di energia gratuita.</span></div>
-            <div class="tl-item"><span class="tl-year">1960s</span><span class="tl-text">I razzi con filo metallico permettono di "provocare" fulmini artificiali in laboratorio.</span></div>
-            <div class="tl-item"><span class="tl-year">1989</span><span class="tl-text">Prima fotografia documentata di uno Sprite da un aereo dell'Università del Minnesota.</span></div>
-            <div class="tl-item"><span class="tl-year">1995</span><span class="tl-text">NASA lancia il Lightning Imaging Sensor (LIS). Prima mappa globale completa della distribuzione dei fulmini.</span></div>
-          </div>
-        </div>
-        <div class="right" style="flex-direction:column;align-items:flex-start;">
-          <span class="slide-eyebrow">rilevamento moderno</span>
-          <h2 class="slide-title" style="font-size:clamp(1.6rem,2.8vw,2.6rem);">La rete <em>invisibile</em></h2>
-          <p class="slide-body">
-            Ogni fulmine emette un impulso radio sferico. Tre o più stazioni lo ricevono
-            con differenze di tempo di frazioni di microsecondo. La
-            <strong>triangolazione time-of-arrival</strong> localizza la scarica
-            con precisione di <strong>pochi metri</strong>.
-          </p>
-          <ul class="detect-list" style="margin-top:.75rem;">
-            <li><span>LINET</span><span>Europa: 135+ sensori, copertura continentale</span></li>
-            <li><span>SIRF</span><span>Italia (ISPRA): 1,5 milioni CG/anno, mappe stagionali</span></li>
-            <li><span>ENTLN</span><span>Globale: 900+ sensori worldwide</span></li>
-            <li><span>ISUAL</span><span>Satellite: rileva TGF, Sprite e Elves dallo spazio</span></li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- P3: Curiosità finali -->
-      <div class="sc-slide panel-center">
-        <span class="slide-eyebrow">lo sapevi che</span>
-        <h2 class="slide-title">Tre fatti che <em>sorprendono</em></h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;max-width:860px;width:100%;margin-top:1rem;">
-          <div class="myth-item">
-            Il fulmine può fare il giro della Terra in meno di mezzo secondo alla velocità del return stroke (<strong>100.000 km/s</strong>).
-          </div>
-          <div class="myth-item">
-            L'energia di un fulmine medio potrebbe far bollire circa <strong>4 litri d'acqua</strong>. Ma è impossibile raccoglierla: dura 0,2 secondi e la maggior parte è calore disperso.
-          </div>
-          <div class="myth-item">
-            Il tuono non si sente oltre <strong>20–25 km</strong>. Le onde sonore vengono piegate verso l'alto dagli strati d'aria a diverse temperature (rifrazione acustica) e si disperdono prima di raggiungere il suolo.
-          </div>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-<section id="s-mondo" class="slide">
-  <div class="sc-carousel">
-    <div class="sc-track">
-
-      <!-- P1: Mappa mondiale Leaflet -->
-      <div class="sc-slide map-panel" style="position:relative;">
-        <div id="map-counter" class="map-counter">— FULMINI NEGLI ULTIMI 5 MIN</div>
-        <div id="map" style="width:100%;height:100%;"></div>
-      </div>
-
-      <!-- P2: Italia -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">il caso italia</span>
-          <h2 class="slide-title">1,5 milioni di fulmini <em>l'anno</em></h2>
-          <p class="slide-body">
-            L'Italia è uno dei paesi europei più esposti. La complessa
-            orografia e la posizione centrale nel Mediterraneo creano
-            meccanismi diversi per area geografica.
-          </p>
-          <table class="data-table" style="margin-top:1rem;">
-            <thead><tr><th>Area</th><th>Stagione</th><th>Meccanismo</th></tr></thead>
-            <tbody>
-              <tr><td>Arco Alpino/Prealpi</td><td>Estate (Giu–Ago)</td><td>Sollevamento orografico</td></tr>
-              <tr><td>Pianura Padana</td><td>Tarda est./Autunno</td><td>Convezione termica + fronte freddo</td></tr>
-              <tr><td>Tirreno/Appennini</td><td>Autunno (Set–Nov)</td><td>Instabilità marittima</td></tr>
-              <tr><td>Costa Adriatica</td><td>Autunno</td><td>Bora + umidità adriatica</td></tr>
-            </tbody>
-          </table>
-          <p class="slide-body" style="margin-top:.75rem;font-style:italic;">
-            Il paradosso della Pianura Padana: d'estate si comporta come una conca
-            subtropicale. Quando un fronte freddo scavalca le Alpi, l'impatto con
-            l'aria surriscaldata genera <strong>temporali supercellulari</strong>
-            tra i più violenti d'Europa.
-          </p>
-        </div>
-        <div class="right">
-          <!-- Mini mappa SVG Italia con zone colorate -->
-          <svg viewBox="0 0 200 280" width="180" style="max-width:100%;">
-            <text x="100" y="20" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="9" fill="var(--muted)" letter-spacing="2">ITALIA · ZONE TEMPORALESCHE</text>
-            <!-- Nord (Alpi/Pianura) -->
-            <rect x="40" y="30" width="120" height="50" rx="4" fill="rgba(58,143,255,.15)" stroke="rgba(58,143,255,.4)" stroke-width="1"/>
-            <text x="100" y="50" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="#3a8fff">ALPI / PREALPI</text>
-            <text x="100" y="65" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="7" fill="var(--muted)">Estate · Orografico</text>
-            <!-- Pianura Padana -->
-            <rect x="45" y="85" width="110" height="35" rx="4" fill="rgba(240,192,64,.12)" stroke="rgba(240,192,64,.4)" stroke-width="1"/>
-            <text x="100" y="100" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--gold)">PIANURA PADANA</text>
-            <text x="100" y="113" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="7" fill="var(--muted)">Autunno · Supercellulari</text>
-            <!-- Centro -->
-            <rect x="55" y="125" width="90" height="60" rx="4" fill="rgba(80,200,120,.1)" stroke="rgba(80,200,120,.3)" stroke-width="1"/>
-            <text x="100" y="150" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="#50c878">APPENNINI / TIRRENO</text>
-            <text x="100" y="163" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="7" fill="var(--muted)">Autunno · Marittimo</text>
-            <!-- Sud -->
-            <rect x="60" y="190" width="80" height="50" rx="4" fill="rgba(255,64,64,.1)" stroke="rgba(255,64,64,.3)" stroke-width="1"/>
-            <text x="100" y="213" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="8" fill="var(--red)">SUD / ADRIATICO</text>
-            <text x="100" y="226" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="7" fill="var(--muted)">Autunno · Bora</text>
-          </svg>
-        </div>
-      </div>
-
-      <!-- P3: Come proteggersi -->
-      <div class="sc-slide panel-split">
-        <div class="left">
-          <span class="slide-eyebrow">protezione</span>
-          <h2 class="slide-title">Cosa fare <em>e non fare</em></h2>
-          <div id="safety-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.75rem;">
-            <div class="safety-item danger" data-tip="Mai sotto un albero. È un conduttore naturale alto e isolato. Mantieni almeno 50 m di distanza.">
-              <span class="s-icon">🌲</span>
-              <span class="s-label">SOTTO UN ALBERO</span>
-              <span class="s-badge">PERICOLO</span>
-            </div>
-            <div class="safety-item safe" data-tip="L'auto è una gabbia di Faraday: la carrozzeria conduce la corrente intorno a te. Non toccare la scocca metallica durante il temporale.">
-              <span class="s-icon">🚗</span>
-              <span class="s-label">IN AUTO</span>
-              <span class="s-badge">SICURO</span>
-            </div>
-            <div class="safety-item safe" data-tip="Edificio solido = sicuro. Stacca gli apparecchi elettrici e i cavi internet. Evita la doccia (acqua + tubature = conduttori).">
-              <span class="s-icon">🏠</span>
-              <span class="s-label">IN EDIFICIO</span>
-              <span class="s-badge">SICURO</span>
-            </div>
-            <div class="safety-item danger" data-tip="Esci subito dall'acqua. La corrente si espande in superficie come cerchi concentrici. Anche a decine di metri dal punto di impatto sei in pericolo.">
-              <span class="s-icon">🏊</span>
-              <span class="s-label">IN ACQUA</span>
-              <span class="s-badge">PERICOLO</span>
-            </div>
-            <div class="safety-item danger" data-tip="Scendi dalla cima. Accovacciati sui talloni (non in ginocchio), metti le mani sulle orecchie, resta distante dagli altri (la corrente può saltare da persona a persona).">
-              <span class="s-icon">⛰️</span>
-              <span class="s-label">IN CIMA</span>
-              <span class="s-badge">PERICOLO</span>
-            </div>
-            <div class="safety-item medium" data-tip="Posizione 'a rana' sui talloni: riduci la superficie di contatto col suolo. Non sdraiarti (tensione di passo). Non correre.">
-              <span class="s-icon">🌾</span>
-              <span class="s-label">CAMPO APERTO</span>
-              <span class="s-badge">ATTENZIONE</span>
-            </div>
-          </div>
-          <div class="safety-tip" id="safety-tip">Clicca uno scenario per il consiglio completo.</div>
-        </div>
-        <div class="right" style="flex-direction:column;align-items:flex-start;">
-          <span class="slide-eyebrow">mito smontato</span>
-          <h2 class="slide-title" style="font-size:clamp(1.6rem,2.8vw,2.6rem);">Non colpisce <em>due volte?</em></h2>
-          <p class="slide-body">
-            Falso. L'Empire State Building viene colpito
-            <strong>23 volte all'anno in media</strong>.
-            Un fulmine colpisce dove trova il percorso di minore
-            resistenza — e se quel percorso è buono, lo userà di nuovo.
-          </p>
-          <ul class="detect-list" style="margin-top:1rem;">
-            <li><span>LINET</span><span>135+ sensori, Europa</span></li>
-            <li><span>SIRF</span><span>Italia · ISPRA</span></li>
-            <li><span>ENTLN</span><span>900+ sensori, globale</span></li>
-            <li><span>ISUAL</span><span>Satellite · TGF/Sprite</span></li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
-    <button class="sc-arrow sc-prev" disabled><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
-    <button class="sc-arrow sc-next"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></button>
-    <div class="sc-nav">
-      <div class="sc-dots"><span class="sc-dot active"></span><span class="sc-dot"></span><span class="sc-dot"></span></div>
-      <span class="sc-counter">01 · 03</span>
-    </div>
-  </div>
-</section>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-/* ===== CURSOR ===== */
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursor-ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-(function raf() {
-  rx += (mx - rx) * 0.12;
-  ry += (my - ry) * 0.12;
-  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
-  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-  requestAnimationFrame(raf);
-})();
-
-/* ===== SLIDES SETUP ===== */
-const slides = [...document.querySelectorAll('.slide')];
-const N = slides.length;
-
-/* ===== NAV DOTS ===== */
-const navDots = document.getElementById('nav-dots');
-slides.forEach((_, i) => {
-  const d = document.createElement('div');
-  d.className = 'ndot' + (i === 0 ? ' active' : '');
-  d.addEventListener('click', () => slides[i].scrollIntoView({ behavior: 'smooth' }));
-  navDots.appendChild(d);
-});
-function updateNav(i) {
-  document.querySelectorAll('.ndot').forEach((d, j) => d.classList.toggle('active', j === i));
-  document.getElementById('slide-counter').textContent =
-    String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
-  document.getElementById('progress-bar').style.height = (i / (N - 1) * 100) + '%';
-}
-
-/* ===== SCROLL HINT ===== */
-const scrollHint = document.getElementById('scroll-hint');
-let hintGone = false;
-window.addEventListener('scroll', () => {
-  if (!hintGone) { scrollHint.style.opacity = '0'; hintGone = true; }
-}, { once: true });
-
-/* ===== FULLSCREEN ===== */
-document.getElementById('fullscreen-btn').addEventListener('click', () => {
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-  else document.exitFullscreen();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'f' || e.key === 'F') document.getElementById('fullscreen-btn').click();
-});
-
-/* ===== SECTION CAROUSEL (horizontal, like terremoti) ===== */
-function initSectionCarousel(sectionEl) {
-  const track = sectionEl.querySelector('.sc-track');
-  const panels = [...sectionEl.querySelectorAll('.sc-slide')];
-  const dots = [...sectionEl.querySelectorAll('.sc-dot')];
-  const prevBtn = sectionEl.querySelector('.sc-prev');
-  const nextBtn = sectionEl.querySelector('.sc-next');
-  const counter = sectionEl.querySelector('.sc-counter');
-  const TOTAL = panels.length;
-  if (!track || TOTAL < 2) return null;
-  let idx = 0, animating = false;
-
-  function go(n, animate) {
-    if (n < 0 || n >= TOTAL) return;
-    animating = true;
-    if (animate === false) {
-      track.style.transition = 'none';
-      track.style.transform = `translateX(calc(${n} * -100vw))`;
-      requestAnimationFrame(() => { track.style.transition = ''; animating = false; });
-    } else {
-      track.style.transform = `translateX(calc(${n} * -100vw))`;
-      track.addEventListener('transitionend', () => { animating = false; }, { once: true });
-      setTimeout(() => { animating = false; }, 650);
-    }
-    idx = n;
-    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-    if (counter) counter.textContent = String(idx + 1).padStart(2, '0') + ' · ' + String(TOTAL).padStart(2, '0');
-    if (prevBtn) prevBtn.disabled = idx === 0;
-    if (nextBtn) nextBtn.disabled = idx === TOTAL - 1;
-  }
-
-  sectionEl.addEventListener('wheel', e => {
-    const goingDown = e.deltaY > 0;
-    if (goingDown && idx === TOTAL - 1) return;
-    if (!goingDown && idx === 0) return;
-    e.preventDefault(); e.stopPropagation();
-    if (animating) return;
-    goingDown ? go(idx + 1) : go(idx - 1);
-  }, { passive: false });
-
-  let tx = 0;
-  sectionEl.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-  sectionEl.addEventListener('touchend', e => {
-    if (animating) return;
-    const dx = e.changedTouches[0].clientX - tx;
-    if (dx < -50) go(idx + 1);
-    else if (dx > 50) go(idx - 1);
-  });
-
-  dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
-  if (prevBtn) prevBtn.addEventListener('click', () => go(idx - 1));
-  if (nextBtn) nextBtn.addEventListener('click', () => go(idx + 1));
-  go(0, false);
-  return { go, reset: () => go(0, false) };
-}
-
-/* ===== HORIZONTAL CAROUSEL ===== */
-function initHorizontalCarousel(wrapEl) {
-  if (!wrapEl) return;
-  if (wrapEl._hcObj) return wrapEl._hcObj; // prevent double-init
-  const track = wrapEl.querySelector('.hc-track');
-  const hcSlides = [...wrapEl.querySelectorAll('.hc-slide')];
-  const tabs = [...wrapEl.querySelectorAll('.hc-tab')];
-  if (!track || hcSlides.length < 2) return;
-  let idx = 0;
-
-  function measure() {
-    const w = wrapEl.offsetWidth || wrapEl.getBoundingClientRect().width || 300;
-    hcSlides.forEach(s => { s.style.width = w + 'px'; s.style.flexShrink = '0'; });
-    return w;
-  }
-
-  function go(n) {
-    idx = Math.max(0, Math.min(n, hcSlides.length - 1));
-    const w = measure();
-    track.style.transform = `translateX(${idx * -w}px)`;
-    tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
-  }
-
-  tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
-  window.addEventListener('resize', () => go(idx));
-  requestAnimationFrame(() => go(0));
-
-  if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(() => { if (wrapEl.offsetWidth > 0) go(idx); });
-    ro.observe(wrapEl);
-  }
-
-  wrapEl._hcObj = { go, getIdx: () => idx };
-  return wrapEl._hcObj;
-}
-
-/* ===== THUNDER SLIDER ===== */
-const tSlider = document.getElementById('thunder-slider');
-const tOut = document.getElementById('thunder-out');
-if (tSlider && tOut) {
-  tSlider.addEventListener('input', () => {
-    tOut.textContent = (tSlider.value / 3).toFixed(1) + ' km';
-  });
-}
-
-/* ===== SAFETY SIMULATOR ===== */
-function initSafetySimulator() {
-  const items = document.querySelectorAll('.safety-item');
-  const tip = document.getElementById('safety-tip');
-  if (!tip) return;
-  items.forEach(item => {
-    item.addEventListener('click', () => {
-      items.forEach(i => i.style.outline = 'none');
-      item.style.outline = '1px solid var(--gold)';
-      tip.textContent = item.dataset.tip || '';
-    });
-  });
-}
-
-/* ===== CANVAS STUBS (implementati nei task 6-8) ===== */
-function initHeroCanvas() {
-  const canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H;
-  function resize() {
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  let frame = 0;
-  let nextBolt = 120 + Math.random() * 120;
-
-  function drawBolt(x1, y1, x2, y2, depth) {
-    if (depth === 0) return;
-    const mx = (x1 + x2) / 2 + (Math.random() - 0.5) * (Math.abs(x2 - x1) + Math.abs(y2 - y1)) * 0.4;
-    const my = (y1 + y2) / 2;
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(mx, my);
-    ctx.lineTo(x2, y2);
-    if (Math.random() < 0.4 && depth > 1) {
-      const bx = mx + (Math.random() - 0.5) * 80;
-      const by = my + Math.random() * 80;
-      ctx.moveTo(mx, my);
-      ctx.lineTo(bx, by);
-    }
-    drawBolt(x1, y1, mx, my, depth - 1);
-    drawBolt(mx, my, x2, y2, depth - 1);
-  }
-
-  let bolts = [];
-
-  function spawnBolt() {
-    const x = Math.random() * W;
-    bolts.push({ x, alpha: 1.0 });
-    ctx.save();
-    ctx.strokeStyle = `rgba(240,192,64,1)`;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#f0c040';
-    ctx.shadowBlur = 12;
-    ctx.beginPath();
-    drawBolt(x, 0, x + (Math.random() - 0.5) * 120, H * 0.7, 5);
-    ctx.stroke();
-    ctx.restore();
-    nextBolt = 120 + Math.random() * 120;
-  }
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.18)';
-    ctx.fillRect(0, 0, W, H);
-    frame++;
-    if (frame >= nextBolt) spawnBolt();
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initCloudCharge() {
-  const canvas = document.getElementById('charge-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 340;
-  canvas.height = canvas.offsetHeight || 300;
-  const W = canvas.width, H = canvas.height;
-
-  let particles = [];
-  let tension = 0;
-  let flashing = false;
-  let flashAlpha = 0;
-
-  function reset() {
-    particles = [];
-    tension = 0;
-    flashing = false;
-    flashAlpha = 0;
-    for (let i = 0; i < 50; i++) {
-      const pos = Math.random() < 0.5 ? 'top' : 'bottom';
-      particles.push({
-        x: 30 + Math.random() * (W - 60),
-        y: pos === 'top' ? 20 + Math.random() * (H * 0.35) : H * 0.55 + Math.random() * (H * 0.35),
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: pos === 'top' ? -0.3 - Math.random() * 0.3 : 0.3 + Math.random() * 0.3,
-        type: pos === 'top' ? '+' : '-',
-        size: 3 + Math.random() * 2
-      });
-    }
-  }
-  reset();
-  canvas.addEventListener('click', reset);
-
-  function loop() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Ground
-    ctx.fillStyle = 'rgba(122,128,153,0.15)';
-    ctx.fillRect(0, H - 18, W, 18);
-    ctx.fillStyle = 'rgba(240,192,64,0.4)';
-    for (let x = 15; x < W; x += 30) {
-      ctx.font = '10px sans-serif';
-      ctx.fillText('+', x, H - 5);
-    }
-
-    // Tension bar
-    tension = Math.min(1, tension + 0.003);
-    const barH = (H - 36) * tension;
-    const barGrad = ctx.createLinearGradient(W - 18, H - 18 - barH, W - 18, H - 18);
-    barGrad.addColorStop(0, 'rgba(240,192,64,.9)');
-    barGrad.addColorStop(1, 'rgba(240,192,64,.1)');
-    ctx.fillStyle = barGrad;
-    ctx.fillRect(W - 14, H - 18 - barH, 10, barH);
-    ctx.strokeStyle = 'rgba(240,192,64,.3)';
-    ctx.strokeRect(W - 14, 8, 10, H - 26);
-    ctx.fillStyle = 'rgba(240,192,64,.5)';
-    ctx.font = '7px Bebas Neue, sans-serif';
-    ctx.fillText('V', W - 12, 6);
-
-    // Flash
-    if (tension >= 1 && !flashing) {
-      flashing = true; flashAlpha = 1;
-      tension = 0;
-    }
-    if (flashing) {
-      ctx.strokeStyle = `rgba(255,255,180,${flashAlpha})`;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#ffffb4';
-      ctx.shadowBlur = 20;
-      ctx.beginPath();
-      ctx.moveTo(W / 2, 0);
-      ctx.lineTo(W / 2 + 20, H * 0.4);
-      ctx.lineTo(W / 2 - 10, H * 0.4);
-      ctx.lineTo(W / 2 + 10, H - 18);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      flashAlpha -= 0.06;
-      if (flashAlpha <= 0) flashing = false;
-    }
-
-    // Particles
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 10 || p.x > W - 20) p.vx *= -1;
-      if (p.type === '+' && p.y < 5) p.vy *= -1;
-      if (p.type === '+' && p.y > H * 0.45) p.vy = -Math.abs(p.vy);
-      if (p.type === '-' && p.y > H - 25) p.vy *= -1;
-      if (p.type === '-' && p.y < H * 0.5) p.vy = Math.abs(p.vy);
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.type === '+' ? 'rgba(240,192,64,.85)' : 'rgba(58,143,255,.85)';
-      ctx.fill();
-      ctx.fillStyle = p.type === '+' ? '#f0c040' : '#3a8fff';
-      ctx.font = `bold ${p.size * 2 + 4}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(p.type, p.x, p.y);
-    });
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initFormationCanvas() {
-  const canvas = document.getElementById('formation-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 320;
-  canvas.height = canvas.offsetHeight || 320;
-  const W = canvas.width, H = canvas.height;
-
-  const crystals = [];
-  const graupel = [];
-  for (let i = 0; i < 20; i++) {
-    crystals.push({ x: 20 + Math.random() * (W - 40), y: H * 0.4 + Math.random() * H * 0.3, vy: -0.4 - Math.random() * 0.4 });
-    graupel.push({ x: 20 + Math.random() * (W - 40), y: H * 0.3 + Math.random() * H * 0.2, vy: 0.5 + Math.random() * 0.5 });
-  }
-
-  function loop() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Cloud body
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 55, 80, 38, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.9)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,0.3)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Labels
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.letterSpacing = '2px';
-    ctx.fillStyle = 'rgba(240,192,64,.5)';
-    ctx.textAlign = 'center';
-    ctx.fillText('ZONA +', W / 2, 30);
-    ctx.fillStyle = 'rgba(58,143,255,.5)';
-    ctx.fillText('ZONA −', W / 2, H * 0.55);
-    ctx.fillStyle = 'rgba(240,192,64,.4)';
-    ctx.fillText('SUOLO +', W / 2, H - 6);
-
-    // Ground
-    ctx.fillStyle = 'rgba(122,128,153,0.12)';
-    ctx.fillRect(0, H - 18, W, 18);
-
-    // Ground + signs
-    ctx.fillStyle = 'rgba(240,192,64,0.5)';
-    ctx.font = '10px sans-serif';
-    for (let x = 15; x < W; x += 28) ctx.fillText('+', x, H - 4);
-
-    // Crystals (+, gold, move up)
-    crystals.forEach(c => {
-      c.y += c.vy;
-      if (c.y < 20) c.y = H * 0.45;
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(240,192,64,0.8)';
-      ctx.fill();
-      ctx.fillStyle = '#f0c040';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('+', c.x, c.y + 4);
-    });
-
-    // Graupel (-, blue, move down)
-    graupel.forEach(g => {
-      g.y += g.vy;
-      if (g.y > H - 20) g.y = H * 0.2;
-      ctx.beginPath();
-      ctx.arc(g.x, g.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(58,143,255,0.6)';
-      ctx.fill();
-      ctx.fillStyle = '#3a8fff';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('−', g.x, g.y + 4);
-    });
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initSteppedLeader() {
-  const canvas = document.getElementById('leader-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 300;
-  canvas.height = canvas.offsetHeight || 400;
-  const W = canvas.width, H = canvas.height;
-
-  const hcWrap = document.getElementById('leader-hc');
-  const hcObj = initHorizontalCarousel(hcWrap);
-  const playBtn = document.getElementById('leader-play-btn');
-  let playing = false;
-  let phase = 0;
-  let frameCount = 0;
-  let autoTimer = null;
-
-  if (playBtn) {
-    playBtn.addEventListener('click', () => {
-      playing = !playing;
-      playBtn.textContent = playing ? '⏸ PAUSA' : '▶ PLAY';
-    });
-  }
-
-  // Leader path: random stepped line top→bottom
-  function steppedPath(x0, y0, x1, y1, steps) {
-    const pts = [{x: x0, y: y0}];
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      pts.push({
-        x: x0 + (x1 - x0) * t + (Math.random() - 0.5) * 30,
-        y: y0 + (y1 - y0) * t
-      });
-    }
-    pts.push({x: x1, y: y1});
-    return pts;
-  }
-
-  const leaderPts = steppedPath(W / 2, 0, W / 2 + 10, H * 0.65, 18);
-  const streamerPts = steppedPath(W / 2 + 10, H, W / 2 + 10, H * 0.7, 8);
-
-  function drawPhase0() {
-    // Stepped leader: dashed gold, partial
-    const progress = Math.min(1, (frameCount % 120) / 80);
-    const end = Math.floor(progress * (leaderPts.length - 1));
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = 'rgba(240,192,64,0.7)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    for (let i = 0; i <= end; i++) {
-      i === 0 ? ctx.moveTo(leaderPts[i].x, leaderPts[i].y) : ctx.lineTo(leaderPts[i].x, leaderPts[i].y);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
-    // Cloud
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 25, 60, 20, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.9)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,0.3)';
-    ctx.stroke();
-  }
-
-  function drawPhase1() {
-    // Stepped leader (full) + streamers (blue, rising)
-    drawPhase0Full();
-    const progress = Math.min(1, (frameCount % 80) / 50);
-    const end = Math.floor(progress * (streamerPts.length - 1));
-    ctx.strokeStyle = 'rgba(58,143,255,0.8)';
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#3a8fff';
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    for (let i = 0; i <= end; i++) {
-      i === 0 ? ctx.moveTo(streamerPts[i].x, streamerPts[i].y) : ctx.lineTo(streamerPts[i].x, streamerPts[i].y);
-    }
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
-
-  function drawPhase0Full() {
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = 'rgba(240,192,64,0.6)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    leaderPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 25, 60, 20, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.9)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,0.3)'; ctx.stroke();
-  }
-
-  function drawPhase2() {
-    // Flash pulsante: canale chiuso
-    const alpha = 0.5 + 0.5 * Math.sin(frameCount * 0.15);
-    ctx.strokeStyle = `rgba(255,255,180,${alpha})`;
-    ctx.lineWidth = 3;
-    ctx.shadowColor = '#ffffb4';
-    ctx.shadowBlur = 20;
-    ctx.beginPath();
-    leaderPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 25, 60, 20, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.9)'; ctx.fill();
-  }
-
-  function drawPhase3() {
-    // Return stroke: bright, risale dal basso
-    const progress = Math.min(1, (frameCount % 60) / 35);
-    const end = Math.floor((1 - progress) * (leaderPts.length - 1));
-    ctx.strokeStyle = 'rgba(255,255,180,0.95)';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 30;
-    ctx.beginPath();
-    for (let i = leaderPts.length - 1; i >= end; i--) {
-      i === leaderPts.length - 1 ? ctx.moveTo(leaderPts[i].x, leaderPts[i].y) : ctx.lineTo(leaderPts[i].x, leaderPts[i].y);
-    }
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 25, 60, 20, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.9)'; ctx.fill();
-  }
-
-  const drawFns = [drawPhase0, drawPhase1, drawPhase2, drawPhase3];
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.5)';
-    ctx.fillRect(0, 0, W, H);
-    // Ground
-    ctx.fillStyle = 'rgba(122,128,153,0.15)';
-    ctx.fillRect(0, H - 14, W, 14);
-    frameCount++;
-    if (playing && frameCount % 120 === 0) {
-      phase = (phase + 1) % 4;
-      hcObj?.go(phase);
-    }
-    // Sync with HC click
-    if (hcWrap) {
-      const tabs = [...hcWrap.querySelectorAll('.hc-tab')];
-      const active = tabs.findIndex(t => t.classList.contains('active'));
-      if (active >= 0 && active !== phase) { phase = active; frameCount = 0; }
-    }
-    drawFns[phase]?.();
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initEMPulse() {
-  const canvas = document.getElementById('em-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 500;
-  canvas.height = canvas.offsetHeight || 180;
-  const W = canvas.width, H = canvas.height;
-  const btn = document.getElementById('em-play-btn');
-
-  let circles = [];
-  let running = false;
-
-  function fire() {
-    running = true;
-    circles = [];
-    if (btn) btn.textContent = 'AVVIATO…';
-  }
-
-  if (btn) btn.addEventListener('click', fire);
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.25)';
-    ctx.fillRect(0, 0, W, H);
-
-    if (running) {
-      if (Math.random() < 0.3) {
-        circles.push({ r: 2, alpha: 0.9, hue: Math.random() * 60 + 180 });
-      }
-    }
-
-    // Bolt (center)
-    if (running && circles.length > 0 && circles.length < 8) {
-      ctx.strokeStyle = 'rgba(255,255,180,0.9)';
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#ffffb4';
-      ctx.shadowBlur = 15;
-      ctx.beginPath();
-      ctx.moveTo(W / 2, 5);
-      ctx.lineTo(W / 2 + 8, H * 0.45);
-      ctx.lineTo(W / 2 - 5, H * 0.45);
-      ctx.lineTo(W / 2 + 3, H - 5);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
-    // Expanding EM rings (iterate in reverse to allow safe splice)
-    for (let i = circles.length - 1; i >= 0; i--) {
-      const c = circles[i];
-      c.r += 3.5;
-      c.alpha -= 0.012;
-      if (c.alpha <= 0) { circles.splice(i, 1); continue; }
-      ctx.beginPath();
-      ctx.arc(W / 2, H / 2, c.r, 0, Math.PI * 2);
-      ctx.strokeStyle = `hsla(${c.hue},80%,65%,${c.alpha})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
-
-    if (running && circles.length === 0 && btn) {
-      running = false;
-      btn.textContent = 'AVVIA IMPULSO';
-    }
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initThunderCalc() {}
-function initThunderCanvas() {
-  const canvas = document.getElementById('thunder-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 340;
-  canvas.height = canvas.offsetHeight || 260;
-  const W = canvas.width, H = canvas.height;
-
-  let waves = [];
-  let waveTimer = 0;
-
-  function spawnWave() {
-    waves.push({ r: 5, alpha: 0.8, speed: 2 + Math.random() });
-  }
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.3)';
-    ctx.fillRect(0, 0, W, H);
-    waveTimer++;
-    if (waveTimer % 90 === 0) {
-      // Spawn bolt + waves
-      waves = [];
-      for (let i = 0; i < 5; i++) setTimeout(spawnWave, i * 80);
-    }
-
-    // Bolt (left side)
-    if (waveTimer % 90 < 15) {
-      const alpha = 1 - (waveTimer % 90) / 15;
-      ctx.strokeStyle = `rgba(255,255,180,${alpha})`;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#ffffb4';
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.moveTo(40, 10); ctx.lineTo(55, 80); ctx.lineTo(35, 80);
-      ctx.lineTo(52, H * 0.75); ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
-    // Waves (arcs expanding right)
-    for (let i = waves.length - 1; i >= 0; i--) {
-      const w = waves[i];
-      w.r += w.speed;
-      w.alpha -= 0.008;
-      if (w.alpha <= 0 || w.r > W) { waves.splice(i, 1); continue; }
-      ctx.beginPath();
-      ctx.arc(45, H / 2, w.r, -Math.PI * 0.6, Math.PI * 0.6);
-      ctx.strokeStyle = `rgba(232,234,240,${w.alpha})`;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
-
-    // Labels
-    ctx.font = '8px Bebas Neue, sans-serif';
-    ctx.fillStyle = 'rgba(240,192,64,.4)';
-    ctx.fillText('ONDA D\'URTO', 90, 30);
-    ctx.fillStyle = 'rgba(122,128,153,.4)';
-    ctx.fillText('ONDA ACUSTICA', 140, 80);
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initTypeVisualizer() {
-  const canvas = document.getElementById('type-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 300;
-  canvas.height = canvas.offsetHeight || 380;
-  const W = canvas.width, H = canvas.height;
-
-  const hcWrap = document.getElementById('cg-hc');
-  const hcObj = initHorizontalCarousel(hcWrap);
-
-  let currentType = 0;
-  let frame = 0;
-
-  // Types: 0=CG-, 1=CG+, 2=IC, 3=CC
-  const typeColors = ['#f0c040', '#ff8040', '#3a8fff', '#a060ff'];
-  const typeLabels = ['CG⁻', 'CG⁺', 'IC', 'CC'];
-
-  function drawCGDown(color, label) {
-    // Cloud top
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 50, 70, 28, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.95)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,.3)'; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = 'rgba(58,143,255,.5)';
-    ctx.font = '8px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('−', W / 2, 55);
-
-    // Bolt: top→bottom
-    const progress = (Math.sin(frame * 0.03) + 1) / 2;
-    if (progress > 0.5) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2 + (progress - 0.5) * 4;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 15 * (progress - 0.5) * 2;
-      ctx.beginPath();
-      ctx.moveTo(W / 2, 78);
-      ctx.lineTo(W / 2 + 15, H * 0.45);
-      ctx.lineTo(W / 2 - 8, H * 0.45);
-      ctx.lineTo(W / 2 + 5, H - 30);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
-    // Ground
-    ctx.fillStyle = 'rgba(122,128,153,0.15)';
-    ctx.fillRect(0, H - 28, W, 28);
-    ctx.fillStyle = 'rgba(240,192,64,.4)';
-    ctx.font = '9px sans-serif';
-    for (let x = 12; x < W; x += 22) ctx.fillText('+', x, H - 10);
-
-    // Label
-    ctx.fillStyle = color;
-    ctx.font = 'bold 14px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, W / 2, H - 5);
-  }
-
-  function drawIC(color) {
-    // Two clouds
-    ctx.beginPath();
-    ctx.ellipse(W / 2, 60, 65, 25, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.95)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,.3)'; ctx.stroke();
-    // Bolt inside cloud
-    const alpha = (Math.sin(frame * 0.05) + 1) / 2;
-    ctx.strokeStyle = `rgba(58,143,255,${0.4 + alpha * 0.6})`;
-    ctx.lineWidth = 2;
-    ctx.shadowColor = '#3a8fff';
-    ctx.shadowBlur = 10 * alpha;
-    ctx.beginPath();
-    ctx.moveTo(W / 2 - 25, 50);
-    ctx.lineTo(W / 2, 65);
-    ctx.lineTo(W / 2 - 10, 65);
-    ctx.lineTo(W / 2 + 20, 80);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = color;
-    ctx.font = 'bold 14px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('IC', W / 2, H / 2 + 20);
-    ctx.fillStyle = 'rgba(58,143,255,.4)';
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.fillText('INTRA-CLOUD · PIÙ FREQUENTE', W / 2, H / 2 + 38);
-  }
-
-  function drawCC(color) {
-    // Two clouds side by side
-    ctx.beginPath();
-    ctx.ellipse(W * 0.28, H * 0.3, 50, 22, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(15,21,37,0.95)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(122,128,153,.3)'; ctx.stroke();
-    ctx.beginPath();
-    ctx.ellipse(W * 0.72, H * 0.3, 50, 22, 0, 0, Math.PI * 2);
-    ctx.fill(); ctx.stroke();
-    // Horizontal bolt
-    const alpha = (Math.sin(frame * 0.04) + 1) / 2;
-    if (alpha > 0.3) {
-      ctx.strokeStyle = `rgba(160,96,255,${alpha})`;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#a060ff';
-      ctx.shadowBlur = 12 * alpha;
-      ctx.beginPath();
-      ctx.moveTo(W * 0.28 + 50, H * 0.3);
-      ctx.lineTo(W / 2, H * 0.3 - 10);
-      ctx.lineTo(W / 2 + 5, H * 0.3 + 8);
-      ctx.lineTo(W * 0.72 - 50, H * 0.3);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-    ctx.fillStyle = color;
-    ctx.font = 'bold 14px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('CC', W / 2, H / 2 + 20);
-  }
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.35)';
-    ctx.fillRect(0, 0, W, H);
-    frame++;
-
-    // Sync with HC
-    if (hcWrap) {
-      const tabs = [...hcWrap.querySelectorAll('.hc-tab')];
-      const active = tabs.findIndex(t => t.classList.contains('active'));
-      if (active >= 0) currentType = active;
-    }
-
-    if (currentType === 0) drawCGDown(typeColors[0], 'CG⁻ NEGATIVO');
-    else if (currentType === 1) drawCGDown(typeColors[1], 'CG⁺ POSITIVO');
-    else if (currentType === 2) drawIC(typeColors[2]);
-    else drawCC(typeColors[3]);
-
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initTLEVisualizer() {
-  const canvas = document.getElementById('tle-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth || 300;
-  canvas.height = canvas.offsetHeight || 380;
-  const W = canvas.width, H = canvas.height;
-
-  const hcWrap = document.getElementById('tle-hc');
-  const hcObj = initHorizontalCarousel(hcWrap);
-  let currentTLE = 0;
-  let frame = 0;
-
-  function drawBall() {
-    // Floating orb
-    const y = H / 2 + Math.sin(frame * 0.02) * 20;
-    const r = 22 + Math.sin(frame * 0.03) * 5;
-    const grad = ctx.createRadialGradient(W / 2, y, 0, W / 2, y, r * 1.5);
-    grad.addColorStop(0, 'rgba(255,200,100,0.95)');
-    grad.addColorStop(0.5, 'rgba(255,160,60,0.6)');
-    grad.addColorStop(1, 'rgba(255,100,20,0)');
-    ctx.beginPath();
-    ctx.arc(W / 2, y, r * 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(W / 2, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,220,120,0.85)';
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,200,80,.6)';
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('BALL LIGHTNING', W / 2, H - 20);
-  }
-
-  function drawSprite() {
-    // Red jellyfish shape
-    const alpha = 0.7 + 0.3 * Math.sin(frame * 0.08);
-    ctx.strokeStyle = `rgba(255,80,100,${alpha})`;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#ff5060';
-    ctx.shadowBlur = 12;
-    // Body (ellipse)
-    ctx.beginPath();
-    ctx.ellipse(W / 2, H * 0.35, 35, 20, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    // Tentacles
-    for (let t = 0; t < 6; t++) {
-      const tx = W / 2 - 30 + t * 12;
-      ctx.beginPath();
-      ctx.moveTo(tx, H * 0.35 + 20);
-      ctx.bezierCurveTo(tx + (Math.random() - 0.5) * 15, H * 0.55, tx + (Math.random() - 0.5) * 15, H * 0.65, tx + (Math.random() - 0.5) * 10, H * 0.75);
-      ctx.stroke();
-    }
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,80,100,.5)';
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('SPRITE · 50–90 KM', W / 2, H - 20);
-  }
-
-  function drawElves() {
-    // Expanding ring
-    const progress = (frame % 80) / 80;
-    const r = 10 + progress * 90;
-    const alpha = 1 - progress;
-    ctx.beginPath();
-    ctx.arc(W / 2, H / 2, r, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(180,230,255,${alpha * 0.8})`;
-    ctx.lineWidth = 2;
-    ctx.shadowColor = '#b4e6ff';
-    ctx.shadowBlur = 10;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(180,230,255,.4)';
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('ELVES · ~400 KM', W / 2, H - 20);
-  }
-
-  function drawBlueJet() {
-    // Blue cone going up
-    const progress = (frame % 60) / 60;
-    const topY = H * 0.7 - progress * H * 0.55;
-    const alpha = 0.5 + 0.5 * Math.sin(frame * 0.1);
-    ctx.beginPath();
-    ctx.moveTo(W / 2, H * 0.75);
-    ctx.lineTo(W / 2 - 30 * (1 - progress), topY);
-    ctx.lineTo(W / 2 + 30 * (1 - progress), topY);
-    ctx.closePath();
-    ctx.fillStyle = `rgba(60,160,255,${alpha * 0.4})`;
-    ctx.fill();
-    ctx.strokeStyle = `rgba(60,160,255,${alpha * 0.8})`;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#3ca0ff';
-    ctx.shadowBlur = 10;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(60,160,255,.5)';
-    ctx.font = '9px Bebas Neue, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('BLUE JET · 40–50 KM', W / 2, H - 20);
-  }
-
-  const fns = [drawBall, drawSprite, drawElves, drawBlueJet];
-
-  function loop() {
-    ctx.fillStyle = 'rgba(5,7,15,0.4)';
-    ctx.fillRect(0, 0, W, H);
-    frame++;
-    if (hcWrap) {
-      const tabs = [...hcWrap.querySelectorAll('.hc-tab')];
-      const active = tabs.findIndex(t => t.classList.contains('active'));
-      if (active >= 0) currentTLE = active;
-    }
-    fns[currentTLE]?.();
-    requestAnimationFrame(loop);
-  }
-  loop();
-}
-function initBlitzortung() {
-  const mapDiv = document.getElementById('map');
-  if (!mapDiv || mapDiv._leaflet_id) return;
-
-  const map = L.map('map', { zoomControl: true, attributionControl: false })
-    .setView([20, 10], 3);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
-  }).addTo(map);
-
-  const hotspots = [
-    { latlng: [9.75, -71.6], name: 'Lago Maracaibo', desc: '230–260 fulmini/km²/anno · 297 notti' },
-    { latlng: [-2.5, 27.5],  name: 'Congo / Kifuka',  desc: '205 fulmini/km²/anno · foresta equatoriale' },
-    { latlng: [27.9, -82.5], name: 'Tampa, Florida',  desc: '1,2M fulmini/anno · convergenza brezze marine' },
-    { latlng: [45.5, 9.2],   name: 'Pianura Padana',  desc: 'Hotspot autunnale · convezione violenta' },
-  ];
-
-  hotspots.forEach(h => {
-    L.circleMarker(h.latlng, {
-      radius: 10,
-      color: '#f0c040',
-      fillColor: 'rgba(240,192,64,0.2)',
-      fillOpacity: 1,
-      weight: 1.5
-    }).bindPopup(`<strong style="color:#f0c040;">${h.name}</strong><br><span style="font-size:.75rem;">${h.desc}</span>`)
-      .addTo(map);
-  });
-
-  // WebSocket Blitzortung
-  const counter = document.getElementById('map-counter');
-  let count = 0;
-  let ws = null;
-  let wsConnected = false;
-
-  function updateCounter() {
-    if (counter) counter.textContent = count + ' FULMINI NEGLI ULTIMI 5 MIN';
-  }
-
-  // Try WebSocket connection with 5s timeout fallback
-  try {
-    ws = new WebSocket('wss://ws1.blitzortung.org:8082/');
-    const wsTimeout = setTimeout(() => {
-      if (!wsConnected) {
-        ws?.close();
-        startSimulation();
-      }
-    }, 5000);
-
-    ws.onopen = () => {
-      wsConnected = true;
-      clearTimeout(wsTimeout);
-      ws.send(JSON.stringify({ west: -180, east: 180, south: -90, north: 90 }));
-    };
-    ws.onmessage = () => {
-      count++;
-      updateCounter();
-    };
-    ws.onerror = () => {
-      clearTimeout(wsTimeout);
-      startSimulation();
-    };
-  } catch (e) {
-    startSimulation();
-  }
-
-  function startSimulation() {
-    if (counter) counter.textContent = '≈ SIMULAZIONE DATI STORICI';
-    setInterval(() => {
-      count += Math.floor(Math.random() * 3) + 1;
-      updateCounter();
-    }, 800);
-  }
-
-  updateCounter();
-}
-
-/* ===== onSlideEnter DISPATCHER ===== */
-const triggered = new Set();
-const inits = [
-  initHeroCanvas,
-  initCloudCharge,
-  () => { initFormationCanvas(); initSteppedLeader(); },
-  initEMPulse,
-  () => { initThunderCalc(); initThunderCanvas(); },
-  () => { initTypeVisualizer(); initTLEVisualizer(); },
-  () => {},
-  () => {},
-  () => {},
-  () => { initBlitzortung(); initSafetySimulator(); },
-];
-
-function onSlideEnter(i) {
-  updateNav(i);
-  if (!triggered.has(i)) {
-    triggered.add(i);
-    inits[i]?.();
-  }
-}
-
-/* ===== INIT ALL SC ===== */
-slides.forEach(s => initSectionCarousel(s));
-
-/* ===== INIT ALL HC (eagerly, after layout) ===== */
-requestAnimationFrame(() => {
-  document.querySelectorAll('.hc-wrap').forEach(w => initHorizontalCarousel(w));
-});
-
-/* ===== INTERSECTION OBSERVER ===== */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting && e.intersectionRatio >= 0.5) {
-      const i = slides.indexOf(e.target);
-      if (i >= 0) onSlideEnter(i);
-    }
-  });
-}, { threshold: 0.5 });
-slides.forEach(s => io.observe(s));
-
-/* ===== KEYBOARD NAV ===== */
-document.addEventListener('keydown', e => {
-  const curr = [...document.querySelectorAll('.ndot')].findIndex(d => d.classList.contains('active'));
-  if (e.key === 'ArrowDown' && curr < N - 1) slides[curr + 1].scrollIntoView({ behavior: 'smooth' });
-  if (e.key === 'ArrowUp' && curr > 0) slides[curr - 1].scrollIntoView({ behavior: 'smooth' });
-});
-
-/* ===== INIT S0 IMMEDIATELY ===== */
-onSlideEnter(0);
-</script>
+  <div id="progress-bar" style="width:0%"></div>
+  <div id="nav-dots"></div>
+  <div id="slide-counter">01 / 01</div>
+  <button id="fullscreen-btn">⛶ FS</button>
+  <div id="scroll-hint">↓ scorri</div>
+
+  <section class="section" id="hero" data-section="0"><!-- HERO CONTENT --></section>
+  <section class="section" id="formazione" data-section="1">
+    <div class="section-header"><span class="section-num">01 — FORMAZIONE</span></div>
+    <!-- FORMAZIONE CONTENT -->
+  </section>
+  <section class="section" id="scarica" data-section="2">
+    <div class="section-header"><span class="section-num">02 — LA SCARICA</span></div>
+    <!-- SCARICA CONTENT -->
+  </section>
+  <section class="section" id="fisica" data-section="3">
+    <div class="section-header"><span class="section-num">03 — FISICA ESTREMA</span></div>
+    <!-- FISICA CONTENT -->
+  </section>
+  <section class="section" id="dati" data-section="4">
+    <div class="section-header"><span class="section-num">04 — I NUMERI</span></div>
+    <!-- DATI CONTENT -->
+  </section>
+  <section class="section" id="tipi" data-section="5">
+    <div class="section-header"><span class="section-num">05 — TASSONOMIA</span></div>
+    <!-- TIPI CONTENT -->
+  </section>
+  <section class="section" id="franklin" data-section="6">
+    <div class="section-header"><span class="section-num">06 — L'ESPERIMENTO</span></div>
+    <!-- FRANKLIN CONTENT -->
+  </section>
+  <section class="section" id="mondo" data-section="7">
+    <div class="section-header"><span class="section-num">07 — NEL MONDO</span></div>
+    <!-- MONDO CONTENT -->
+  </section>
+  <section class="section" id="mitologia" data-section="8">
+    <div class="section-header"><span class="section-num">08 — MITO E STORIA</span></div>
+    <!-- MITOLOGIA CONTENT -->
+  </section>
+  <section class="section" id="sicurezza" data-section="9">
+    <div class="section-header"><span class="section-num">09 — SICUREZZA</span></div>
+    <!-- SICUREZZA CONTENT -->
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // === SCROLL ENGINE ===
+    // === CAROUSEL ENGINE ===
+    // === HERO INIT ===
+    // === FORMAZIONE CANVAS ===
+    // === SCARICA CANVAS ===
+    // === FISICA CANVAS ===
+    // === DATI INIT ===
+    // === TIPI CANVAS ===
+    // === FRANKLIN CANVAS ===
+    // === MONDO MAP ===
+    // === MITOLOGIA INIT ===
+    // === SICUREZZA INIT ===
+    // === REVEAL INIT ===
+    // === BOOTSTRAP ===
+  </script>
 </body>
 </html>
